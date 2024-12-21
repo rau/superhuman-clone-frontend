@@ -1,14 +1,13 @@
-import { format } from "date-fns"
-import { formatSender } from "@/libs/stringOps"
 import { Avatar, AvatarFallback } from "@/components/ui/Avatar"
+import { formatSender } from "@/libs/stringOps"
 import {
 	Linkedin as LinkedinIcon,
-	Twitter as TwitterIcon,
 	Mail as MailIcon,
+	Twitter as TwitterIcon,
 } from "lucide-react"
 
 interface EmailSenderDetailsPaneProps {
-	email: Email | undefined
+	email: EmailThread | undefined
 }
 
 export const EmailSenderDetailsPane = ({
@@ -22,15 +21,17 @@ export const EmailSenderDetailsPane = ({
 				<div className="flex flex-row items-center gap-4">
 					<Avatar>
 						<AvatarFallback className="bg-blue-100 text-blue-700">
-							{formatSender(email.sender)[0].toUpperCase()}
+							{formatSender(
+								email.messages[0].sender
+							)[0].toUpperCase()}
 						</AvatarFallback>
 					</Avatar>
 					<div className="flex flex-col">
 						<span className="font-medium">
-							{formatSender(email.sender)}
+							{formatSender(email.messages[0].sender)}
 						</span>
 						<span className="text-sm text-slate-500">
-							{email.sender}
+							{email.messages[0].sender.email}
 						</span>
 						<span className="mt-1 text-sm text-slate-400">
 							CEO at Company

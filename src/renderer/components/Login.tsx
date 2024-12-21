@@ -1,5 +1,5 @@
-import { Button } from "./ui/Button"
 import { initiateGoogleAuth } from "@/services/googleServices"
+import { Button } from "./ui/Button"
 
 export const Login = () => {
 	const handleGmailLogin = async () => {

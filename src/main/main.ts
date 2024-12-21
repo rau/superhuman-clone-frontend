@@ -15,6 +15,19 @@ import log from "electron-log"
 import MenuBuilder from "./menu"
 import { resolveHtmlPath } from "./util"
 
+import { dialog } from "electron"
+import fs from "fs/promises"
+
+ipcMain.handle("open-file", async () => {
+	return dialog.showOpenDialog({
+		properties: ["openFile", "multiSelections"],
+	})
+})
+
+ipcMain.handle("get-file-stats", async (_, path: string) => {
+	return fs.stat(path)
+})
+
 class AppUpdater {
 	constructor() {
 		log.transports.file.level = "info"

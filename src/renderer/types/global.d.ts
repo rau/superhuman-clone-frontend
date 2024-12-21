@@ -10,14 +10,42 @@ declare global {
 		title: string
 	}
 
-	type Email = {
+	type EmailThread = {
 		id: string
+		messages: EmailMessage[]
 		subject: string
-		sender: string
-		date: Date
 		snippet: string
-		body: string
+		last_message_timestamp: number
+	}
+
+	type EmailMessage = {
+		id: string
+		thread_id: string
+		subject: string
+		sender: EmailSender
+		to: EmailSender[]
+		date: Date
+		timestamp: number
+		snippet: string
 		read: boolean
+	}
+
+	type EmailSender = {
+		email: string
+		name?: string
+	}
+
+	type Contact = {
+		email: string
+		name?: string
+		interactionCount?: number
+		lastInteraction?: Date
+	}
+
+	type Attachment = {
+		name: string
+		size: number
+		path: string
 	}
 }
 

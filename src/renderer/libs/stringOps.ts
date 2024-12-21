@@ -52,9 +52,9 @@ export const formatMilliseconds = (milliseconds: number) => {
 	return `${hours}h ${minutes}m ${seconds}s`
 }
 
-export const formatSender = (sender: string) => {
-	const match = sender.match(/(.*?)\s*<(.+?)>/)
-	if (!match) return sender
+export const formatSender = (sender: EmailSender) => {
+	const match = sender.name?.match(/(.*?)\s*<(.+?)>/)
+	if (!match) return sender.email
 
 	const [_, name, email] = match
 	return name.trim() || email

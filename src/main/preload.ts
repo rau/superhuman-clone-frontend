@@ -26,6 +26,9 @@ const electronHandler = {
 	},
 }
 
-contextBridge.exposeInMainWorld("electron", electronHandler)
+contextBridge.exposeInMainWorld("electron", {
+	openFile: () => ipcRenderer.invoke("open-file"),
+	getFileStats: (path: string) => ipcRenderer.invoke("get-file-stats", path),
+})
 
 export type ElectronHandler = typeof electronHandler

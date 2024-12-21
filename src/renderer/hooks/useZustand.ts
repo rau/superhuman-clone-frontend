@@ -1,47 +1,126 @@
 import { create } from "zustand"
 
-type TimeframeState = {
-	timeframe: Date
-	setTimeframe: (timeframe: Date) => void
+interface ComposeState {
+	toQuery: string
+	ccQuery: string
+	bccQuery: string
+	subject: string
+	message: string
+	toContacts: Contact[]
+	ccContacts: Contact[]
+	bccContacts: Contact[]
+	attachments: Attachment[]
+	showCcBcc: boolean
+	showSuggestions: boolean
+	selectedContactIndex: number
+	activeField: "to" | "cc" | "bcc"
+
+	setQuery: (value: string, field: "to" | "cc" | "bcc") => void
+	addContact: (contact: Contact, field: "to" | "cc" | "bcc") => void
+	removeContact: (email: string, field: "to" | "cc" | "bcc") => void
+	setSubject: (subject: string) => void
+	setMessage: (message: string) => void
+	addAttachment: (attachment: Attachment) => void
+	removeAttachment: (path: string) => void
+	toggleCcBcc: () => void
+	reset: () => void
+	setSelectedContactIndex: (index: number) => void
+	setActiveField: (field: "to" | "cc" | "bcc") => void
+	setShowSuggestions: (show: boolean) => void
 }
 
-type TimeframeScaleState = {
-	scale: number
-	start: Date
-	setScale: (scale: number) => void
-	setStart: (start: Date) => void
-}
+export const useComposeStore = create<ComposeState>((set) => ({
+	toQuery: "",
+	ccQuery: "",
+	bccQuery: "",
+	subject: "",
+	message: "",
+	toContacts: [],
+	ccContacts: [],
+	bccContacts: [],
+	attachments: [],
+	showCcBcc: false,
+	showSuggestions: false,
+	selectedContactIndex: 0,
+	activeField: "to",
 
-type EnabledAppsState = {
-	cloneEnabled: boolean
-	setCloneEnabled: (cloneEnabled: boolean) => void
-	whoopEnabled: boolean
-	setWhoopEnabled: (whoopEnabled: boolean) => void
-	stravaEnabled: boolean
-	setStravaEnabled: (stravaEnabled: boolean) => void
-	spotifyEnabled: boolean
-	setSpotifyEnabled: (spotifyEnabled: boolean) => void
-}
+	setQuery: (value, field) =>
+		set((state) => ({
+			[field === "to"
+				? "toQuery"
+				: field === "cc"
+					? "ccQuery"
+					: "bccQuery"]: value,
+			activeField: field,
+			showSuggestions: true,
+			selectedContactIndex: 0,
+		})),
 
-export const useTimeframeStore = create<TimeframeState>((set) => ({
-	timeframe: new Date(new Date().setHours(0, 0, 0, 0)),
-	setTimeframe: (timeframe) => set({ timeframe }),
-}))
+	addContact: (contact, field) =>
+		set((state) => ({
+			[field === "to"
+				? "toContacts"
+				: field === "cc"
+					? "ccContacts"
+					: "bccContacts"]: [
+				...state[
+					field === "to"
+						? "toContacts"
+						: field === "cc"
+							? "ccContacts"
+							: "bccContacts"
+				],
+				contact,
+			],
+			[field === "to"
+				? "toQuery"
+				: field === "cc"
+					? "ccQuery"
+					: "bccQuery"]: "",
+			showSuggestions: false,
+		})),
 
-export const useTimeframeScaleStore = create<TimeframeScaleState>((set) => ({
-	scale: 160.0,
-	start: new Date(new Date().setHours(new Date().getHours() - 5, 0, 0, 0)),
-	setScale: (scale) => set({ scale }),
-	setStart: (start) => set({ start }),
-}))
+	removeContact: (email, field) =>
+		set((state) => ({
+			[field === "to"
+				? "toContacts"
+				: field === "cc"
+					? "ccContacts"
+					: "bccContacts"]: state[
+				field === "to"
+					? "toContacts"
+					: field === "cc"
+						? "ccContacts"
+						: "bccContacts"
+			].filter((c) => c.email !== email),
+		})),
 
-export const useEnabledAppsStore = create<EnabledAppsState>((set) => ({
-	cloneEnabled: true,
-	whoopEnabled: true,
-	stravaEnabled: true,
-	spotifyEnabled: true,
-	setCloneEnabled: (cloneEnabled) => set({ cloneEnabled }),
-	setWhoopEnabled: (whoopEnabled) => set({ whoopEnabled }),
-	setStravaEnabled: (stravaEnabled) => set({ stravaEnabled }),
-	setSpotifyEnabled: (spotifyEnabled) => set({ spotifyEnabled }),
+	setSubject: (subject) => set({ subject }),
+	setMessage: (message) => set({ message }),
+	addAttachment: (attachment) =>
+		set((state) => ({ attachments: [...state.attachments, attachment] })),
+	removeAttachment: (path) =>
+		set((state) => ({
+			attachments: state.attachments.filter((a) => a.path !== path),
+		})),
+	toggleCcBcc: () => set((state) => ({ showCcBcc: !state.showCcBcc })),
+	reset: () =>
+		set({
+			toQuery: "",
+			ccQuery: "",
+			bccQuery: "",
+			subject: "",
+			message: "",
+			toContacts: [],
+			ccContacts: [],
+			bccContacts: [],
+			attachments: [],
+			showCcBcc: false,
+			showSuggestions: false,
+			selectedContactIndex: 0,
+			activeField: "to",
+		}),
+	setSelectedContactIndex: (index) => set({ selectedContactIndex: index }),
+	setActiveField: (field) => set({ activeField: field }),
+	setShowSuggestions: (show) => set({ showSuggestions: show }),
 }))

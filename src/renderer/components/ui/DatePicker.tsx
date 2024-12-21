@@ -1,10 +1,9 @@
 "use client"
 
-import * as React from "react"
 import { format } from "date-fns"
 import { Calendar as CalendarIcon } from "lucide-react"
+import * as React from "react"
 
-import { cn } from "@/libs/utils"
 import { Button } from "@/components/ui/Button"
 import { Calendar } from "@/components/ui/Calendar"
 import {
@@ -12,6 +11,7 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from "@/components/ui/Popover"
+import { cn } from "@/libs/utils"
 
 interface DatePickerProps {
 	date: Date
@@ -37,6 +37,7 @@ const DatePicker: React.FC<DatePickerProps> = ({ date, setDate }) => {
 				<Calendar
 					mode="single"
 					selected={date}
+					// @ts-ignore
 					onSelect={setDate}
 					initialFocus
 				/>

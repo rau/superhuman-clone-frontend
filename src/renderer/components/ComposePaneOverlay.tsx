@@ -1,5 +1,7 @@
+import { EmailSenderDetailsPane } from "@/components/EmailSenderDetailsPane"
 import { KeyboardTooltip } from "@/components/KeyboardTooltip"
 import { Avatar, AvatarFallback } from "@/components/ui/Avatar"
+import { Button } from "@/components/ui/Button"
 import {
 	Dialog,
 	DialogContent,
@@ -13,8 +15,11 @@ import { useUIStore } from "@/hooks/useUIStore"
 import { useComposeStore } from "@/hooks/useZustand"
 import { cn } from "@/libs/utils"
 import {
+	ArrowLeft,
 	Braces as BracesIcon,
 	Calendar as CalendarIcon,
+	ChevronDown,
+	ChevronUp,
 	File,
 	Paperclip,
 	Trash2,
@@ -28,21 +33,6 @@ interface ComposePaneOverlayProps {
 	replyToEmail?: EmailMessage
 }
 
-const Header = () => {
-	const { setIsComposing } = useUIStore()
-	return (
-		<div className="flex h-14 items-center justify-between border-b border-slate-200 px-4">
-			<h2 className="text-lg font-medium">New Message</h2>
-			<button
-				onClick={() => setIsComposing(false)}
-				className="rounded p-1 hover:bg-slate-100"
-			>
-				<X className="h-5 w-5" />
-			</button>
-		</div>
-	)
-}
-
 const ContactChip = ({
 	contact,
 	onRemove,
@@ -52,12 +42,13 @@ const ContactChip = ({
 }) => (
 	<span className="flex items-center gap-1 rounded-full bg-blue-50 px-2 py-1 text-sm text-blue-700">
 		{contact.name || contact.email}
-		<button
+		<Button
 			onClick={onRemove}
 			className="ml-1 rounded-full hover:bg-blue-100"
+			variant="ghost"
 		>
 			<X className="h-3 w-3" />
-		</button>
+		</Button>
 	</span>
 )
 
@@ -79,18 +70,18 @@ const SendEmptySubjectDialog = ({
 				</DialogDescription>
 			</DialogHeader>
 			<DialogFooter>
-				<button
+				<Button
 					onClick={() => onOpenChange(false)}
 					className="rounded-md px-3 py-1.5 text-sm hover:bg-slate-100"
 				>
 					Cancel
-				</button>
-				<button
+				</Button>
+				<Button
 					onClick={onConfirm}
 					className="rounded-md bg-blue-600 px-3 py-1.5 text-sm text-white hover:bg-blue-700"
 				>
 					Send anyway
-				</button>
+				</Button>
 			</DialogFooter>
 		</DialogContent>
 	</Dialog>
@@ -375,7 +366,7 @@ const RecipientFields = ({
 		<div className="relative">
 			<div className="flex flex-col gap-2">
 				<div className="flex items-center gap-2">
-					<div className="relative flex flex-1 flex-wrap items-center gap-2 border-b border-slate-200 py-2">
+					<div className="relative flex flex-1 flex-wrap items-center gap-2 py-2">
 						{toContacts.map((contact) => (
 							<ContactChip
 								key={contact.email}
@@ -407,7 +398,7 @@ const RecipientFields = ({
 
 				{showCcBcc && (
 					<>
-						<div className="flex items-center gap-2 border-b border-slate-200 py-2">
+						<div className="flex items-center gap-2 py-2">
 							<span className="text-sm text-slate-500">Cc</span>
 							<div className="flex flex-1 flex-wrap items-center gap-2">
 								{ccContacts.map((contact) => (
@@ -666,11 +657,7 @@ export const ComposePaneOverlay = ({
 	}, [showSuggestions, filteredContacts, selectedContactIndex])
 
 	return (
-		<div
-			className={cn(
-				!isReply && "absolute inset-0 z-50 flex flex-col bg-white"
-			)}
-		>
+		<div className="absolute inset-0 z-40 flex flex-row bg-white">
 			<SendEmptySubjectDialog
 				open={showEmptySubjectDialog}
 				onOpenChange={setShowEmptySubjectDialog}
@@ -694,43 +681,79 @@ export const ComposePaneOverlay = ({
 					)
 				}}
 			/>
-			<Header />
-			<div className="flex min-h-0 flex-1 flex-col p-4">
-				<div className="flex flex-1 flex-col gap-2">
-					<RecipientFields
-						toContacts={toContacts}
-						ccContacts={ccContacts}
-						bccContacts={bccContacts}
-						toQuery={toQuery}
-						ccQuery={ccQuery}
-						bccQuery={bccQuery}
-						showCcBcc={showCcBcc}
-						setShowCcBcc={toggleCcBcc}
-						onContactRemove={handleContactRemove}
-						onQueryChange={handleQueryChange}
-						onContactAdd={handleContactAdd}
-						showSuggestions={showSuggestions}
-						filteredContacts={filteredContacts}
-						selectedContactIndex={selectedContactIndex}
-						activeField={activeField}
-					/>
-					<input
-						type="text"
-						value={subject}
-						onChange={(e) => setSubject(e.target.value)}
-						className="border-b border-slate-200 py-2 pr-4 outline-none"
-						placeholder="Subject"
-					/>
-					<MessageArea message={message} onChange={setMessage} />
+			<div className="flex w-64 flex-col bg-slate-50 p-4">
+				<div className="flex flex-row gap-2">
+					<Button
+						onClick={() => setIsComposing(false)}
+						variant="ghost"
+						className="rounded-full bg-white shadow-md"
+					>
+						<ArrowLeft className="h-4 w-4" />
+					</Button>
+
+					<div className="flex flex-row gap-2 rounded-full bg-white shadow-md">
+						<KeyboardTooltip
+							keys={["K"]}
+							label="Previous conversation"
+						>
+							<Button variant="ghost">
+								<ChevronUp className="h-4 w-4" />
+							</Button>
+						</KeyboardTooltip>
+						<KeyboardTooltip keys={["J"]} label="Next conversation">
+							<Button variant="ghost">
+								<ChevronDown className="h-4 w-4" />
+							</Button>
+						</KeyboardTooltip>
+					</div>
 				</div>
-				<MessageActions
-					attachments={attachments}
-					onAttach={handleAttach}
-					onRemoveAttachment={handleRemoveAttachment}
-					onDelete={handleDelete}
-					onSend={handleSend}
-					isSending={isPending}
-				/>
+			</div>
+
+			<div className="flex w-[calc(100%-400px-8rem)] flex-col items-center">
+				<h2 className="w-4/5 p-4 pl-12 text-lg font-medium">
+					New Message
+				</h2>
+				<div className="flex h-fit min-h-0 w-4/5 flex-col rounded-2xl p-4 shadow-2xl">
+					<div className="flex flex-col gap-2">
+						<RecipientFields
+							toContacts={toContacts}
+							ccContacts={ccContacts}
+							bccContacts={bccContacts}
+							toQuery={toQuery}
+							ccQuery={ccQuery}
+							bccQuery={bccQuery}
+							showCcBcc={showCcBcc}
+							setShowCcBcc={toggleCcBcc}
+							onContactRemove={handleContactRemove}
+							onQueryChange={handleQueryChange}
+							onContactAdd={handleContactAdd}
+							showSuggestions={showSuggestions}
+							filteredContacts={filteredContacts}
+							selectedContactIndex={selectedContactIndex}
+							activeField={activeField}
+						/>
+						<input
+							type="text"
+							value={subject}
+							onChange={(e) => setSubject(e.target.value)}
+							className="py-2 pr-4 outline-none"
+							placeholder="Subject"
+						/>
+						<MessageArea message={message} onChange={setMessage} />
+					</div>
+					<MessageActions
+						attachments={attachments}
+						onAttach={handleAttach}
+						onRemoveAttachment={handleRemoveAttachment}
+						onDelete={handleDelete}
+						onSend={handleSend}
+						isSending={isPending}
+					/>
+				</div>
+			</div>
+
+			<div className="w-[400px] border-l border-slate-200">
+				<EmailSenderDetailsPane email={replyToEmail} />
 			</div>
 		</div>
 	)

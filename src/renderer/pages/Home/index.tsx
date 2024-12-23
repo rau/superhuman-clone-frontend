@@ -7,7 +7,6 @@
 
 import { ComposePaneOverlay } from "@/components/ComposePaneOverlay"
 import { EmailsContainer } from "@/components/EmailsContainer"
-import { FolderSidebar } from "@/components/FolderSidebar"
 import { Login } from "@/components/Login"
 import { SearchPane } from "@/components/SearchPane"
 import { TipBar } from "@/components/TipBar"
@@ -85,7 +84,7 @@ export default function Home() {
 		<TooltipProvider>
 			<div className="relative flex h-screen flex-col">
 				<main className="flex flex-1">
-					<FolderSidebar />
+					{/* <FolderSidebar /> */}
 					<EmailsContainer
 						selectedIndex={selectedIndex}
 						setSelectedIndex={setSelectedIndex}

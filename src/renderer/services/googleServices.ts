@@ -104,3 +104,22 @@ export const markEmailRead = async (emailId: string) => {
 	})
 	return data
 }
+
+export const fetchFolders = async (): Promise<Folder[]> => {
+	const { data } = await fetchWithAxios("folders/", {
+		method: "GET",
+	})
+	return data
+}
+
+export const fetchFolderEmails = async (
+	folderId: string
+): Promise<EmailThread[]> => {
+	const { data } = await fetchWithAxios(
+		`folder-emails/?folder_id=${folderId}`,
+		{
+			method: "GET",
+		}
+	)
+	return data
+}

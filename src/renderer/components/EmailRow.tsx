@@ -17,7 +17,7 @@ export const EmailRow = ({ email, isSelected, onClick }: EmailRowProps) => {
 		<div
 			onClick={onClick}
 			className={cn(
-				"group flex h-14 cursor-pointer items-center gap-4 border-b border-slate-100 px-4 hover:bg-slate-50",
+				"group flex h-14 w-full max-w-full cursor-pointer items-center gap-4 border-b border-slate-100 px-4 hover:bg-slate-50",
 				isSelected && "bg-blue-50"
 			)}
 		>
@@ -29,15 +29,13 @@ export const EmailRow = ({ email, isSelected, onClick }: EmailRowProps) => {
 					{formatSender(email.messages[0].sender)}
 				</span>
 			</div>
-			<div className="flex-1 overflow-hidden">
-				<div className="flex flex-row gap-2">
-					<span className="truncate text-xs font-medium">
-						{email.subject}
-					</span>
-					<span className="truncate text-xs text-slate-500">
-						{email.snippet}
-					</span>
-				</div>
+			<div className="flex flex-1 flex-row gap-2 overflow-hidden">
+				<span className="truncate text-xs font-medium">
+					{email.subject}
+				</span>
+				<span className="truncate text-xs text-slate-500">
+					{email.snippet}
+				</span>
 			</div>
 			<div className="flex w-[200px] items-center justify-end gap-2">
 				<span className="text-xs text-slate-500">

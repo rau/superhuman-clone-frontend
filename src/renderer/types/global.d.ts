@@ -47,6 +47,13 @@ declare global {
 		size: number
 		path: string
 	}
+
+	type Folder = {
+		id: string
+		type: string
+		name: string
+		messageCount: number
+	}
 }
 
 export {}

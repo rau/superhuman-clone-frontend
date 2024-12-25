@@ -27,6 +27,7 @@ declare global {
 		date: Date
 		timestamp: number
 		snippet: string
+		body: string
 		read: boolean
 	}
 

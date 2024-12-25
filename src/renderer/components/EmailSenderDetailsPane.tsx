@@ -1,10 +1,18 @@
 import { Avatar, AvatarFallback } from "@/components/ui/Avatar"
+import { Button } from "@/components/ui/Button"
+import { Separator } from "@/components/ui/Separator"
+import { useUIStore } from "@/hooks/useUIStore"
 import { formatSender } from "@/libs/stringOps"
 import {
+	Calendar,
+	CircleHelp,
+	Gift,
 	Linkedin as LinkedinIcon,
 	Mail as MailIcon,
+	Settings,
 	Twitter as TwitterIcon,
 } from "lucide-react"
+import { KeyboardTooltip } from "./KeyboardTooltip"
 
 interface EmailSenderDetailsPaneProps {
 	email: EmailThread | undefined
@@ -13,6 +21,8 @@ interface EmailSenderDetailsPaneProps {
 export const EmailSenderDetailsPane = ({
 	email,
 }: EmailSenderDetailsPaneProps) => {
+	const { setIsSettingsOpen } = useUIStore()
+
 	if (!email) return null
 
 	return (
@@ -60,6 +70,48 @@ export const EmailSenderDetailsPane = ({
 					<span className="text-sm text-slate-600">
 						12 previous email threads
 					</span>
+				</div>
+			</div>
+
+			<div className="mt-auto flex flex-col">
+				<Separator />
+
+				<div className="flex flex-row items-center justify-between gap-2">
+					<span className="text-sm font-medium text-slate-700">
+						Superhuman
+					</span>
+
+					<div className="flex flex-row gap-0">
+						<KeyboardTooltip
+							tooltips={[
+								{
+									keys: ["?"],
+									label: "Ask AI",
+								},
+							]}
+						>
+							<Button variant="ghost" size="icon">
+								<span>AI</span>
+							</Button>
+						</KeyboardTooltip>
+						<Button variant="ghost" size="icon">
+							<Gift className="h-4 w-4" />
+						</Button>
+						<Button variant="ghost" size="icon">
+							<CircleHelp className="h-4 w-4" />
+						</Button>
+						<Button variant="ghost" size="icon">
+							<Calendar className="h-4 w-4" />
+						</Button>
+						<Button variant="ghost" size="icon">
+							<Settings
+								onClick={() => {
+									setIsSettingsOpen(true)
+								}}
+								className="h-4 w-4"
+							/>
+						</Button>
+					</div>
 				</div>
 			</div>
 		</div>

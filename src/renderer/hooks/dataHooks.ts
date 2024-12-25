@@ -1,4 +1,5 @@
 import {
+	createDoneFolder,
 	fetchAuthTokens,
 	fetchContacts,
 	fetchEmails,
@@ -93,5 +94,15 @@ export const useFolderEmails = () => {
 		queryFn: () => fetchFolderEmails(selectedFolder?.id || "inbox"),
 		enabled: true,
 		staleTime: 1000 * 60 * 5,
+	})
+}
+
+export const useCreateDoneFolder = () => {
+	const queryClient = useQueryClient()
+	return useMutation({
+		mutationFn: createDoneFolder,
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["folders"] })
+		},
 	})
 }

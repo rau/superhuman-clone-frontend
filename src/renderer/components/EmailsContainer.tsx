@@ -1,5 +1,9 @@
+import { AISettingsDialog } from "@/components/AISettingsDialog"
 import { EmailRow } from "@/components/EmailRow"
+import { EmailSenderDetailsPane } from "@/components/EmailSenderDetailsPane"
 import { KeyboardTooltip } from "@/components/KeyboardTooltip"
+import { SettingsPane } from "@/components/SettingsPane"
+import { ShortcutsPane } from "@/components/ShortcutsPane"
 import { Button } from "@/components/ui/Button"
 import { EmptyState } from "@/components/ui/EmptyState"
 import { Loader } from "@/components/ui/Loader"
@@ -8,10 +12,17 @@ import { useFolderEmails } from "@/hooks/dataHooks"
 import { useUIStore } from "@/hooks/useUIStore"
 import { Pencil, Search } from "lucide-react"
 import { useEffect } from "react"
-import { EmailSenderDetailsPane } from "./EmailSenderDetailsPane"
 
 const ComposeButton = ({ onClick }: { onClick: () => void }) => (
-	<KeyboardTooltip keys={["C"]} label="New message" delayDuration={150}>
+	<KeyboardTooltip
+		tooltips={[
+			{
+				keys: ["C"],
+				label: "New message",
+			},
+		]}
+		delayDuration={150}
+	>
 		<Button onClick={onClick} className="flex items-center gap-2">
 			<span>Compose</span>
 			<Pencil className="h-4 w-4" />
@@ -20,7 +31,15 @@ const ComposeButton = ({ onClick }: { onClick: () => void }) => (
 )
 
 const SearchButton = ({ onClick }: { onClick: () => void }) => (
-	<KeyboardTooltip keys={["/"]} label="Search" delayDuration={150}>
+	<KeyboardTooltip
+		tooltips={[
+			{
+				keys: ["/"],
+				label: "Search",
+			},
+		]}
+		delayDuration={150}
+	>
 		<Button
 			onClick={onClick}
 			variant="ghost"
@@ -46,10 +65,10 @@ export const EmailsContainer = ({
 		setIsSearching,
 		setIsShowingEmail,
 		selectedFolder,
+		isSettingsOpen,
+		isShortcutsPaneOpen,
 	} = useUIStore()
 
-	console.log("isLoading", isLoading)
-	console.log("emails", emails)
 	const showEmptyState = !isLoading && (!emails || emails.length === 0)
 	const showEmails = !isLoading && emails && emails.length > 0
 
@@ -118,8 +137,16 @@ export const EmailsContainer = ({
 						))}
 				</div>
 			</div>
-			<div className="w-[400px] bg-slate-50 p-6">
-				<EmailSenderDetailsPane email={emails?.[selectedIndex]} />
+
+			<div className="h-full w-[400px] bg-slate-50">
+				{isShortcutsPaneOpen ? (
+					<ShortcutsPane />
+				) : isSettingsOpen ? (
+					<SettingsPane />
+				) : (
+					<EmailSenderDetailsPane email={emails?.[selectedIndex]} />
+				)}
+				<AISettingsDialog />
 			</div>
 		</div>
 	)

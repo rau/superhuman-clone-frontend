@@ -1,4 +1,3 @@
-import { EmailSenderDetailsPane } from "@/components/EmailSenderDetailsPane"
 import { KeyboardTooltip } from "@/components/KeyboardTooltip"
 import { Avatar, AvatarFallback } from "@/components/ui/Avatar"
 import { Button } from "@/components/ui/Button"
@@ -22,6 +21,7 @@ import {
 	ChevronUp,
 	File,
 	Paperclip,
+	PictureInPicture2,
 	Trash2,
 	X,
 } from "lucide-react"
@@ -178,8 +178,12 @@ const MessageActions = ({
 		<div className="flex items-center justify-between py-4">
 			<div className="flex items-center gap-2">
 				<KeyboardTooltip
-					keys={["⌘", "Enter"]}
-					label="Send"
+					tooltips={[
+						{
+							keys: ["⌘", "Enter"],
+							label: "Send",
+						},
+					]}
 					delayDuration={150}
 				>
 					<button
@@ -191,8 +195,12 @@ const MessageActions = ({
 					</button>
 				</KeyboardTooltip>
 				<KeyboardTooltip
-					keys={["⌘", "shift", "L"]}
-					label="Send later"
+					tooltips={[
+						{
+							keys: ["⌘", "shift", "L"],
+							label: "Send later",
+						},
+					]}
 					delayDuration={150}
 				>
 					<button className="rounded-md border border-slate-200 px-3 py-1.5 text-sm hover:bg-slate-50">
@@ -200,8 +208,12 @@ const MessageActions = ({
 					</button>
 				</KeyboardTooltip>
 				<KeyboardTooltip
-					keys={["⌘", "shift", "H"]}
-					label="Remind me"
+					tooltips={[
+						{
+							keys: ["⌘", "shift", "H"],
+							label: "Remind me",
+						},
+					]}
 					delayDuration={150}
 				>
 					<button className="rounded-md border border-slate-200 px-3 py-1.5 text-sm hover:bg-slate-50">
@@ -212,8 +224,12 @@ const MessageActions = ({
 			<div className="flex items-center gap-4">
 				<div className="flex items-center gap-1">
 					<KeyboardTooltip
-						keys={["⌘", "J"]}
-						label="Write with AI"
+						tooltips={[
+							{
+								keys: ["⌘", "J"],
+								label: "Write with AI",
+							},
+						]}
 						delayDuration={150}
 					>
 						<button className="rounded-md p-2 hover:bg-slate-100">
@@ -223,8 +239,12 @@ const MessageActions = ({
 						</button>
 					</KeyboardTooltip>
 					<KeyboardTooltip
-						keys={["⌘", "shift", "A"]}
-						label="Share availability"
+						tooltips={[
+							{
+								keys: ["⌘", "shift", "A"],
+								label: "Share availability",
+							},
+						]}
 						delayDuration={150}
 					>
 						<button className="rounded-md p-2 hover:bg-slate-100">
@@ -232,8 +252,12 @@ const MessageActions = ({
 						</button>
 					</KeyboardTooltip>
 					<KeyboardTooltip
-						keys={[";"]}
-						label="Use snippet inline"
+						tooltips={[
+							{
+								keys: [";"],
+								label: "Use snippet inline",
+							},
+						]}
 						delayDuration={150}
 					>
 						<button className="rounded-md p-2 hover:bg-slate-100">
@@ -242,8 +266,12 @@ const MessageActions = ({
 					</KeyboardTooltip>
 
 					<KeyboardTooltip
-						keys={["⌘", "shift", "U"]}
-						label="Attach"
+						tooltips={[
+							{
+								keys: ["⌘", "shift", "U"],
+								label: "Attach",
+							},
+						]}
 						delayDuration={150}
 					>
 						<button
@@ -254,8 +282,12 @@ const MessageActions = ({
 						</button>
 					</KeyboardTooltip>
 					<KeyboardTooltip
-						keys={["⌘", "shift", ","]}
-						label="Discard"
+						tooltips={[
+							{
+								keys: ["⌘", "shift", ","],
+								label: "Discard",
+							},
+						]}
 						delayDuration={150}
 					>
 						<button
@@ -388,12 +420,43 @@ const RecipientFields = ({
 							className="flex-1 outline-none"
 						/>
 					</div>
-					<button
-						onClick={() => setShowCcBcc(!showCcBcc)}
-						className="text-sm text-slate-500 hover:text-slate-700"
+					<KeyboardTooltip
+						tooltips={[
+							{
+								keys: ["⌘", "shift", "C"],
+								label: "Cc/Bcc",
+							},
+						]}
+						delayDuration={150}
 					>
-						{showCcBcc ? "−" : "+"} Cc/Bcc
-					</button>
+						<button
+							onClick={() => setShowCcBcc(!showCcBcc)}
+							className="text-sm text-slate-500 hover:text-slate-700"
+							tabIndex={-1}
+						>
+							{showCcBcc ? "−" : "+"} Cc/Bcc
+						</button>
+					</KeyboardTooltip>
+					<KeyboardTooltip
+						tooltips={[
+							{
+								keys: ["⌘", "shift", "P"],
+								label: "Popout",
+							},
+							{
+								keys: ["⌘", "/"],
+								label: "Popout and search",
+							},
+						]}
+						delayDuration={150}
+					>
+						<button
+							className="text-sm text-slate-500 hover:text-slate-700"
+							tabIndex={-1}
+						>
+							<PictureInPicture2 className="h-4 w-4" />
+						</button>
+					</KeyboardTooltip>
 				</div>
 
 				{showCcBcc && (
@@ -683,24 +746,47 @@ export const ComposePaneOverlay = ({
 			/>
 			<div className="flex w-64 flex-col bg-slate-50 p-4">
 				<div className="flex flex-row gap-2">
-					<Button
-						onClick={() => setIsComposing(false)}
-						variant="ghost"
-						className="rounded-full bg-white shadow-md"
+					<KeyboardTooltip
+						tooltips={[
+							{
+								keys: ["Esc"],
+								label: "Close",
+							},
+						]}
+						delayDuration={150}
 					>
-						<ArrowLeft className="h-4 w-4" />
-					</Button>
+						<Button
+							onClick={() => setIsComposing(false)}
+							variant="ghost"
+							className="rounded-full bg-white shadow-md"
+						>
+							<ArrowLeft className="h-4 w-4" />
+						</Button>
+					</KeyboardTooltip>
 
 					<div className="flex flex-row gap-2 rounded-full bg-white shadow-md">
 						<KeyboardTooltip
-							keys={["K"]}
-							label="Previous conversation"
+							tooltips={[
+								{
+									keys: ["K"],
+									label: "Previous conversation",
+								},
+							]}
+							delayDuration={150}
 						>
 							<Button variant="ghost">
 								<ChevronUp className="h-4 w-4" />
 							</Button>
 						</KeyboardTooltip>
-						<KeyboardTooltip keys={["J"]} label="Next conversation">
+						<KeyboardTooltip
+							tooltips={[
+								{
+									keys: ["J"],
+									label: "Next conversation",
+								},
+							]}
+							delayDuration={150}
+						>
 							<Button variant="ghost">
 								<ChevronDown className="h-4 w-4" />
 							</Button>
@@ -750,10 +836,6 @@ export const ComposePaneOverlay = ({
 						isSending={isPending}
 					/>
 				</div>
-			</div>
-
-			<div className="w-[400px] border-l border-slate-200">
-				<EmailSenderDetailsPane email={replyToEmail} />
 			</div>
 		</div>
 	)

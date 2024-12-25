@@ -13,8 +13,9 @@ import { TipBar } from "@/components/TipBar"
 import { TooltipProvider } from "@/components/ui/Tooltip"
 import { ViewEmailPane } from "@/components/ViewEmailPane"
 import { useAuth } from "@/hooks/dataHooks"
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts"
 import { useUIStore } from "@/hooks/useUIStore"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 
 export default function Home() {
 	const { data: tokens, isLoading } = useAuth()
@@ -28,50 +29,27 @@ export default function Home() {
 	} = useUIStore()
 	const [selectedIndex, setSelectedIndex] = useState(0)
 
-	// console.log("emails", emails)
-	// console.log("isComposing", isComposing)
-	// console.log("isSearching", isSearching)
-	// console.log("isShowingEmail", isShowingEmail)
-
-	useEffect(() => {
-		const handleKeyDown = (e: KeyboardEvent) => {
-			if (
-				e.key === "c" &&
-				!isComposing &&
-				!isSearching &&
-				!isShowingEmail
-			) {
-				e.preventDefault()
-				setIsComposing(true)
-			}
-			if (
-				e.key === "/" &&
-				!isSearching &&
-				!isComposing &&
-				!isShowingEmail
-			) {
-				e.preventDefault()
-				setIsSearching(true)
-			}
-			if (e.key === "Escape") {
-				if (isSearching) {
-					e.preventDefault()
-					setIsSearching(false)
-				}
-				if (isComposing) {
-					e.preventDefault()
-					setIsComposing(false)
-				}
-				if (isShowingEmail) {
-					e.preventDefault()
-					setIsShowingEmail(false)
-				}
-			}
-		}
-
-		window.addEventListener("keydown", handleKeyDown)
-		return () => window.removeEventListener("keydown", handleKeyDown)
-	}, [isComposing, isSearching, isShowingEmail])
+	useKeyboardShortcuts([
+		{
+			key: "c",
+			handler: () => setIsComposing(true),
+			mode: "global",
+		},
+		{
+			key: "/",
+			handler: () => setIsSearching(true),
+			mode: "global",
+		},
+		{
+			key: "Escape",
+			handler: () => {
+				setIsSearching(false)
+				setIsComposing(false)
+				setIsShowingEmail(false)
+			},
+			mode: "global",
+		},
+	])
 
 	if (isLoading) {
 		return null
@@ -84,7 +62,6 @@ export default function Home() {
 		<TooltipProvider>
 			<div className="relative flex h-screen flex-col">
 				<main className="flex flex-1">
-					{/* <FolderSidebar /> */}
 					<EmailsContainer
 						selectedIndex={selectedIndex}
 						setSelectedIndex={setSelectedIndex}

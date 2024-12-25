@@ -123,3 +123,11 @@ export const fetchFolderEmails = async (
 	)
 	return data
 }
+
+export const createDoneFolder = async () => {
+	const { data } = await fetchWithAxios("create-folder/", {
+		method: "POST",
+		data: { folder_name: "[SHClone] Done" },
+	})
+	return data
+}

@@ -52,7 +52,14 @@ export const ComposeEmailForm = ({
 
 			<div className="flex items-center justify-between border-t border-slate-200 p-4">
 				<div className="flex items-center gap-2">
-					<KeyboardTooltip keys={["⌘", "Enter"]} label="Send">
+					<KeyboardTooltip
+						tooltips={[
+							{
+								keys: ["⌘", "Enter"],
+								label: "Send",
+							},
+						]}
+					>
 						<button
 							onClick={onSend}
 							disabled={isSending}
@@ -64,7 +71,14 @@ export const ComposeEmailForm = ({
 				</div>
 
 				<div className="flex items-center gap-1">
-					<KeyboardTooltip keys={["⌘", "J"]} label="Write with AI">
+					<KeyboardTooltip
+						tooltips={[
+							{
+								keys: ["⌘", "J"],
+								label: "Write with AI",
+							},
+						]}
+					>
 						<button className="rounded-md p-2 hover:bg-slate-100">
 							<span className="font-medium text-slate-500">
 								AI
@@ -72,7 +86,14 @@ export const ComposeEmailForm = ({
 						</button>
 					</KeyboardTooltip>
 
-					<KeyboardTooltip keys={["⌘", "⇧", "U"]} label="Attach">
+					<KeyboardTooltip
+						tooltips={[
+							{
+								keys: ["⌘", "⇧", "U"],
+								label: "Attach",
+							},
+						]}
+					>
 						<button
 							onClick={onAttach}
 							className="rounded-md p-2 hover:bg-slate-100"
@@ -81,7 +102,14 @@ export const ComposeEmailForm = ({
 						</button>
 					</KeyboardTooltip>
 
-					<KeyboardTooltip keys={["⌘", "shift", ","]} label="Discard">
+					<KeyboardTooltip
+						tooltips={[
+							{
+								keys: ["⌘", "shift", ","],
+								label: "Discard",
+							},
+						]}
+					>
 						<button
 							onClick={onDelete}
 							className="rounded-md p-2 text-red-500 hover:bg-red-50"

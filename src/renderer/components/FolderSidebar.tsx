@@ -7,7 +7,7 @@ import {
 	SidebarMenuItem,
 	useSidebar,
 } from "@/components/ui/Sidebar"
-import { useFolders } from "@/hooks/dataHooks"
+import { useCreateDoneFolder, useFolders } from "@/hooks/dataHooks"
 import { useUIStore } from "@/hooks/useUIStore"
 import { ChevronRight } from "lucide-react"
 
@@ -62,6 +62,7 @@ export const FolderSidebar = () => {
 		useUIStore()
 	const { data: fetchedFolders } = useFolders()
 	const { setOpen } = useSidebar()
+	const { mutate: createFolder } = useCreateDoneFolder()
 
 	const filteredCustomFolders = fetchedFolders?.filter(
 		(folder) =>
@@ -132,6 +133,13 @@ export const FolderSidebar = () => {
 						</SidebarMenuButton>
 					</SidebarMenuItem>
 				))}
+			<Button
+				onClick={() => createFolder()}
+				variant="ghost"
+				className="m-4 text-sm text-slate-600 hover:bg-slate-100"
+			>
+				Create Done Folder
+			</Button>
 		</SidebarMenu>
 	)
 }

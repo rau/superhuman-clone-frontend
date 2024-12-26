@@ -9,6 +9,8 @@ interface UIState {
 	isSettingsOpen: boolean
 	isShortcutsPaneOpen: boolean
 	isAISettingsOpen: boolean
+	isQuickTipsOpen: boolean
+	isDownloadsOpen: boolean
 	setIsSearching: (isSearching: boolean) => void
 	setIsShowingEmail: (isShowingEmail: boolean) => void
 	setIsComposing: (isComposing: boolean) => void
@@ -17,6 +19,8 @@ interface UIState {
 	setIsSettingsOpen: (open: boolean) => void
 	setIsShortcutsPaneOpen: (open: boolean) => void
 	setIsAISettingsOpen: (open: boolean) => void
+	setIsQuickTipsOpen: (open: boolean) => void
+	setIsDownloadsOpen: (value: boolean) => void
 }
 
 const INITIAL_FOLDER: Folder = {
@@ -35,6 +39,8 @@ export const useUIStore = create<UIState>((set) => ({
 	isShortcutsPaneOpen: false,
 	isAISettingsOpen: false,
 	selectedFolder: INITIAL_FOLDER,
+	isQuickTipsOpen: true,
+	isDownloadsOpen: false,
 	setIsSearching: (isSearching) => set({ isSearching }),
 	setIsShowingEmail: (isShowingEmail) => set({ isShowingEmail }),
 	setIsComposing: (isComposing) => set({ isComposing }),
@@ -43,4 +49,6 @@ export const useUIStore = create<UIState>((set) => ({
 	setSelectedFolder: (folder) => set({ selectedFolder: folder }),
 	setIsShortcutsPaneOpen: (open) => set({ isShortcutsPaneOpen: open }),
 	setIsAISettingsOpen: (open) => set({ isAISettingsOpen: open }),
+	setIsQuickTipsOpen: (open) => set({ isQuickTipsOpen: open }),
+	setIsDownloadsOpen: (value) => set({ isDownloadsOpen: value }),
 }))

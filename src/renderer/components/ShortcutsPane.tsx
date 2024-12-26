@@ -870,26 +870,24 @@ export const ShortcutsPane = () => {
 			<div className="fixed right-0 top-0 z-50 flex h-screen w-[400px] flex-col bg-white">
 				<SearchBar search={search} setSearch={setSearch} />
 				<div className="flex-1 overflow-y-auto">
-					<div className="p-6">
-						<div className="flex flex-col gap-4">
-							{filteredSections.map((section) => (
-								<div key={section.title}>
-									<h2 className="mb-2 text-xs font-bold">
-										{section.title}
-									</h2>
-									<div className="flex flex-col gap-1">
-										{section.shortcuts.map((shortcut) => (
-											<ShortcutItem
-												key={shortcut.label}
-												label={shortcut.label}
-												keys={shortcut.keys}
-												searchTerm={search}
-											/>
-										))}
-									</div>
+					<div className="flex flex-col gap-4 p-6">
+						{filteredSections.map((section) => (
+							<div key={section.title}>
+								<h2 className="mb-2 text-xs font-bold">
+									{section.title}
+								</h2>
+								<div className="flex flex-col gap-1">
+									{section.shortcuts.map((shortcut) => (
+										<ShortcutItem
+											key={shortcut.label}
+											label={shortcut.label}
+											keys={shortcut.keys}
+											searchTerm={search}
+										/>
+									))}
 								</div>
-							))}
-						</div>
+							</div>
+						))}
 					</div>
 				</div>
 			</div>

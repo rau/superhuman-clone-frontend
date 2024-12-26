@@ -140,8 +140,11 @@ const SearchTips = () => (
 )
 
 export const SearchPane = () => {
+	const { isSearching } = useUIStore()
 	const { query } = useSearchStore()
 	const { data: results = [] } = useSearchEmails(query)
+
+	if (!isSearching) return null
 
 	return (
 		<div className="absolute inset-0 z-50 flex flex-col bg-white">

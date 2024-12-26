@@ -540,7 +540,7 @@ export const ComposePaneOverlay = ({
 	const { data: contacts } = useContacts()
 	const { mutateAsync: sendEmail, isPending } = sendEmailMutation()
 	const [showEmptySubjectDialog, setShowEmptySubjectDialog] = useState(false)
-	const { setIsComposing } = useUIStore()
+	const { isComposing, setIsComposing } = useUIStore()
 	const {
 		toQuery,
 		ccQuery,
@@ -568,6 +568,8 @@ export const ComposePaneOverlay = ({
 		toggleCcBcc,
 		reset,
 	} = useComposeStore()
+
+	if (!isComposing) return null
 
 	const handleContactRemove = (email: string, field: "to" | "cc" | "bcc") => {
 		removeContact(email, field)

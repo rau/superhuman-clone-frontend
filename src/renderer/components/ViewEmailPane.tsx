@@ -125,7 +125,9 @@ export const ViewEmailPane = ({
 	const { handleMarkDone } = useEmailActions(email?.id || "")
 	const [showReplyPane, setShowReplyPane] = useState(false)
 	const [selectedMessageIndex, setSelectedMessageIndex] = useState(0)
-	const { setIsShowingEmail } = useUIStore()
+	const { isShowingEmail, setIsShowingEmail } = useUIStore()
+
+	if (!isShowingEmail) return null
 
 	const handlePrevEmail = () => {
 		if (emailIndex > 0) {

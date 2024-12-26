@@ -10,8 +10,10 @@ import { Loader } from "@/components/ui/Loader"
 import { SidebarTrigger } from "@/components/ui/Sidebar"
 import { useFolderEmails } from "@/hooks/dataHooks"
 import { useUIStore } from "@/hooks/useUIStore"
+import { cn } from "@/libs/utils"
 import { Pencil, Search } from "lucide-react"
 import { useEffect } from "react"
+import { DownloadsDialog } from "./DownloadsDialog"
 
 const ComposeButton = ({ onClick }: { onClick: () => void }) => (
 	<KeyboardTooltip
@@ -67,6 +69,7 @@ export const EmailsContainer = ({
 		selectedFolder,
 		isSettingsOpen,
 		isShortcutsPaneOpen,
+		isQuickTipsOpen,
 	} = useUIStore()
 
 	const showEmptyState = !isLoading && (!emails || emails.length === 0)
@@ -98,7 +101,7 @@ export const EmailsContainer = ({
 	}, [emails, isComposing, selectedIndex])
 
 	return (
-		<div className="max-w-screen flex w-screen flex-1">
+		<div className="max-w-screen flex h-full w-screen flex-1">
 			<div className="relative flex flex-1 flex-col overflow-hidden border-r border-slate-200 bg-white p-4">
 				<div className="flex h-14 items-center justify-between border-b border-slate-200 px-4">
 					<div className="flex items-center gap-2">
@@ -138,7 +141,12 @@ export const EmailsContainer = ({
 				</div>
 			</div>
 
-			<div className="h-full w-[400px] bg-slate-50">
+			<div
+				className={cn(
+					"w-[400px] bg-slate-50",
+					isQuickTipsOpen ? "h-[calc(100vh-40px)]" : "h-screen"
+				)}
+			>
 				{isShortcutsPaneOpen ? (
 					<ShortcutsPane />
 				) : isSettingsOpen ? (
@@ -147,6 +155,7 @@ export const EmailsContainer = ({
 					<EmailSenderDetailsPane email={emails?.[selectedIndex]} />
 				)}
 				<AISettingsDialog />
+				<DownloadsDialog />
 			</div>
 		</div>
 	)

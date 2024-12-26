@@ -61,21 +61,20 @@ export default function Home() {
 	return (
 		<TooltipProvider>
 			<div className="relative flex h-screen flex-col">
-				<main className="flex flex-1">
+				<main className="flex h-full flex-1 flex-col">
 					<EmailsContainer
 						selectedIndex={selectedIndex}
 						setSelectedIndex={setSelectedIndex}
 					/>
+					<TipBar />
 				</main>
-				<TipBar />
-				{isComposing && <ComposePaneOverlay />}
-				{isSearching && <SearchPane />}
-				{isShowingEmail && (
-					<ViewEmailPane
-						emailIndex={selectedIndex}
-						setSelectedIndex={setSelectedIndex}
-					/>
-				)}
+
+				<ComposePaneOverlay />
+				<SearchPane />
+				<ViewEmailPane
+					emailIndex={selectedIndex}
+					setSelectedIndex={setSelectedIndex}
+				/>
 			</div>
 		</TooltipProvider>
 	)

@@ -7,27 +7,38 @@ body {
 	overflow: hidden;
 }
 
-::-webkit-scrollbar {
+/* ::-webkit-scrollbar {
 	width: 12px;
+	background: transparent;
 }
 
 ::-webkit-scrollbar-track {
-	border-radius: 0px;
+	background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-	background: #c1c1c1;
+	background: transparent;
 	border-radius: 12px;
 	border: 2px solid transparent;
 	background-clip: padding-box;
+	transition: background-color 0.2s;
 }
 
-::-webkit-scrollbar-thumb:hover {
-	background: #a1a1a1;
-	border-radius: 12px;
-	border: 2px solid transparent;
-	background-clip: padding-box;
+.scrolling::-webkit-scrollbar-thumb {
+	background: #c1c1c1;
 }
+
+.scrolling::-webkit-scrollbar-thumb:hover {
+	background: #a1a1a1;
+}
+
+*::-webkit-scrollbar-thumb {
+	opacity: 0;
+}
+
+*:active::-webkit-scrollbar-thumb {
+	opacity: 1;
+} */
 
 @layer base {
 	:root {

@@ -1,10 +1,10 @@
 // @ts-nocheck
 import axios, { AxiosRequestConfig } from "axios"
-
 interface FetchParameters {
 	method?: string
 	data?: Record<string, any>
 	params?: Record<string, any>
+	accountId?: string
 }
 
 export const fetchWithAxios = async (
@@ -13,12 +13,13 @@ export const fetchWithAxios = async (
 	responseType: "json" | "blob" = "json"
 ) => {
 	const formData = new FormData()
-
 	let options: AxiosRequestConfig = {
 		method: parameters.method || "GET",
 		url: "http://localhost:8000/api/" + endpoint,
 		responseType: responseType,
-		headers: {},
+		headers: parameters.accountId
+			? { "X-Account-ID": parameters.accountId }
+			: {},
 	}
 
 	if (options.method === "GET" && parameters.params) {
@@ -39,7 +40,7 @@ export const fetchWithAxios = async (
 			status: res.status,
 			statusText: res.statusText,
 		}
-	} catch (error: AxiosError | any) {
+	} catch (error: any) {
 		console.log(error)
 		if (error.response) {
 			const errorData = error.response.data

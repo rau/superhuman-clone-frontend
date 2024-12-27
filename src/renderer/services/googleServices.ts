@@ -5,23 +5,18 @@ export const initiateGoogleAuth = async () => {
 		const { data } = await fetchWithAxios("auth/gmail/", {
 			method: "GET",
 		})
-		console.log(data, "data")
 		window.electron.openExternalUrl(data.auth_url)
 	} catch (err) {
 		console.error("Error initiating Google auth", err)
 	}
 }
 
-export const fetchAuthTokens = async (): Promise<GoogleAuthToken[]> => {
-	const { data } = await fetchWithAxios("tokens/", {
-		method: "GET",
-	})
-	return data
-}
-
-export const fetchEmails = async (): Promise<EmailThread[]> => {
+export const fetchEmails = async (
+	accountId: string
+): Promise<EmailThread[]> => {
 	const { data } = await fetchWithAxios("emails/", {
 		method: "GET",
+		accountId: accountId,
 	})
 
 	return data.map((email: any) => ({
@@ -30,9 +25,10 @@ export const fetchEmails = async (): Promise<EmailThread[]> => {
 	}))
 }
 
-export const fetchContacts = async (): Promise<Contact[]> => {
+export const fetchContacts = async (accountId: string): Promise<Contact[]> => {
 	const { data } = await fetchWithAxios("contacts/", {
 		method: "GET",
+		accountId: accountId,
 	})
 
 	return data.map((contact: any) => ({
@@ -41,7 +37,7 @@ export const fetchContacts = async (): Promise<Contact[]> => {
 	}))
 }
 
-interface SendEmailPayload {
+export interface SendEmailPayload {
 	to: Contact[]
 	cc: Contact[]
 	bcc: Contact[]
@@ -51,11 +47,13 @@ interface SendEmailPayload {
 	replyToEmail?: EmailMessage
 }
 
-export const sendEmail = async (payload: SendEmailPayload) => {
-	console.log("payload", payload)
-
+export const sendEmail = async (
+	payload: SendEmailPayload,
+	accountId: string
+) => {
 	return fetchWithAxios("send-email/", {
 		method: "POST",
+		accountId: accountId,
 		data: {
 			to: payload.to.map((c) => c.email),
 			cc: payload.cc.map((c) => c.email),
@@ -68,7 +66,10 @@ export const sendEmail = async (payload: SendEmailPayload) => {
 	})
 }
 
-export const searchEmails = async (query: string): Promise<EmailThread[]> => {
+export const searchEmails = async (
+	query: string,
+	accountId: string
+): Promise<EmailThread[]> => {
 	const params = new URLSearchParams()
 
 	const filters = {
@@ -85,49 +86,69 @@ export const searchEmails = async (query: string): Promise<EmailThread[]> => {
 
 	const { data } = await fetchWithAxios(`search/?${params.toString()}`, {
 		method: "GET",
+		accountId: accountId,
 	})
 	return data
 }
 
-export const markEmailDone = async (emailId: string) => {
+export const markEmailDone = async (emailId: string, accountId: string) => {
 	const { data } = await fetchWithAxios(`markdone/`, {
 		method: "POST",
+		accountId: accountId,
 		data: { email_id: emailId },
 	})
 	return data
 }
 
-export const markEmailRead = async (emailId: string) => {
+export const markEmailRead = async (emailId: string, accountId: string) => {
 	const { data } = await fetchWithAxios(`markread/`, {
 		method: "POST",
+		accountId: accountId,
 		data: { email_id: emailId },
 	})
 	return data
 }
 
-export const fetchFolders = async (): Promise<Folder[]> => {
+export const fetchFolders = async (accountId: string): Promise<Folder[]> => {
 	const { data } = await fetchWithAxios("folders/", {
 		method: "GET",
+		accountId: accountId,
 	})
 	return data
 }
 
 export const fetchFolderEmails = async (
-	folderId: string
+	folderId: string,
+	accountId: string
 ): Promise<EmailThread[]> => {
 	const { data } = await fetchWithAxios(
 		`folder-emails/?folder_id=${folderId}`,
 		{
 			method: "GET",
+			accountId: accountId,
 		}
 	)
 	return data
 }
 
-export const createDoneFolder = async () => {
+export const createDoneFolder = async (accountId: string) => {
 	const { data } = await fetchWithAxios("create-folder/", {
 		method: "POST",
+		accountId: accountId,
 		data: { folder_name: "[SHClone] Done" },
 	})
 	return data
+}
+
+export const fetchAccounts = async (): Promise<Account[]> => {
+	const { data } = await fetchWithAxios("accounts/", {
+		method: "GET",
+	})
+	return data
+}
+
+export const signOutAccount = async (accountId: string) => {
+	await fetchWithAxios(`tokens/${accountId}/`, {
+		method: "DELETE",
+	})
 }

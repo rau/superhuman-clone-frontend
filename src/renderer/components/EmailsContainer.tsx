@@ -1,6 +1,8 @@
 import { AISettingsDialog } from "@/components/AISettingsDialog"
+import { DownloadsDialog } from "@/components/DownloadsDialog"
 import { EmailRow } from "@/components/EmailRow"
 import { EmailSenderDetailsPane } from "@/components/EmailSenderDetailsPane"
+import { ImageSettingsDialog } from "@/components/ImageSettingsDialog"
 import { KeyboardTooltip } from "@/components/KeyboardTooltip"
 import { SettingsPane } from "@/components/SettingsPane"
 import { ShortcutsPane } from "@/components/ShortcutsPane"
@@ -13,8 +15,6 @@ import { useUIStore } from "@/hooks/useUIStore"
 import { cn } from "@/libs/utils"
 import { Pencil, Search } from "lucide-react"
 import { useEffect } from "react"
-import { DownloadsDialog } from "./DownloadsDialog"
-
 const ComposeButton = ({ onClick }: { onClick: () => void }) => (
 	<KeyboardTooltip
 		tooltips={[
@@ -53,13 +53,7 @@ const SearchButton = ({ onClick }: { onClick: () => void }) => (
 	</KeyboardTooltip>
 )
 
-export const EmailsContainer = ({
-	selectedIndex,
-	setSelectedIndex,
-}: {
-	selectedIndex: number
-	setSelectedIndex: (index: number) => void
-}) => {
+export const EmailsContainer = () => {
 	const { data: emails, isLoading } = useFolderEmails()
 	const {
 		isComposing,
@@ -67,16 +61,17 @@ export const EmailsContainer = ({
 		setIsSearching,
 		setIsShowingEmail,
 		selectedFolder,
+		selectedIndices,
+		setSelectedIndex,
 		isSettingsOpen,
 		isShortcutsPaneOpen,
 		isQuickTipsOpen,
 	} = useUIStore()
 
-	const showEmptyState = !isLoading && (!emails || emails.length === 0)
-	const showEmails = !isLoading && emails && emails.length > 0
+	const selectedIndex = selectedIndices[selectedFolder?.id || "inbox"] || 0
 
 	useEffect(() => {
-		setSelectedIndex(0)
+		setSelectedIndex(selectedFolder?.id || "inbox", 0)
 	}, [selectedFolder])
 
 	useEffect(() => {
@@ -89,16 +84,25 @@ export const EmailsContainer = ({
 			}
 
 			if (e.key === "ArrowDown") {
-				setSelectedIndex(Math.min(selectedIndex + 1, emails.length - 1))
+				setSelectedIndex(
+					selectedFolder?.id || "inbox",
+					Math.min(selectedIndex + 1, emails.length - 1)
+				)
 			}
 			if (e.key === "ArrowUp") {
-				setSelectedIndex(Math.max(selectedIndex - 1, 0))
+				setSelectedIndex(
+					selectedFolder?.id || "inbox",
+					Math.max(selectedIndex - 1, 0)
+				)
 			}
 		}
 
 		window.addEventListener("keydown", handleKeyDown)
 		return () => window.removeEventListener("keydown", handleKeyDown)
-	}, [emails, isComposing, selectedIndex])
+	}, [emails, isComposing, selectedIndex, selectedFolder])
+
+	const showEmptyState = !isLoading && (!emails || emails.length === 0)
+	const showEmails = !isLoading && emails && emails.length > 0
 
 	return (
 		<div className="max-w-screen flex h-full w-screen flex-1">
@@ -133,7 +137,10 @@ export const EmailsContainer = ({
 								email={email}
 								isSelected={index === selectedIndex}
 								onClick={() => {
-									setSelectedIndex(index)
+									setSelectedIndex(
+										selectedFolder?.id || "inbox",
+										index
+									)
 									setIsShowingEmail(true)
 								}}
 							/>
@@ -156,6 +163,7 @@ export const EmailsContainer = ({
 				)}
 				<AISettingsDialog />
 				<DownloadsDialog />
+				<ImageSettingsDialog />
 			</div>
 		</div>
 	)

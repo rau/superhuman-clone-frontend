@@ -1,6 +1,8 @@
+import { useAccountStore } from "@/hooks/useAccountStore"
+import { useUIStore } from "@/hooks/useUIStore"
 import {
 	createDoneFolder,
-	fetchAuthTokens,
+	fetchAccounts,
 	fetchContacts,
 	fetchEmails,
 	fetchFolderEmails,
@@ -9,38 +11,38 @@ import {
 	markEmailRead,
 	searchEmails,
 	sendEmail,
+	SendEmailPayload,
+	signOutAccount,
 } from "@/services/googleServices"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { useUIStore } from "./useUIStore"
-
-export const useAuth = () => {
-	return useQuery<GoogleAuthToken[]>({
-		queryKey: ["auth"],
-		queryFn: fetchAuthTokens,
-		staleTime: Infinity,
-	})
-}
 
 export const useEmails = () => {
+	const { selectedAccountId } = useAccountStore()
+
 	return useQuery<EmailThread[]>({
-		queryKey: ["emails"],
-		queryFn: fetchEmails,
+		queryKey: ["emails", selectedAccountId],
+		queryFn: () => fetchEmails(selectedAccountId || ""),
+		enabled: !!selectedAccountId,
 		staleTime: 1000 * 60 * 5,
 	})
 }
 
 export const useContacts = () => {
+	const { selectedAccountId } = useAccountStore()
 	return useQuery<Contact[]>({
-		queryKey: ["contacts"],
-		queryFn: fetchContacts,
+		queryKey: ["contacts", selectedAccountId],
+		queryFn: () => fetchContacts(selectedAccountId || ""),
+		enabled: !!selectedAccountId,
 		staleTime: 1000 * 60 * 5,
 	})
 }
 
 export const sendEmailMutation = () => {
 	const queryClient = useQueryClient()
+	const { selectedAccountId } = useAccountStore()
 	return useMutation({
-		mutationFn: sendEmail,
+		mutationFn: (payload: SendEmailPayload) =>
+			sendEmail(payload, selectedAccountId || ""),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["emails"] })
 		},
@@ -48,9 +50,10 @@ export const sendEmailMutation = () => {
 }
 
 export const useSearchEmails = (query: string) => {
+	const { selectedAccountId } = useAccountStore()
 	return useQuery<EmailThread[]>({
-		queryKey: ["search", query],
-		queryFn: () => searchEmails(query),
+		queryKey: ["search", query, selectedAccountId],
+		queryFn: () => searchEmails(query, selectedAccountId || ""),
 		enabled: false,
 		staleTime: 1000 * 60 * 5,
 	})
@@ -58,8 +61,10 @@ export const useSearchEmails = (query: string) => {
 
 export const useMarkEmailDone = () => {
 	const queryClient = useQueryClient()
+	const { selectedAccountId } = useAccountStore()
 	return useMutation({
-		mutationFn: markEmailDone,
+		mutationFn: (emailId: string) =>
+			markEmailDone(emailId, selectedAccountId || ""),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["emails"] })
 		},
@@ -68,8 +73,10 @@ export const useMarkEmailDone = () => {
 
 export const useMarkEmailRead = () => {
 	const queryClient = useQueryClient()
+	const { selectedAccountId } = useAccountStore()
 	return useMutation({
-		mutationFn: markEmailRead,
+		mutationFn: (emailId: string) =>
+			markEmailRead(emailId, selectedAccountId || ""),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["emails"] })
 		},
@@ -77,9 +84,11 @@ export const useMarkEmailRead = () => {
 }
 
 export const useFolders = () => {
+	const { selectedAccountId } = useAccountStore()
 	return useQuery<Folder[]>({
-		queryKey: ["folders"],
-		queryFn: fetchFolders,
+		queryKey: ["folders", selectedAccountId],
+		queryFn: () => fetchFolders(selectedAccountId || ""),
+		enabled: !!selectedAccountId,
 		placeholderData: [],
 		staleTime: 1000 * 60 * 5,
 		retry: 2,
@@ -89,20 +98,45 @@ export const useFolders = () => {
 
 export const useFolderEmails = () => {
 	const { selectedFolder } = useUIStore()
+	const { selectedAccountId } = useAccountStore()
 	return useQuery({
-		queryKey: ["emails", selectedFolder?.id],
-		queryFn: () => fetchFolderEmails(selectedFolder?.id || "inbox"),
-		enabled: true,
+		queryKey: ["emails", selectedFolder?.id, selectedAccountId],
+		queryFn: () =>
+			fetchFolderEmails(
+				selectedFolder?.id || "inbox",
+				selectedAccountId || ""
+			),
+		enabled: !!selectedAccountId && !!selectedFolder?.id,
 		staleTime: 1000 * 60 * 5,
 	})
 }
 
 export const useCreateDoneFolder = () => {
 	const queryClient = useQueryClient()
+	const { selectedAccountId } = useAccountStore()
 	return useMutation({
-		mutationFn: createDoneFolder,
+		mutationFn: () => createDoneFolder(selectedAccountId || ""),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["folders"] })
+		},
+	})
+}
+
+export const useAccounts = () => {
+	return useQuery<Account[]>({
+		queryKey: ["accounts"],
+		queryFn: fetchAccounts,
+		staleTime: 1000 * 60 * 5,
+	})
+}
+
+export const useSignOutAccount = () => {
+	const queryClient = useQueryClient()
+
+	return useMutation({
+		mutationFn: signOutAccount,
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["accounts"] })
 		},
 	})
 }

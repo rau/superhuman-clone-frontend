@@ -606,7 +606,6 @@ export const ComposePaneOverlay = ({
 	}
 
 	const handleSend = () => {
-		console.log("isReply", isReply)
 		if (!subject.trim()) {
 			setShowEmptySubjectDialog(true)
 			return

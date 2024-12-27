@@ -1,6 +1,7 @@
 import { SuperhumanFooter } from "@/components/SuperhumanFooter"
 import { Switch } from "@/components/ui/Switch"
 import { useUIStore } from "@/hooks/useUIStore"
+import { useEffect } from "react"
 
 export const SettingsPane = () => {
 	const {
@@ -10,31 +11,33 @@ export const SettingsPane = () => {
 		setIsAISettingsOpen,
 		setIsQuickTipsOpen,
 		setIsDownloadsOpen,
+		setIsImageSettingsOpen,
+		setIsAccountDialogOpen,
 	} = useUIStore()
 
-	// useEffect(() => {
-	// 	const scrollable = document.getElementById("scrollingArea")
-	// 	let timer: NodeJS.Timeout
-	// 	let isScrolling = false
+	useEffect(() => {
+		const scrollable = document.getElementById("scrollingArea")
+		let timer: NodeJS.Timeout
+		let isScrolling = false
 
-	// 	const handleScroll = () => {
-	// 		if (!isScrolling) {
-	// 			scrollable?.classList.add("scrolling")
-	// 			isScrolling = true
-	// 		}
-	// 		clearTimeout(timer)
-	// 		timer = setTimeout(() => {
-	// 			scrollable?.classList.remove("scrolling")
-	// 			isScrolling = false
-	// 		}, 500)
-	// 	}
+		const handleScroll = () => {
+			if (!isScrolling) {
+				scrollable?.classList.add("scrolling")
+				isScrolling = true
+			}
+			clearTimeout(timer)
+			timer = setTimeout(() => {
+				scrollable?.classList.remove("scrolling")
+				isScrolling = false
+			}, 500)
+		}
 
-	// 	scrollable?.addEventListener("scroll", handleScroll)
-	// 	return () => {
-	// 		scrollable?.removeEventListener("scroll", handleScroll)
-	// 		clearTimeout(timer)
-	// 	}
-	// }, [])
+		scrollable?.addEventListener("scroll", handleScroll)
+		return () => {
+			scrollable?.removeEventListener("scroll", handleScroll)
+			clearTimeout(timer)
+		}
+	}, [])
 
 	return (
 		<div className="flex h-full flex-col p-3">
@@ -104,6 +107,7 @@ export const SettingsPane = () => {
 									Quick Tips
 								</p>
 								<Switch
+									variant="small"
 									checked={isQuickTipsOpen}
 									onCheckedChange={() => {
 										setIsQuickTipsOpen(!isQuickTipsOpen)
@@ -116,7 +120,10 @@ export const SettingsPane = () => {
 					<div>
 						<h2 className="mb-2 text-xs font-bold">My Account</h2>
 						<div className="flex flex-col gap-1">
-							<p className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700">
+							<p
+								className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700"
+								onClick={() => setIsAccountDialogOpen(true)}
+							>
 								Add Accounts
 							</p>
 							<p className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700">
@@ -156,13 +163,13 @@ export const SettingsPane = () => {
 								<p className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700">
 									Autocomplete
 								</p>
-								<Switch />
+								<Switch variant="small" />
 							</div>
 							<div className="flex items-center justify-between">
 								<p className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700">
 									Autocorrect
 								</p>
-								<Switch />
+								<Switch variant="small" />
 							</div>
 							<p className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700">
 								Emoji
@@ -191,7 +198,10 @@ export const SettingsPane = () => {
 							>
 								Downloads
 							</p>
-							<p className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700">
+							<p
+								className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700"
+								onClick={() => setIsImageSettingsOpen(true)}
+							>
 								Images
 							</p>
 							<p className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700">
@@ -216,31 +226,31 @@ export const SettingsPane = () => {
 								<p className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700">
 									Backtick as Escape
 								</p>
-								<Switch />
+								<Switch variant="small" />
 							</div>
 							<div className="flex items-center justify-between">
 								<p className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700">
 									Send + Mark Done
 								</p>
-								<Switch />
+								<Switch variant="small" />
 							</div>
 							<div className="flex items-center justify-between">
 								<p className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700">
 									RSVP + Mark Done
 								</p>
-								<Switch />
+								<Switch variant="small" />
 							</div>
 							<div className="flex items-center justify-between">
 								<p className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700">
 									Hide Comment Bar
 								</p>
-								<Switch />
+								<Switch variant="small" />
 							</div>
 							<div className="flex items-center justify-between">
 								<p className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700">
 									Show Sender Full Names
 								</p>
-								<Switch />
+								<Switch variant="small" />
 							</div>
 						</div>
 					</div>

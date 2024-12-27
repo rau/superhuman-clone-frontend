@@ -11,6 +11,9 @@ interface UIState {
 	isAISettingsOpen: boolean
 	isQuickTipsOpen: boolean
 	isDownloadsOpen: boolean
+	isImageSettingsOpen: boolean
+	isSignInOpen: boolean
+	selectedIndices: Record<string, number>
 	setIsSearching: (isSearching: boolean) => void
 	setIsShowingEmail: (isShowingEmail: boolean) => void
 	setIsComposing: (isComposing: boolean) => void
@@ -21,6 +24,9 @@ interface UIState {
 	setIsAISettingsOpen: (open: boolean) => void
 	setIsQuickTipsOpen: (open: boolean) => void
 	setIsDownloadsOpen: (value: boolean) => void
+	setIsImageSettingsOpen: (value: boolean) => void
+	setIsSignInOpen: (value: boolean) => void
+	setSelectedIndex: (folderId: string, index: number) => void
 }
 
 const INITIAL_FOLDER: Folder = {
@@ -41,6 +47,9 @@ export const useUIStore = create<UIState>((set) => ({
 	selectedFolder: INITIAL_FOLDER,
 	isQuickTipsOpen: true,
 	isDownloadsOpen: false,
+	isImageSettingsOpen: false,
+	isSignInOpen: false,
+	selectedIndices: {},
 	setIsSearching: (isSearching) => set({ isSearching }),
 	setIsShowingEmail: (isShowingEmail) => set({ isShowingEmail }),
 	setIsComposing: (isComposing) => set({ isComposing }),
@@ -51,4 +60,10 @@ export const useUIStore = create<UIState>((set) => ({
 	setIsAISettingsOpen: (open) => set({ isAISettingsOpen: open }),
 	setIsQuickTipsOpen: (open) => set({ isQuickTipsOpen: open }),
 	setIsDownloadsOpen: (value) => set({ isDownloadsOpen: value }),
+	setIsImageSettingsOpen: (value) => set({ isImageSettingsOpen: value }),
+	setIsSignInOpen: (value) => set({ isSignInOpen: value }),
+	setSelectedIndex: (folderId, index) =>
+		set((state) => ({
+			selectedIndices: { ...state.selectedIndices, [folderId]: index },
+		})),
 }))

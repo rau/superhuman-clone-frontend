@@ -29,7 +29,7 @@ export const EmailSenderDetailsPane = ({
 					</Avatar>
 					<div className="flex flex-col">
 						<span className="font-medium">
-							{formatSender(email.messages[0].sender)}
+							{email.messages[0].sender.name}
 						</span>
 						<span className="text-sm text-slate-500">
 							{email.messages[0].sender.email}

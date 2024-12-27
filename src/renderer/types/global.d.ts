@@ -55,6 +55,16 @@ declare global {
 		name: string
 		messageCount: number
 	}
+
+	type Account = {
+		id: string
+		email: string
+		name: string
+		picture: string
+		provider: "gmail"
+	}
+
+	type ShortcutMode = "global" | "compose" | "search" | "email"
 }
 
 export {}

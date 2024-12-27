@@ -3,7 +3,6 @@ import { X } from "lucide-react"
 
 export const TipBar = () => {
 	const { isQuickTipsOpen, setIsQuickTipsOpen } = useUIStore()
-	console.log("isQuickTipsOpen", isQuickTipsOpen)
 	if (!isQuickTipsOpen) return null
 
 	return (

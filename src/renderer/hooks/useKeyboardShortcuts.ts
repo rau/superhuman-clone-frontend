@@ -1,12 +1,9 @@
+import { useUIStore } from "@/hooks/useUIStore"
 import { useEffect } from "react"
-import { useUIStore } from "./useUIStore"
-
-type KeyHandler = (e: KeyboardEvent) => void
-type ShortcutMode = "global" | "email" | "compose" | "search"
 
 interface ShortcutConfig {
 	key: string
-	handler: KeyHandler
+	handler: (e: KeyboardEvent) => void
 	meta?: boolean
 	shift?: boolean
 	ctrl?: boolean
@@ -48,5 +45,5 @@ export const useKeyboardShortcuts = (shortcuts: ShortcutConfig[]) => {
 
 		window.addEventListener("keydown", handleKeyDown)
 		return () => window.removeEventListener("keydown", handleKeyDown)
-	}, [isComposing, isSearching, isShowingEmail])
+	}, [isComposing, isSearching, isShowingEmail, shortcuts])
 }

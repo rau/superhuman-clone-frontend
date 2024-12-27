@@ -111,17 +111,11 @@ const EmailMessage = ({ message }: { message: EmailMessage }) => {
 	)
 }
 
-interface ViewEmailPaneProps {
-	emailIndex: number
-	setSelectedIndex: (index: number) => void
-}
-
-export const ViewEmailPane = ({
-	emailIndex,
-	setSelectedIndex,
-}: ViewEmailPaneProps) => {
+export const ViewEmailPane = () => {
+	const { selectedFolder, selectedIndices, setSelectedIndex } = useUIStore()
+	const selectedIndex = selectedIndices[selectedFolder?.id || "inbox"] || 0
 	const { data: emails } = useEmails()
-	const email = emails?.[emailIndex]
+	const email = emails?.[selectedIndex]
 	const { handleMarkDone } = useEmailActions(email?.id || "")
 	const [showReplyPane, setShowReplyPane] = useState(false)
 	const [selectedMessageIndex, setSelectedMessageIndex] = useState(0)
@@ -130,14 +124,14 @@ export const ViewEmailPane = ({
 	if (!isShowingEmail) return null
 
 	const handlePrevEmail = () => {
-		if (emailIndex > 0) {
-			setSelectedIndex(emailIndex - 1)
+		if (selectedIndex > 0) {
+			setSelectedIndex(selectedFolder?.id || "inbox", selectedIndex - 1)
 		}
 	}
 
 	const handleNextEmail = () => {
-		if (emails && emailIndex < emails.length - 1) {
-			setSelectedIndex(emailIndex + 1)
+		if (emails && selectedIndex < emails.length - 1) {
+			setSelectedIndex(selectedFolder?.id || "inbox", selectedIndex + 1)
 		}
 	}
 

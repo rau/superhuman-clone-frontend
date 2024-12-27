@@ -7,7 +7,7 @@ body {
 	overflow: hidden;
 }
 
-/* ::-webkit-scrollbar {
+::-webkit-scrollbar {
 	width: 12px;
 	background: transparent;
 }
@@ -38,7 +38,7 @@ body {
 
 *:active::-webkit-scrollbar-thumb {
 	opacity: 1;
-} */
+}
 
 @layer base {
 	:root {

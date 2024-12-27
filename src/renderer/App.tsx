@@ -1,8 +1,9 @@
 // React/Next
-import { MemoryRouter as Router, Routes, Route } from "react-router-dom"
+import { Route, MemoryRouter as Router, Routes } from "react-router-dom"
 // Components
 import { ReactQueryClientProvider } from "@/components/ReactQueryClientProvider"
 import { SharedLayout } from "@/components/SharedLayout"
+import { TooltipProvider } from "@/components/ui/Tooltip"
 // Hooks
 // Libraries
 // Icons
@@ -19,13 +20,15 @@ export default function App() {
 
 	return (
 		<ReactQueryClientProvider>
-			<Router>
-				<Routes>
-					<Route path="/" element={<SharedLayout />}>
-						{pageRoutes}
-					</Route>
-				</Routes>
-			</Router>
+			<TooltipProvider>
+				<Router>
+					<Routes>
+						<Route path="/" element={<SharedLayout />}>
+							{pageRoutes}
+						</Route>
+					</Routes>
+				</Router>
+			</TooltipProvider>
 		</ReactQueryClientProvider>
 	)
 }

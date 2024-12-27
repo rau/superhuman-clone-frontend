@@ -1,9 +1,10 @@
 import { useEmailActions } from "@/hooks/useEmailActions"
-import { formatSender } from "@/libs/stringOps"
+import { getUniqueSenderNames } from "@/libs/stringOps"
 import { cn } from "@/libs/utils"
 import { format } from "date-fns"
 import { Check, Clock, Copy } from "lucide-react"
 import { KeyboardTooltip } from "./KeyboardTooltip"
+
 interface EmailRowProps {
 	email: EmailThread
 	isSelected?: boolean
@@ -21,12 +22,14 @@ export const EmailRow = ({ email, isSelected, onClick }: EmailRowProps) => {
 				isSelected && "bg-blue-50"
 			)}
 		>
-			{email.messages[0].read && (
-				<div className="h-1 w-1 rounded-full bg-blue-500" />
-			)}
-			<div className="w-[300px]">
+			<div className="h-1 w-1">
+				{!email.messages[0].read && (
+					<div className="h-full w-full rounded-full bg-blue-500" />
+				)}
+			</div>
+			<div className="w-[300px] overflow-hidden truncate">
 				<span className="truncate text-xs font-medium">
-					{formatSender(email.messages[0].sender)}
+					{getUniqueSenderNames(email.messages)}
 				</span>
 			</div>
 			<div className="flex flex-1 flex-row gap-2 overflow-hidden">

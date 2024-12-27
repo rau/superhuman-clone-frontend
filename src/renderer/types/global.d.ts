@@ -34,6 +34,7 @@ declare global {
 	type EmailSender = {
 		email: string
 		name?: string
+		is_me: boolean
 	}
 
 	type Contact = {

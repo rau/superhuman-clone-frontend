@@ -43,6 +43,8 @@ export default function Home() {
 		}
 	}, [accounts])
 
+	console.log(emails)
+
 	useKeyboardShortcuts([
 		{
 			key: "c",

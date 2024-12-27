@@ -59,3 +59,13 @@ export const formatSender = (sender: EmailSender) => {
 	const [_, name, email] = match
 	return name.trim() || email
 }
+
+export const getUniqueSenderNames = (messages: EmailMessage[]): string => {
+	const uniqueNames = new Set(
+		messages
+			.filter((m) => !m.sender.is_me)
+			.map((m) => m.sender.name)
+			.filter(Boolean)
+	)
+	return Array.from(uniqueNames).join(", ")
+}

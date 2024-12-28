@@ -13,6 +13,7 @@ interface UIState {
 	isDownloadsOpen: boolean
 	isImageSettingsOpen: boolean
 	isSignInOpen: boolean
+	isThemeDialogOpen: boolean
 	selectedIndices: Record<string, number>
 	setIsSearching: (isSearching: boolean) => void
 	setIsShowingEmail: (isShowingEmail: boolean) => void
@@ -27,6 +28,7 @@ interface UIState {
 	setIsImageSettingsOpen: (value: boolean) => void
 	setIsSignInOpen: (value: boolean) => void
 	setSelectedIndex: (folderId: string, index: number) => void
+	setIsThemeDialogOpen: (value: boolean) => void
 }
 
 const INITIAL_FOLDER: Folder = {
@@ -50,6 +52,7 @@ export const useUIStore = create<UIState>((set) => ({
 	isImageSettingsOpen: false,
 	isSignInOpen: false,
 	selectedIndices: {},
+	isThemeDialogOpen: false,
 	setIsSearching: (isSearching) => set({ isSearching }),
 	setIsShowingEmail: (isShowingEmail) => set({ isShowingEmail }),
 	setIsComposing: (isComposing) => set({ isComposing }),
@@ -66,4 +69,5 @@ export const useUIStore = create<UIState>((set) => ({
 		set((state) => ({
 			selectedIndices: { ...state.selectedIndices, [folderId]: index },
 		})),
+	setIsThemeDialogOpen: (value) => set({ isThemeDialogOpen: value }),
 }))

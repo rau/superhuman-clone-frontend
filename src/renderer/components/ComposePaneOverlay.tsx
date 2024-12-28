@@ -745,7 +745,7 @@ export const ComposePaneOverlay = ({
 					)
 				}}
 			/>
-			<div className="flex w-64 flex-col bg-slate-50 p-4">
+			<div className="flex w-1/5 flex-col bg-slate-50 p-4">
 				<div className="flex flex-row gap-2">
 					<KeyboardTooltip
 						tooltips={[

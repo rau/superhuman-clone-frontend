@@ -5,10 +5,14 @@
 // Icons
 // Types
 
+import { AISettingsDialog } from "@/components/AISettingsDialog"
 import { ComposePaneOverlay } from "@/components/ComposePaneOverlay"
+import { DownloadsDialog } from "@/components/DownloadsDialog"
 import { EmailsContainer } from "@/components/EmailsContainer"
+import { ImageSettingsDialog } from "@/components/ImageSettingsDialog"
 import { SearchPane } from "@/components/SearchPane"
 import { SignInPane } from "@/components/SignInPane"
+import { ThemeDialog } from "@/components/ThemeDialog"
 import { TipBar } from "@/components/TipBar"
 import { ViewEmailPane } from "@/components/ViewEmailPane"
 import {
@@ -97,6 +101,10 @@ export default function Home() {
 				<EmailsContainer />
 				<TipBar />
 			</main>
+			<AISettingsDialog />
+			<DownloadsDialog />
+			<ImageSettingsDialog />
+			<ThemeDialog />
 
 			<ComposePaneOverlay />
 			<SearchPane />

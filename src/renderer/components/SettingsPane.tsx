@@ -13,6 +13,7 @@ export const SettingsPane = () => {
 		setIsDownloadsOpen,
 		setIsImageSettingsOpen,
 		setIsAccountDialogOpen,
+		setIsThemeDialogOpen,
 	} = useUIStore()
 
 	useEffect(() => {
@@ -132,7 +133,10 @@ export const SettingsPane = () => {
 							<p className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700">
 								Calendars
 							</p>
-							<p className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700">
+							<p
+								className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700"
+								onClick={() => setIsThemeDialogOpen(true)}
+							>
 								Theme
 							</p>
 							<p className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700">

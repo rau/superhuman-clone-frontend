@@ -22,8 +22,8 @@ declare global {
 		id: string
 		thread_id: string
 		subject: string
-		sender: EmailSender
-		to: EmailSender[]
+		sender: EmailParticipant
+		to: EmailParticipants
 		date: Date
 		timestamp: number
 		snippet: string
@@ -31,10 +31,16 @@ declare global {
 		read: boolean
 	}
 
-	type EmailSender = {
+	type EmailParticipant = {
 		email: string
 		name?: string
 		is_me: boolean
+	}
+
+	type EmailParticipants = {
+		bcc?: EmailParticipant[]
+		cc?: EmailParticipant[]
+		to?: EmailParticipant[]
 	}
 
 	type Contact = {

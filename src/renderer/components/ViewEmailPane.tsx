@@ -2,111 +2,74 @@ import { ComposePaneOverlay } from "@/components/ComposePaneOverlay"
 import { KeyboardTooltip } from "@/components/KeyboardTooltip"
 import { useEmails } from "@/hooks/dataHooks"
 import { useEmailActions } from "@/hooks/useEmailActions"
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts"
 import { useUIStore } from "@/hooks/useUIStore"
-import { formatSender } from "@/libs/stringOps"
+import { parseEmailBody } from "@/libs/emailUtils"
 import { cn } from "@/libs/utils"
-import { format } from "date-fns"
 import {
-	ArrowDown,
 	ArrowLeft,
-	ArrowLeftToLine,
-	ArrowRight,
-	ArrowUp,
 	Check,
+	ChevronDown,
+	ChevronUp,
 	Clock,
 	Copy,
 	Share,
 } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useState } from "react"
+import { EmailSenderDetailsPane } from "./EmailSenderDetailsPane"
+import { TopActionsBar } from "./TopActionsBar"
+import { Button } from "./ui/Button"
 
-interface TopActionsBarProps {
-	sender: EmailSender
-	date: Date
-	setShowReplyPane: (show: boolean) => void
-}
+const EmailMessage = ({
+	message,
+	isCollapsed,
+}: {
+	message: EmailMessage
+	isCollapsed: boolean
+}) => {
+	const { mainContent, quotedContent } = parseEmailBody(message.body)
+	const [showQuoted, setShowQuoted] = useState(false)
 
-const TopActionsBar = ({
-	sender,
-	date,
-	setShowReplyPane,
-}: TopActionsBarProps) => {
-	return (
-		<div className="flex items-center justify-between border-slate-200 py-2">
-			<p className="font-semibold">{formatSender(sender)}</p>
-
-			<div className="flex items-center gap-4">
-				<div className="flex items-center gap-1">
-					<KeyboardTooltip
-						tooltips={[
-							{
-								keys: ["R"],
-								label: "Reply",
-							},
-						]}
-					>
-						<button
-							onClick={() => setShowReplyPane(true)}
-							className="rounded p-1 text-slate-400 hover:bg-slate-50"
-						>
-							<ArrowLeft className="h-4 w-4" />
-						</button>
-					</KeyboardTooltip>
-
-					<KeyboardTooltip
-						tooltips={[
-							{
-								keys: ["R", "↵"],
-								label: "Reply all",
-							},
-						]}
-					>
-						<button className="rounded p-1 text-slate-400 hover:bg-slate-50">
-							<ArrowLeftToLine className="h-4 w-4" />
-						</button>
-					</KeyboardTooltip>
-
-					<KeyboardTooltip
-						tooltips={[
-							{
-								keys: ["F"],
-								label: "Forward",
-							},
-						]}
-					>
-						<button className="rounded p-1 text-slate-400 hover:bg-slate-50">
-							<ArrowRight className="h-4 w-4" />
-						</button>
-					</KeyboardTooltip>
-				</div>
-				<KeyboardTooltip
-					tooltips={[
-						{
-							keys: [],
-							label: format(
-								date,
-								"EEE, MMMM do, yyyy, 'at' h:mm a zzz"
-							),
-						},
-					]}
-				>
-					<span className="text-xs font-light uppercase tracking-wider text-slate-500">
-						{format(date, "LLL d")}
-					</span>
-				</KeyboardTooltip>
-			</div>
-		</div>
-	)
-}
-
-const EmailMessage = ({ message }: { message: EmailMessage }) => {
 	return (
 		<div className="w-full rounded-lg bg-white py-2">
-			<div
-				className="prose max-w-none text-sm"
-				dangerouslySetInnerHTML={{
-					__html: message.body,
-				}}
-			/>
+			<div>
+				{isCollapsed ? (
+					<p className="text-sm text-slate-500">{message.snippet}</p>
+				) : (
+					<>
+						<div
+							className="prose max-w-none text-sm"
+							dangerouslySetInnerHTML={{
+								__html: mainContent,
+							}}
+						/>
+						{quotedContent && (
+							<div className="mt-4">
+								<button
+									onClick={() => setShowQuoted(!showQuoted)}
+									className="text-sm text-blue-500 hover:text-blue-600"
+								>
+									{showQuoted
+										? "Hide quoted text"
+										: "Show quoted text"}
+								</button>
+								<div
+									className={cn(
+										showQuoted ? "block" : "hidden"
+									)}
+								>
+									<div
+										className="prose max-w-none text-sm text-slate-500"
+										dangerouslySetInnerHTML={{
+											__html: quotedContent,
+										}}
+									/>
+								</div>
+							</div>
+						)}
+					</>
+				)}
+			</div>
 		</div>
 	)
 }
@@ -120,8 +83,9 @@ export const ViewEmailPane = () => {
 	const [showReplyPane, setShowReplyPane] = useState(false)
 	const [selectedMessageIndex, setSelectedMessageIndex] = useState(0)
 	const { isShowingEmail, setIsShowingEmail } = useUIStore()
-
-	if (!isShowingEmail) return null
+	const [collapsedMessages, setCollapsedMessages] = useState<
+		Record<number, boolean>
+	>({})
 
 	const handlePrevEmail = () => {
 		if (selectedIndex > 0) {
@@ -135,75 +99,91 @@ export const ViewEmailPane = () => {
 		}
 	}
 
-	useEffect(() => {
-		const handleKeyDown = (e: KeyboardEvent) => {
-			if (
-				e.key.toLowerCase() === "r" &&
-				!e.metaKey &&
-				!e.ctrlKey &&
-				!showReplyPane
-			) {
-				e.preventDefault()
-				setShowReplyPane(true)
-			}
-			if (e.key === "Escape" && showReplyPane) {
-				e.preventDefault()
-				setShowReplyPane(false)
-			}
-		}
+	useKeyboardShortcuts([
+		{
+			key: "r",
+			handler: () => setShowReplyPane(true),
+			mode: "email",
+		},
+		{
+			key: "Escape",
+			handler: () => setShowReplyPane(false),
+			mode: "email",
+		},
+		{
+			key: "o",
+			handler: () => setCollapsedMessages({}),
+			shift: true,
+			mode: "email",
+		},
+	])
 
-		window.addEventListener("keydown", handleKeyDown)
-		return () => window.removeEventListener("keydown", handleKeyDown)
-	}, [showReplyPane])
+	const toggleMessage = (index: number) => {
+		setCollapsedMessages((prev) => ({
+			...prev,
+			[index]: !prev[index],
+		}))
+	}
+
+	if (!isShowingEmail) return null
+
+	console.log(email)
 
 	return (
 		<div className="absolute inset-0 z-50 flex flex-row bg-white">
-			<div className="flex w-32 flex-col items-center bg-slate-50 py-4">
-				<div className="flex flex-col gap-2">
-					<button
-						onClick={() => setIsShowingEmail(false)}
-						className="rounded-full bg-white p-2 text-slate-500 shadow-md hover:bg-slate-100"
+			<div className="flex w-1/5 flex-col bg-slate-50 p-4">
+				<div className="flex flex-row gap-2">
+					<KeyboardTooltip
+						tooltips={[
+							{
+								keys: ["Esc"],
+								label: "Close",
+							},
+						]}
+						delayDuration={150}
 					>
-						<ArrowLeft className="h-4 w-4" />
-					</button>
+						<Button
+							onClick={() => setIsShowingEmail(false)}
+							variant="ghost"
+							className="rounded-full bg-white shadow-md"
+						>
+							<ArrowLeft className="h-4 w-4" />
+						</Button>
+					</KeyboardTooltip>
 
-					<div className="flex flex-col rounded-full bg-white shadow-md">
+					<div className="flex flex-row gap-2 rounded-full bg-white shadow-md">
 						<KeyboardTooltip
 							tooltips={[
 								{
 									keys: ["K"],
-									label: "Previous email",
+									label: "Previous conversation",
 								},
 							]}
+							delayDuration={150}
 						>
-							<button
-								onClick={handlePrevEmail}
-								className="rounded-t-full p-2 text-slate-500 hover:bg-slate-100"
-							>
-								<ArrowUp className="h-4 w-4" />
-							</button>
+							<Button variant="ghost" onClick={handlePrevEmail}>
+								<ChevronUp className="h-4 w-4" />
+							</Button>
 						</KeyboardTooltip>
 						<KeyboardTooltip
 							tooltips={[
 								{
 									keys: ["J"],
-									label: "Next email",
+									label: "Next conversation",
 								},
 							]}
+							delayDuration={150}
 						>
-							<button
-								onClick={handleNextEmail}
-								className="rounded-b-full p-2 text-slate-500 hover:bg-slate-100"
-							>
-								<ArrowDown className="h-4 w-4" />
-							</button>
+							<Button variant="ghost" onClick={handleNextEmail}>
+								<ChevronDown className="h-4 w-4" />
+							</Button>
 						</KeyboardTooltip>
 					</div>
 				</div>
 			</div>
-			<div className="flex w-full flex-col overflow-y-auto border-b border-slate-200 p-4">
+			<div className="flex w-3/5 flex-col overflow-y-auto border-b border-slate-200 p-4">
 				<div className="flex flex-row items-center justify-between gap-2">
-					<h1 className="text-2xl font-semibold">{email?.subject}</h1>
+					<h1 className="text-xl">{email?.subject}</h1>
 
 					<div className="flex items-center gap-2">
 						<KeyboardTooltip
@@ -263,29 +243,38 @@ export const ViewEmailPane = () => {
 					</div>
 				</div>
 
-				{email?.messages.map((message, i) => (
-					<div
-						onClick={() => setSelectedMessageIndex(i)}
-						className={cn(
-							"flex h-fit flex-col rounded-lg bg-white px-8 py-2 shadow-md",
-							i === selectedMessageIndex &&
-								"border-l-4 border-blue-500"
-						)}
-					>
-						<TopActionsBar
-							sender={message.sender || { email: "" }}
-							date={message.date || new Date()}
-							setShowReplyPane={setShowReplyPane}
-						/>
-						<EmailMessage message={message} />
-						{showReplyPane && (
-							<ComposePaneOverlay
-								isReply={true}
-								replyToEmail={email}
+				<div className="flex flex-col gap-2">
+					{email?.messages.map((message, i) => (
+						<div
+							onClick={() => setSelectedMessageIndex(i)}
+							className={cn(
+								"flex h-fit flex-col rounded-lg bg-white px-8 py-2 shadow-md",
+								i === selectedMessageIndex &&
+									"-ml-[4px] border-l-[4px] border-blue-500"
+							)}
+						>
+							<TopActionsBar
+								message={message}
+								setShowReplyPane={setShowReplyPane}
+								isCollapsed={collapsedMessages[i]}
+								onToggle={() => toggleMessage(i)}
 							/>
-						)}
-					</div>
-				))}
+							<EmailMessage
+								message={message}
+								isCollapsed={collapsedMessages[i]}
+							/>
+							{showReplyPane && (
+								<ComposePaneOverlay
+									isReply={true}
+									replyToEmail={email}
+								/>
+							)}
+						</div>
+					))}
+				</div>
+			</div>
+			<div className="flex w-1/5 flex-col bg-slate-50 p-4">
+				<EmailSenderDetailsPane email={email} />
 			</div>
 		</div>
 	)

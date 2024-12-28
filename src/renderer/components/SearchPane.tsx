@@ -43,6 +43,7 @@ const Header = () => {
 	const { query, setQuery } = useSearchStore()
 	const { refetch } = useSearchEmails(query)
 	const { setIsSearching } = useUIStore()
+
 	const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
 		if (e.key === "Enter" && query) {
 			refetch()

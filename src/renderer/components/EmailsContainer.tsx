@@ -1,8 +1,5 @@
-import { AISettingsDialog } from "@/components/AISettingsDialog"
-import { DownloadsDialog } from "@/components/DownloadsDialog"
 import { EmailRow } from "@/components/EmailRow"
 import { EmailSenderDetailsPane } from "@/components/EmailSenderDetailsPane"
-import { ImageSettingsDialog } from "@/components/ImageSettingsDialog"
 import { KeyboardTooltip } from "@/components/KeyboardTooltip"
 import { SettingsPane } from "@/components/SettingsPane"
 import { ShortcutsPane } from "@/components/ShortcutsPane"
@@ -11,10 +8,12 @@ import { EmptyState } from "@/components/ui/EmptyState"
 import { Loader } from "@/components/ui/Loader"
 import { SidebarTrigger } from "@/components/ui/Sidebar"
 import { useFolderEmails } from "@/hooks/dataHooks"
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts"
 import { useUIStore } from "@/hooks/useUIStore"
 import { cn } from "@/libs/utils"
 import { Pencil, Search } from "lucide-react"
 import { useEffect } from "react"
+
 const ComposeButton = ({ onClick }: { onClick: () => void }) => (
 	<KeyboardTooltip
 		tooltips={[
@@ -74,32 +73,35 @@ export const EmailsContainer = () => {
 		setSelectedIndex(selectedFolder?.id || "inbox", 0)
 	}, [selectedFolder])
 
-	useEffect(() => {
-		const handleKeyDown = (e: KeyboardEvent) => {
-			if (!emails?.length || isComposing) return
-
-			if (e.key === "Enter" && !e.metaKey && !e.ctrlKey) {
-				e.preventDefault()
-				setIsShowingEmail(true)
-			}
-
-			if (e.key === "ArrowDown") {
+	useKeyboardShortcuts([
+		{
+			key: "Enter",
+			handler: () => setIsShowingEmail(true),
+			mode: "global",
+		},
+		{
+			key: "ArrowDown",
+			handler: () => {
+				if (!emails?.length) return
 				setSelectedIndex(
 					selectedFolder?.id || "inbox",
 					Math.min(selectedIndex + 1, emails.length - 1)
 				)
-			}
-			if (e.key === "ArrowUp") {
+			},
+			mode: "global",
+		},
+		{
+			key: "ArrowUp",
+			handler: () => {
+				if (!emails?.length) return
 				setSelectedIndex(
 					selectedFolder?.id || "inbox",
 					Math.max(selectedIndex - 1, 0)
 				)
-			}
-		}
-
-		window.addEventListener("keydown", handleKeyDown)
-		return () => window.removeEventListener("keydown", handleKeyDown)
-	}, [emails, isComposing, selectedIndex, selectedFolder])
+			},
+			mode: "global",
+		},
+	])
 
 	const showEmptyState = !isLoading && (!emails || emails.length === 0)
 	const showEmails = !isLoading && emails && emails.length > 0
@@ -161,9 +163,6 @@ export const EmailsContainer = () => {
 				) : (
 					<EmailSenderDetailsPane email={emails?.[selectedIndex]} />
 				)}
-				<AISettingsDialog />
-				<DownloadsDialog />
-				<ImageSettingsDialog />
 			</div>
 		</div>
 	)

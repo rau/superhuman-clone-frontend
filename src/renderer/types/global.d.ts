@@ -16,6 +16,7 @@ declare global {
 		subject: string
 		snippet: string
 		last_message_timestamp: number
+		starred: boolean
 	}
 
 	type EmailMessage = {

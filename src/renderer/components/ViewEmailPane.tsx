@@ -1,7 +1,6 @@
 import { ComposePaneOverlay } from "@/components/ComposePaneOverlay"
 import { KeyboardTooltip } from "@/components/KeyboardTooltip"
-import { useEmails } from "@/hooks/dataHooks"
-import { useEmailActions } from "@/hooks/useEmailActions"
+import { useFolderEmails, useMarkEmailDone } from "@/hooks/dataHooks"
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts"
 import { useUIStore } from "@/hooks/useUIStore"
 import { parseEmailBody } from "@/libs/emailUtils"
@@ -13,9 +12,10 @@ import {
 	ChevronUp,
 	Clock,
 	Copy,
+	Ellipsis,
 	Share,
 } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { EmailSenderDetailsPane } from "./EmailSenderDetailsPane"
 import { TopActionsBar } from "./TopActionsBar"
 import { Button } from "./ui/Button"
@@ -30,46 +30,34 @@ const EmailMessage = ({
 	const { mainContent, quotedContent } = parseEmailBody(message.body)
 	const [showQuoted, setShowQuoted] = useState(false)
 
+	if (isCollapsed) return null
+
 	return (
 		<div className="w-full rounded-lg bg-white py-2">
-			<div>
-				{isCollapsed ? (
-					<p className="text-sm text-slate-500">{message.snippet}</p>
-				) : (
-					<>
+			<div
+				className="prose max-w-none text-sm"
+				dangerouslySetInnerHTML={{
+					__html: mainContent,
+				}}
+			/>
+			{quotedContent && (
+				<>
+					<button
+						onClick={() => setShowQuoted(!showQuoted)}
+						className="text-sm text-blue-500 hover:text-blue-600"
+					>
+						<Ellipsis className="h-4 w-4" />
+					</button>
+					<div className={cn(showQuoted ? "block" : "hidden")}>
 						<div
-							className="prose max-w-none text-sm"
+							className="prose max-w-none text-sm text-slate-500"
 							dangerouslySetInnerHTML={{
-								__html: mainContent,
+								__html: quotedContent,
 							}}
 						/>
-						{quotedContent && (
-							<div className="mt-4">
-								<button
-									onClick={() => setShowQuoted(!showQuoted)}
-									className="text-sm text-blue-500 hover:text-blue-600"
-								>
-									{showQuoted
-										? "Hide quoted text"
-										: "Show quoted text"}
-								</button>
-								<div
-									className={cn(
-										showQuoted ? "block" : "hidden"
-									)}
-								>
-									<div
-										className="prose max-w-none text-sm text-slate-500"
-										dangerouslySetInnerHTML={{
-											__html: quotedContent,
-										}}
-									/>
-								</div>
-							</div>
-						)}
-					</>
-				)}
-			</div>
+					</div>
+				</>
+			)}
 		</div>
 	)
 }
@@ -77,15 +65,29 @@ const EmailMessage = ({
 export const ViewEmailPane = () => {
 	const { selectedFolder, selectedIndices, setSelectedIndex } = useUIStore()
 	const selectedIndex = selectedIndices[selectedFolder?.id || "inbox"] || 0
-	const { data: emails } = useEmails()
+	const { data: emails } = useFolderEmails()
 	const email = emails?.[selectedIndex]
-	const { handleMarkDone } = useEmailActions(email?.id || "")
+	const { mutate: handleMarkDone } = useMarkEmailDone()
 	const [showReplyPane, setShowReplyPane] = useState(false)
 	const [selectedMessageIndex, setSelectedMessageIndex] = useState(0)
 	const { isShowingEmail, setIsShowingEmail } = useUIStore()
 	const [collapsedMessages, setCollapsedMessages] = useState<
 		Record<number, boolean>
 	>({})
+
+	useEffect(() => {
+		if (email?.messages) {
+			setCollapsedMessages(
+				email.messages.reduce(
+					(acc, _, index) => ({
+						...acc,
+						[index]: index !== email.messages.length - 1,
+					}),
+					{}
+				)
+			)
+		}
+	}, [email])
 
 	const handlePrevEmail = () => {
 		if (selectedIndex > 0) {
@@ -101,19 +103,43 @@ export const ViewEmailPane = () => {
 
 	useKeyboardShortcuts([
 		{
+			key: "n",
+			handler: () => {
+				setSelectedMessageIndex(
+					Math.min(
+						selectedMessageIndex + 1,
+						(email?.messages?.length || 0) - 1
+					)
+				)
+			},
+			mode: "email",
+		},
+		{
+			key: "p",
+			handler: () => {
+				setSelectedMessageIndex(Math.max(selectedMessageIndex - 1, 0))
+			},
+			mode: "email",
+		},
+		{
 			key: "r",
 			handler: () => setShowReplyPane(true),
 			mode: "email",
 		},
 		{
 			key: "Escape",
-			handler: () => setShowReplyPane(false),
+			handler: () => setIsShowingEmail(false),
 			mode: "email",
 		},
 		{
 			key: "o",
 			handler: () => setCollapsedMessages({}),
 			shift: true,
+			mode: "email",
+		},
+		{
+			key: "o",
+			handler: () => toggleMessage(selectedMessageIndex),
 			mode: "email",
 		},
 	])
@@ -208,7 +234,7 @@ export const ViewEmailPane = () => {
 							]}
 						>
 							<button
-								onClick={handleMarkDone}
+								onClick={() => handleMarkDone(email)}
 								className="rounded p-1 text-slate-400 hover:bg-green-50 hover:text-green-600"
 							>
 								<Check className="h-4 w-4" />

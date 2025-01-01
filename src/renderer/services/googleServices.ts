@@ -11,20 +11,6 @@ export const initiateGoogleAuth = async () => {
 	}
 }
 
-export const fetchEmails = async (
-	accountId: string
-): Promise<EmailThread[]> => {
-	const { data } = await fetchWithAxios("emails/", {
-		method: "GET",
-		accountId: accountId,
-	})
-
-	return data.map((email: any) => ({
-		...email,
-		date: new Date(email.date),
-	}))
-}
-
 export const fetchContacts = async (accountId: string): Promise<Contact[]> => {
 	const { data } = await fetchWithAxios("contacts/", {
 		method: "GET",
@@ -91,23 +77,37 @@ export const searchEmails = async (
 	return data
 }
 
-export const markEmailDone = async (emailId: string, accountId: string) => {
-	const { data } = await fetchWithAxios(`markdone/`, {
+export const markEmailDone = async (email: EmailThread, accountId: string) => {
+	await fetchWithAxios(`markdone/`, {
 		method: "POST",
 		accountId: accountId,
-		data: { email_id: emailId },
+		data: { email_id: email.id },
+	})
+	return email
+}
+
+export const markEmailUndone = async (
+	email: EmailThread,
+	accountId: string
+) => {
+	const { data } = await fetchWithAxios(`markundone/`, {
+		method: "POST",
+		accountId: accountId,
+		data: { email_id: email.id },
 	})
 	return data
 }
 
-export const markEmailRead = async (emailId: string, accountId: string) => {
-	const { data } = await fetchWithAxios(`markread/`, {
+export const markEmailRead = (
+	email: EmailThread,
+	accountId: string,
+	read: boolean
+) =>
+	fetchWithAxios("read/", {
 		method: "POST",
 		accountId: accountId,
-		data: { email_id: emailId },
+		data: { email_id: email.id, read },
 	})
-	return data
-}
 
 export const fetchFolders = async (accountId: string): Promise<Folder[]> => {
 	const { data } = await fetchWithAxios("folders/", {
@@ -150,5 +150,17 @@ export const fetchAccounts = async (): Promise<Account[]> => {
 export const signOutAccount = async (accountId: string) => {
 	await fetchWithAxios(`tokens/${accountId}/`, {
 		method: "DELETE",
+	})
+}
+
+export const starEmail = async (
+	email: EmailThread,
+	accountId: string,
+	star: boolean
+) => {
+	await fetchWithAxios("star/", {
+		method: "POST",
+		accountId: accountId,
+		data: { email_id: email.id, star },
 	})
 }

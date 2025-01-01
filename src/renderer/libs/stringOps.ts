@@ -52,7 +52,7 @@ export const formatMilliseconds = (milliseconds: number) => {
 	return `${hours}h ${minutes}m ${seconds}s`
 }
 
-export const formatSender = (sender: EmailSender) => {
+export const formatSender = (sender: EmailParticipant) => {
 	const match = sender.name?.match(/(.*?)\s*<(.+?)>/)
 	if (!match) return sender.email
 

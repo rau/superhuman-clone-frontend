@@ -14,17 +14,22 @@ import { SearchPane } from "@/components/SearchPane"
 import { SignInPane } from "@/components/SignInPane"
 import { ThemeDialog } from "@/components/ThemeDialog"
 import { TipBar } from "@/components/TipBar"
+import { ActionUndoToast } from "@/components/ui/ActionUndoToast"
 import { ViewEmailPane } from "@/components/ViewEmailPane"
 import {
 	useAccounts,
 	useFolderEmails,
 	useMarkEmailDone,
+	useMarkEmailRead,
+	useStarEmail,
 } from "@/hooks/dataHooks"
 import { useAccountStore } from "@/hooks/useAccountStore"
+import { useEmailActionsStore } from "@/hooks/useEmailActionsStore"
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts"
 import { useUIStore } from "@/hooks/useUIStore"
+import { useUndo } from "@/hooks/useUndo"
 import { useEffect } from "react"
-
+import { toast } from "react-toastify"
 export default function Home() {
 	const { data: accounts, isLoading } = useAccounts()
 	const { data: emails } = useFolderEmails()
@@ -36,18 +41,20 @@ export default function Home() {
 		setIsShowingEmail,
 		selectedFolder,
 		selectedIndices,
+		setSelectedIndex,
 	} = useUIStore()
-	const { mutate: markDone } = useMarkEmailDone()
-
+	const { mutateAsync: markDone } = useMarkEmailDone()
+	const { handleUndo } = useUndo()
 	const selectedIndex = selectedIndices[selectedFolder?.id || "inbox"] || 0
 	const selectedEmail = emails?.[selectedIndex]
+	const { lastAction } = useEmailActionsStore()
+	const { mutateAsync: starEmail } = useStarEmail()
+	const { mutateAsync: markEmailRead } = useMarkEmailRead()
 	useEffect(() => {
 		if (accounts && accounts.length > 0) {
 			setSelectedAccountId(accounts[0].id)
 		}
 	}, [accounts])
-
-	console.log(emails)
 
 	useKeyboardShortcuts([
 		{
@@ -72,9 +79,48 @@ export default function Home() {
 		{
 			key: "e",
 			handler: () => {
-				if (selectedEmail?.id) {
-					console.log("marking email done", selectedEmail.id)
-					markDone(selectedEmail.id)
+				if (selectedEmail) {
+					markDone(selectedEmail).then(() => {
+						toast(<ActionUndoToast action="Marked as Done" />, {
+							className:
+								"px-2 w-[400px] border border-purple-600/40",
+							closeButton: false,
+						})
+					})
+				}
+			},
+			mode: "global",
+		},
+		{
+			key: "z",
+			handler: () => {
+				if (lastAction) {
+					handleUndo()
+				}
+			},
+			mode: "global",
+			meta: true,
+		},
+		{
+			key: "j",
+			handler: () => {
+				if (emails && selectedIndex < emails.length - 1) {
+					setSelectedIndex(
+						selectedFolder?.id || "inbox",
+						selectedIndex + 1
+					)
+				}
+			},
+			mode: "global",
+		},
+		{
+			key: "k",
+			handler: () => {
+				if (selectedIndex > 0) {
+					setSelectedIndex(
+						selectedFolder?.id || "inbox",
+						selectedIndex - 1
+					)
 				}
 			},
 			mode: "global",
@@ -85,6 +131,60 @@ export default function Home() {
 			mode: "global" as ShortcutMode,
 			ctrl: true,
 		})) || []),
+		{
+			key: "s",
+			handler: () => {
+				if (selectedEmail) {
+					starEmail({
+						email: selectedEmail,
+						star: !selectedEmail.starred,
+					}).then(() => {
+						toast(
+							<ActionUndoToast
+								action={
+									selectedEmail.starred
+										? "Unstarred"
+										: "Starred"
+								}
+							/>,
+							{
+								className:
+									"px-2 w-[400px] border border-purple-600/40",
+								closeButton: false,
+							}
+						)
+					})
+				}
+			},
+			mode: "global",
+		},
+		{
+			key: "u",
+			handler: () => {
+				if (selectedEmail) {
+					markEmailRead({
+						email: selectedEmail,
+						read: !selectedEmail.messages[0].read,
+					}).then(() => {
+						toast(
+							<ActionUndoToast
+								action={
+									selectedEmail.messages[0].read
+										? "Marked as Unread"
+										: "Marked as Read"
+								}
+							/>,
+							{
+								className:
+									"px-2 w-[400px] border border-purple-600/40",
+								closeButton: false,
+							}
+						)
+					})
+				}
+			},
+			mode: "global",
+		},
 	])
 
 	if (isLoading) {
@@ -94,6 +194,8 @@ export default function Home() {
 	if (accounts?.length === 0 || isSignInOpen) {
 		return <SignInPane />
 	}
+
+	console.log(emails)
 
 	return (
 		<div className="relative flex h-screen flex-col">

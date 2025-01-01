@@ -14,6 +14,7 @@ import {
 	sendEmail,
 	SendEmailPayload,
 	signOutAccount,
+	spamEmail,
 	starEmail,
 	trashEmail,
 } from "@/services/googleServices"
@@ -366,6 +367,61 @@ export const useTrashEmail = () => {
 				["emails", selectedFolder?.id, selectedAccountId],
 				(old) =>
 					trash
+						? old?.filter((e) => e.id !== email.id)
+						: [...(old || []), email]
+			)
+
+			return { previousEmails }
+		},
+		onError: (err, variables, context) => {
+			queryClient.setQueryData(
+				["emails", selectedFolder?.id, selectedAccountId],
+				context?.previousEmails
+			)
+		},
+		onSettled: () => {
+			queryClient.invalidateQueries({
+				queryKey: ["emails", selectedFolder?.id, selectedAccountId],
+			})
+		},
+	})
+}
+
+export const useSpamEmail = () => {
+	const queryClient = useQueryClient()
+	const { selectedAccountId } = useAccountStore()
+	const { selectedFolder } = useUIStore()
+	const { setLastAction } = useEmailActionsStore()
+	return useMutation({
+		mutationFn: ({
+			email,
+			spam,
+		}: {
+			email: EmailThread
+			spam: boolean
+		}) => {
+			setLastAction({
+				type: "spam",
+				email,
+				previousValue: false,
+			})
+			return spamEmail(email, selectedAccountId || "", spam)
+		},
+		onMutate: async ({ email, spam }) => {
+			await queryClient.cancelQueries({
+				queryKey: ["emails", selectedFolder?.id, selectedAccountId],
+			})
+
+			const previousEmails = queryClient.getQueryData<EmailThread[]>([
+				"emails",
+				selectedFolder?.id,
+				selectedAccountId,
+			])
+
+			queryClient.setQueryData<EmailThread[]>(
+				["emails", selectedFolder?.id, selectedAccountId],
+				(old) =>
+					spam
 						? old?.filter((e) => e.id !== email.id)
 						: [...(old || []), email]
 			)

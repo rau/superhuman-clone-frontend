@@ -21,6 +21,7 @@ import {
 	useFolderEmails,
 	useMarkEmailDone,
 	useMarkEmailRead,
+	useSpamEmail,
 	useStarEmail,
 	useTrashEmail,
 } from "@/hooks/dataHooks"
@@ -52,6 +53,8 @@ export default function Home() {
 	const { mutateAsync: starEmail } = useStarEmail()
 	const { mutateAsync: markEmailRead } = useMarkEmailRead()
 	const { mutateAsync: trashEmail } = useTrashEmail()
+	const { mutateAsync: spamEmail } = useSpamEmail()
+
 	useEffect(() => {
 		if (accounts && accounts.length > 0) {
 			setSelectedAccountId(accounts[0].id)
@@ -196,6 +199,25 @@ export default function Home() {
 						trash: true,
 					}).then(() => {
 						toast(<ActionUndoToast action="Moved to trash" />, {
+							className:
+								"px-2 w-[400px] border border-purple-600/40",
+							closeButton: false,
+						})
+					})
+				}
+			},
+			mode: "global",
+			shift: true,
+		},
+		{
+			key: "!",
+			handler: () => {
+				if (selectedEmail) {
+					spamEmail({
+						email: selectedEmail,
+						spam: true,
+					}).then(() => {
+						toast(<ActionUndoToast action="Marked as Spam" />, {
 							className:
 								"px-2 w-[400px] border border-purple-600/40",
 							closeButton: false,

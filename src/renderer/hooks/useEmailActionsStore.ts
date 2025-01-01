@@ -1,6 +1,6 @@
 import { create } from "zustand"
 
-type ActionType = "done" | "star" | "read" | "trash"
+type ActionType = "done" | "star" | "read" | "trash" | "spam"
 
 interface Action {
 	type: ActionType

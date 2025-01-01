@@ -15,6 +15,7 @@ import {
 	SendEmailPayload,
 	signOutAccount,
 	starEmail,
+	trashEmail,
 } from "@/services/googleServices"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
@@ -311,6 +312,62 @@ export const useStarEmail = () => {
 					old?.map((e) =>
 						e.id === email.id ? { ...e, starred: star } : e
 					)
+			)
+
+			return { previousEmails }
+		},
+		onError: (err, variables, context) => {
+			queryClient.setQueryData(
+				["emails", selectedFolder?.id, selectedAccountId],
+				context?.previousEmails
+			)
+		},
+		onSettled: () => {
+			queryClient.invalidateQueries({
+				queryKey: ["emails", selectedFolder?.id, selectedAccountId],
+			})
+		},
+	})
+}
+
+export const useTrashEmail = () => {
+	const queryClient = useQueryClient()
+	const { selectedAccountId } = useAccountStore()
+	const { selectedFolder } = useUIStore()
+	const { setLastAction } = useEmailActionsStore()
+
+	return useMutation({
+		mutationFn: ({
+			email,
+			trash,
+		}: {
+			email: EmailThread
+			trash: boolean
+		}) => {
+			setLastAction({
+				type: "trash",
+				email,
+				previousValue: false,
+			})
+			return trashEmail(email, selectedAccountId || "", trash)
+		},
+		onMutate: async ({ email, trash }) => {
+			await queryClient.cancelQueries({
+				queryKey: ["emails", selectedFolder?.id, selectedAccountId],
+			})
+
+			const previousEmails = queryClient.getQueryData<EmailThread[]>([
+				"emails",
+				selectedFolder?.id,
+				selectedAccountId,
+			])
+
+			queryClient.setQueryData<EmailThread[]>(
+				["emails", selectedFolder?.id, selectedAccountId],
+				(old) =>
+					trash
+						? old?.filter((e) => e.id !== email.id)
+						: [...(old || []), email]
 			)
 
 			return { previousEmails }

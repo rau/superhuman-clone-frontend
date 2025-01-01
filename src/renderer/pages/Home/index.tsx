@@ -22,6 +22,7 @@ import {
 	useMarkEmailDone,
 	useMarkEmailRead,
 	useStarEmail,
+	useTrashEmail,
 } from "@/hooks/dataHooks"
 import { useAccountStore } from "@/hooks/useAccountStore"
 import { useEmailActionsStore } from "@/hooks/useEmailActionsStore"
@@ -50,6 +51,7 @@ export default function Home() {
 	const { lastAction } = useEmailActionsStore()
 	const { mutateAsync: starEmail } = useStarEmail()
 	const { mutateAsync: markEmailRead } = useMarkEmailRead()
+	const { mutateAsync: trashEmail } = useTrashEmail()
 	useEffect(() => {
 		if (accounts && accounts.length > 0) {
 			setSelectedAccountId(accounts[0].id)
@@ -184,6 +186,25 @@ export default function Home() {
 				}
 			},
 			mode: "global",
+		},
+		{
+			key: "#",
+			handler: () => {
+				if (selectedEmail) {
+					trashEmail({
+						email: selectedEmail,
+						trash: true,
+					}).then(() => {
+						toast(<ActionUndoToast action="Moved to trash" />, {
+							className:
+								"px-2 w-[400px] border border-purple-600/40",
+							closeButton: false,
+						})
+					})
+				}
+			},
+			mode: "global",
+			shift: true,
 		},
 	])
 

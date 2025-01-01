@@ -1,5 +1,6 @@
 import {
 	useMarkEmailRead,
+	useSpamEmail,
 	useStarEmail,
 	useTrashEmail,
 	useUndoMarkEmailDone,
@@ -13,6 +14,7 @@ export const useUndo = () => {
 	const { mutate: starEmail } = useStarEmail()
 	const { mutate: markEmailRead } = useMarkEmailRead()
 	const { mutate: trashEmail } = useTrashEmail()
+	const { mutate: spamEmail } = useSpamEmail()
 
 	const handleUndo = () => {
 		console.log("lastAction", lastAction)
@@ -38,6 +40,12 @@ export const useUndo = () => {
 				trashEmail({
 					email: lastAction.email,
 					trash: false,
+				})
+				break
+			case "spam":
+				spamEmail({
+					email: lastAction.email,
+					spam: false,
 				})
 				break
 		}

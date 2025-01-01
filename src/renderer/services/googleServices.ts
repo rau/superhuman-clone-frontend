@@ -176,3 +176,15 @@ export const trashEmail = async (
 		data: { email_id: email.id, trash: trash },
 	})
 }
+
+export const spamEmail = async (
+	email: EmailThread,
+	accountId: string,
+	spam: boolean
+) => {
+	await fetchWithAxios("spam/", {
+		method: "POST",
+		accountId: accountId,
+		data: { email_id: email.id, spam },
+	})
+}

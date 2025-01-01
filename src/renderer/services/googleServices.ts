@@ -164,3 +164,15 @@ export const starEmail = async (
 		data: { email_id: email.id, star },
 	})
 }
+
+export const trashEmail = async (
+	email: EmailThread,
+	accountId: string,
+	trash: boolean
+) => {
+	await fetchWithAxios("trash/", {
+		method: "POST",
+		accountId: accountId,
+		data: { email_id: email.id, trash: trash },
+	})
+}

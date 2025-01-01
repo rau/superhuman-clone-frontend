@@ -1,5 +1,6 @@
 import { KeyboardTooltip } from "@/components/KeyboardTooltip"
-import { UndoToast } from "@/components/ui/UndoToast"
+import { ActionUndoToast } from "@/components/ui/ActionUndoToast"
+
 import { useMarkEmailDone, useStarEmail } from "@/hooks/dataHooks"
 import { getUniqueSenderNames } from "@/libs/stringOps"
 import { cn, decodeHtml } from "@/libs/utils"
@@ -14,7 +15,7 @@ interface EmailRowProps {
 }
 
 export const EmailRow = ({ email, isSelected, onClick }: EmailRowProps) => {
-	const { mutate: handleMarkDone } = useMarkEmailDone()
+	const { mutateAsync: markDone } = useMarkEmailDone()
 	const { mutate: handleStar } = useStarEmail()
 
 	return (
@@ -74,11 +75,15 @@ export const EmailRow = ({ email, isSelected, onClick }: EmailRowProps) => {
 						<button
 							onClick={(e) => {
 								e.stopPropagation()
-								handleMarkDone(email)
-								toast(<UndoToast />, {
-									className:
-										"px-2 w-[400px] border border-purple-600/40",
-									closeButton: false,
+								markDone(email).then(() => {
+									toast(
+										<ActionUndoToast action="Marked as Done" />,
+										{
+											className:
+												"px-2 w-[400px] border border-purple-600/40",
+											closeButton: false,
+										}
+									)
 								})
 							}}
 							className="rounded p-1 text-slate-400 hover:bg-green-50 hover:text-green-600"

@@ -1,18 +1,21 @@
-import { toast } from "react-toastify"
 import {
 	useMarkEmailRead,
 	useStarEmail,
+	useTrashEmail,
 	useUndoMarkEmailDone,
-} from "./dataHooks"
-import { useEmailActionsStore } from "./useEmailActionsStore"
+} from "@/hooks/dataHooks"
+import { useEmailActionsStore } from "@/hooks/useEmailActionsStore"
+import { toast } from "react-toastify"
 
 export const useUndo = () => {
 	const { lastAction } = useEmailActionsStore()
 	const { mutate: undoMarkEmailDone } = useUndoMarkEmailDone()
 	const { mutate: starEmail } = useStarEmail()
 	const { mutate: markEmailRead } = useMarkEmailRead()
+	const { mutate: trashEmail } = useTrashEmail()
 
 	const handleUndo = () => {
+		console.log("lastAction", lastAction)
 		if (!lastAction) return
 
 		switch (lastAction.type) {
@@ -29,6 +32,12 @@ export const useUndo = () => {
 				markEmailRead({
 					email: lastAction.email,
 					read: lastAction.previousValue,
+				})
+				break
+			case "trash":
+				trashEmail({
+					email: lastAction.email,
+					trash: false,
 				})
 				break
 		}

@@ -72,7 +72,7 @@ declare global {
 		provider: "gmail"
 	}
 
-	type ShortcutMode = "global" | "compose" | "search" | "email"
+	type ShortcutMode = "global" | "compose" | "search" | "email" | "dialog"
 }
 
 export {}

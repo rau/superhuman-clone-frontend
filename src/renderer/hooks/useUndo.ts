@@ -1,5 +1,6 @@
 import {
 	useMarkEmailRead,
+	useModifyLabels,
 	useSpamEmail,
 	useStarEmail,
 	useTrashEmail,
@@ -15,37 +16,44 @@ export const useUndo = () => {
 	const { mutate: markEmailRead } = useMarkEmailRead()
 	const { mutate: trashEmail } = useTrashEmail()
 	const { mutate: spamEmail } = useSpamEmail()
+	const { mutate: modifyLabels } = useModifyLabels()
 
 	const handleUndo = () => {
-		console.log("lastAction", lastAction)
 		if (!lastAction) return
 
 		switch (lastAction.type) {
 			case "done":
-				undoMarkEmailDone(lastAction.email)
+				undoMarkEmailDone(lastAction.emails)
 				break
 			case "star":
 				starEmail({
-					email: lastAction.email,
-					star: lastAction.previousValue,
+					emails_input: lastAction.emails,
+					star: lastAction.previousValues[0],
 				})
 				break
 			case "read":
 				markEmailRead({
-					email: lastAction.email,
-					read: lastAction.previousValue,
+					emails_input: lastAction.emails,
+					read: lastAction.previousValues[0],
 				})
 				break
 			case "trash":
 				trashEmail({
-					email: lastAction.email,
+					emails_input: lastAction.emails,
 					trash: false,
 				})
 				break
 			case "spam":
 				spamEmail({
-					email: lastAction.email,
+					emails_input: lastAction.emails,
 					spam: false,
+				})
+				break
+			case "modifyLabels":
+				modifyLabels({
+					threads: lastAction.emails,
+					addLabels: lastAction.previousValues[1],
+					removeLabels: lastAction.previousValues[0],
 				})
 				break
 		}

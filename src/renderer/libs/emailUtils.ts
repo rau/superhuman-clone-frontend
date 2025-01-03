@@ -53,3 +53,25 @@ export const formatEmailParticipant = (participant: EmailParticipant) => {
 	if (participant.is_me) return "Me"
 	return participant.name || participant.email
 }
+
+export const getSelectedEmails = (
+	selectedThreads: Record<string, Set<string>>,
+	selectedFolder: Folder | null,
+	selectedIndices: Record<string, number>,
+	emails: EmailThread[] | undefined
+): EmailThread[] => {
+	const currentFolderId = selectedFolder?.id || "INBOX"
+
+	if (selectedThreads[currentFolderId]?.size) {
+		return Array.from(selectedThreads[currentFolderId])
+			.map((id) => emails?.find((e) => e.id === id))
+			.filter(Boolean) as EmailThread[]
+	}
+
+	const selectedEmail = emails?.[selectedIndices[currentFolderId] || 0]
+	return selectedEmail ? [selectedEmail] : []
+}
+
+export const getDomainFromEmail = (email: string) => {
+	return email.split("@")[1]
+}

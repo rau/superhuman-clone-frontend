@@ -11,9 +11,11 @@ interface ShortcutConfig {
 }
 
 export const useKeyboardShortcuts = (shortcuts: ShortcutConfig[]) => {
-	const { isComposing, isSearching, isShowingEmail } = useUIStore()
+	const { isComposing, isSearching, isShowingEmail, isMoveToDialogOpen } =
+		useUIStore()
 
 	const getCurrentMode = (): ShortcutMode => {
+		if (isMoveToDialogOpen) return "dialog"
 		if (isComposing) return "compose"
 		if (isSearching) return "search"
 		if (isShowingEmail) return "email"
@@ -23,9 +25,15 @@ export const useKeyboardShortcuts = (shortcuts: ShortcutConfig[]) => {
 	useEffect(() => {
 		const handleKeyDown = (e: KeyboardEvent) => {
 			const currentMode = getCurrentMode()
+			let handled = false
 
 			shortcuts.forEach(({ key, handler, meta, shift, ctrl, mode }) => {
-				if (mode !== currentMode && mode !== "global") return
+				if (handled) return
+				if (
+					mode !== currentMode &&
+					(mode !== "global" || currentMode === "dialog")
+				)
+					return
 
 				const metaMatch = meta ? e.metaKey : !e.metaKey
 				const shiftMatch = shift ? e.shiftKey : !e.shiftKey
@@ -38,12 +46,20 @@ export const useKeyboardShortcuts = (shortcuts: ShortcutConfig[]) => {
 					ctrlMatch
 				) {
 					e.preventDefault()
+					e.stopPropagation()
 					handler(e)
+					handled = true
 				}
 			})
 		}
 
 		window.addEventListener("keydown", handleKeyDown)
 		return () => window.removeEventListener("keydown", handleKeyDown)
-	}, [isComposing, isSearching, isShowingEmail, shortcuts])
+	}, [
+		isComposing,
+		isSearching,
+		isShowingEmail,
+		isMoveToDialogOpen,
+		shortcuts,
+	])
 }

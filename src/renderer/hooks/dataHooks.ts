@@ -10,6 +10,7 @@ import {
 	markEmailDone,
 	markEmailRead,
 	markEmailUndone,
+	modifyLabels,
 	searchEmails,
 	sendEmail,
 	SendEmailPayload,
@@ -58,12 +59,12 @@ export const useMarkEmailDone = () => {
 	const { selectedAccountId } = useAccountStore()
 	const { selectedFolder, selectedIndices, setSelectedIndex } = useUIStore()
 	const { data: emails } = useFolderEmails()
-	const selectedIndex = selectedIndices[selectedFolder?.id || "inbox"] || 0
+	const selectedIndex = selectedIndices[selectedFolder?.id || "INBOX"] || 0
 
 	return useMutation({
-		mutationFn: (email: EmailThread) =>
-			markEmailDone(email, selectedAccountId || ""),
-		onMutate: async (email) => {
+		mutationFn: (emails_input: EmailThread[]) =>
+			markEmailDone(emails_input, selectedAccountId || ""),
+		onMutate: async (emails_input) => {
 			await queryClient.cancelQueries({
 				queryKey: ["emails", selectedFolder?.id, selectedAccountId],
 			})
@@ -76,18 +77,21 @@ export const useMarkEmailDone = () => {
 
 			setLastAction({
 				type: "done",
-				email: email,
-				previousValue: false,
+				emails: emails_input,
+				previousValues: emails?.map(() => false) || [],
 			})
 
 			queryClient.setQueryData<EmailThread[]>(
 				["emails", selectedFolder?.id, selectedAccountId],
-				(old) => old?.filter((e) => e.id !== email.id)
+				(old) =>
+					old?.filter(
+						(e) => !emails_input.map((e) => e.id).includes(e.id)
+					)
 			)
 
 			if (emails && selectedIndex < emails.length - 1) {
 				setSelectedIndex(
-					selectedFolder?.id || "inbox",
+					selectedFolder?.id || "INBOX",
 					selectedIndex + 1
 				)
 			}
@@ -110,9 +114,9 @@ export const useUndoMarkEmailDone = () => {
 	const { selectedFolder } = useUIStore()
 
 	return useMutation({
-		mutationFn: (email: EmailThread) =>
-			markEmailUndone(email, selectedAccountId || ""),
-		onMutate: async (email) => {
+		mutationFn: (emails_input: EmailThread[]) =>
+			markEmailUndone(emails_input, selectedAccountId || ""),
+		onMutate: async (emails_input) => {
 			await queryClient.cancelQueries({
 				queryKey: ["emails", selectedFolder?.id, selectedAccountId],
 			})
@@ -126,7 +130,7 @@ export const useUndoMarkEmailDone = () => {
 			if (lastAction) {
 				queryClient.setQueryData<EmailThread[]>(
 					["emails", selectedFolder?.id, selectedAccountId],
-					(old) => [...(old || []), lastAction.email]
+					(old) => [...(old || []), ...emails_input]
 				)
 			}
 
@@ -157,20 +161,20 @@ export const useMarkEmailRead = () => {
 
 	return useMutation({
 		mutationFn: ({
-			email,
+			emails_input,
 			read,
 		}: {
-			email: EmailThread
+			emails_input: EmailThread[]
 			read: boolean
 		}) => {
 			setLastAction({
 				type: "read",
-				email: email,
-				previousValue: email.messages[0].read,
+				emails: emails_input,
+				previousValues: emails_input.map((e) => e.messages[0].read),
 			})
-			return markEmailRead(email, selectedAccountId || "", read)
+			return markEmailRead(emails_input, selectedAccountId || "", read)
 		},
-		onMutate: async ({ email, read }) => {
+		onMutate: async ({ emails_input, read }) => {
 			await queryClient.cancelQueries({
 				queryKey: ["emails", selectedFolder?.id, selectedAccountId],
 			})
@@ -185,7 +189,7 @@ export const useMarkEmailRead = () => {
 				["emails", selectedFolder?.id, selectedAccountId],
 				(old) =>
 					old?.map((e) =>
-						e.id === email.id
+						emails_input.map((e) => e.id).includes(e.id)
 							? {
 									...e,
 									messages: e.messages.map((m) => ({
@@ -233,7 +237,7 @@ export const useFolderEmails = () => {
 		queryKey: ["emails", selectedFolder?.id, selectedAccountId],
 		queryFn: () =>
 			fetchFolderEmails(
-				selectedFolder?.id || "inbox",
+				selectedFolder?.id || "INBOX",
 				selectedAccountId || ""
 			),
 		select: (emails: EmailThread[]) =>
@@ -283,20 +287,20 @@ export const useStarEmail = () => {
 
 	return useMutation({
 		mutationFn: ({
-			email,
+			emails_input,
 			star,
 		}: {
-			email: EmailThread
+			emails_input: EmailThread[]
 			star: boolean
 		}) => {
 			setLastAction({
 				type: "star",
-				email,
-				previousValue: email.starred,
+				emails: emails_input,
+				previousValues: emails_input.map((e) => e.starred),
 			})
-			return starEmail(email, selectedAccountId || "", star)
+			return starEmail(emails_input, selectedAccountId || "", star)
 		},
-		onMutate: async ({ email, star }) => {
+		onMutate: async ({ emails_input, star }) => {
 			await queryClient.cancelQueries({
 				queryKey: ["emails", selectedFolder?.id, selectedAccountId],
 			})
@@ -311,7 +315,9 @@ export const useStarEmail = () => {
 				["emails", selectedFolder?.id, selectedAccountId],
 				(old) =>
 					old?.map((e) =>
-						e.id === email.id ? { ...e, starred: star } : e
+						emails_input.map((e) => e.id).includes(e.id)
+							? { ...e, starred: star }
+							: e
 					)
 			)
 
@@ -339,20 +345,20 @@ export const useTrashEmail = () => {
 
 	return useMutation({
 		mutationFn: ({
-			email,
+			emails_input,
 			trash,
 		}: {
-			email: EmailThread
+			emails_input: EmailThread[]
 			trash: boolean
 		}) => {
 			setLastAction({
 				type: "trash",
-				email,
-				previousValue: false,
+				emails: emails_input,
+				previousValues: emails_input.map(() => false),
 			})
-			return trashEmail(email, selectedAccountId || "", trash)
+			return trashEmail(emails_input, selectedAccountId || "", trash)
 		},
-		onMutate: async ({ email, trash }) => {
+		onMutate: async ({ emails_input, trash }) => {
 			await queryClient.cancelQueries({
 				queryKey: ["emails", selectedFolder?.id, selectedAccountId],
 			})
@@ -367,8 +373,13 @@ export const useTrashEmail = () => {
 				["emails", selectedFolder?.id, selectedAccountId],
 				(old) =>
 					trash
-						? old?.filter((e) => e.id !== email.id)
-						: [...(old || []), email]
+						? old?.filter(
+								(e) =>
+									!emails_input
+										.map((e) => e.id)
+										.includes(e.id)
+							)
+						: [...(old || []), ...emails_input]
 			)
 
 			return { previousEmails }
@@ -394,20 +405,20 @@ export const useSpamEmail = () => {
 	const { setLastAction } = useEmailActionsStore()
 	return useMutation({
 		mutationFn: ({
-			email,
+			emails_input,
 			spam,
 		}: {
-			email: EmailThread
+			emails_input: EmailThread[]
 			spam: boolean
 		}) => {
 			setLastAction({
 				type: "spam",
-				email,
-				previousValue: false,
+				emails: emails_input,
+				previousValues: emails_input.map(() => false),
 			})
-			return spamEmail(email, selectedAccountId || "", spam)
+			return spamEmail(emails_input, selectedAccountId || "", spam)
 		},
-		onMutate: async ({ email, spam }) => {
+		onMutate: async ({ emails_input, spam }) => {
 			await queryClient.cancelQueries({
 				queryKey: ["emails", selectedFolder?.id, selectedAccountId],
 			})
@@ -422,8 +433,84 @@ export const useSpamEmail = () => {
 				["emails", selectedFolder?.id, selectedAccountId],
 				(old) =>
 					spam
-						? old?.filter((e) => e.id !== email.id)
-						: [...(old || []), email]
+						? old?.filter(
+								(e) =>
+									!emails_input
+										.map((e) => e.id)
+										.includes(e.id)
+							)
+						: [...(old || []), ...emails_input]
+			)
+
+			return { previousEmails }
+		},
+		onError: (err, variables, context) => {
+			queryClient.setQueryData(
+				["emails", selectedFolder?.id, selectedAccountId],
+				context?.previousEmails
+			)
+		},
+		onSettled: () => {
+			queryClient.invalidateQueries({
+				queryKey: ["emails", selectedFolder?.id, selectedAccountId],
+			})
+		},
+	})
+}
+
+export const useModifyLabels = () => {
+	const queryClient = useQueryClient()
+	const { selectedAccountId } = useAccountStore()
+	const { selectedFolder } = useUIStore()
+	const { setLastAction } = useEmailActionsStore()
+
+	return useMutation({
+		mutationFn: ({
+			threads,
+			addLabels,
+			removeLabels,
+		}: {
+			threads: EmailThread[]
+			addLabels: string[]
+			removeLabels: string[]
+		}) => {
+			setLastAction({
+				type: "modifyLabels",
+				emails: threads,
+				previousValues: [addLabels, removeLabels],
+			})
+
+			return modifyLabels(
+				selectedAccountId || "",
+				threads,
+				addLabels,
+				removeLabels
+			)
+		},
+		onMutate: async ({ threads, addLabels, removeLabels }) => {
+			await queryClient.cancelQueries({
+				queryKey: ["emails", selectedFolder?.id, selectedAccountId],
+			})
+
+			const previousEmails = queryClient.getQueryData<EmailThread[]>([
+				"emails",
+				selectedFolder?.id,
+				selectedAccountId,
+			])
+
+			queryClient.setQueryData<EmailThread[]>(
+				["emails", selectedFolder?.id, selectedAccountId],
+				(old) => old?.filter((e) => !threads.includes(e))
+			)
+
+			queryClient.setQueryData<EmailThread[]>(
+				["emails", addLabels[0], selectedAccountId],
+				(old) => [...(old || []), ...threads]
+			)
+
+			queryClient.setQueryData<EmailThread[]>(
+				["emails", removeLabels[0], selectedAccountId],
+				(old) => old?.filter((e) => !threads.includes(e))
 			)
 
 			return { previousEmails }

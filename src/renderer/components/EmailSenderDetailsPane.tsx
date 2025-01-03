@@ -1,11 +1,8 @@
 import { SuperhumanFooter } from "@/components/SuperhumanFooter"
 import { Avatar, AvatarFallback } from "@/components/ui/Avatar"
+import { getDomainFromEmail } from "@/libs/emailUtils"
 import { formatSender } from "@/libs/stringOps"
-import {
-	Linkedin as LinkedinIcon,
-	Mail as MailIcon,
-	Twitter as TwitterIcon,
-} from "lucide-react"
+import { Link, Linkedin, Mail, Twitter } from "lucide-react"
 
 interface EmailSenderDetailsPaneProps {
 	email: EmailThread | undefined
@@ -43,13 +40,13 @@ export const EmailSenderDetailsPane = ({
 
 			<div className="flex gap-2">
 				<button className="rounded-md bg-blue-50 p-2 text-blue-600 hover:bg-blue-100">
-					<LinkedinIcon className="h-4 w-4" />
+					<Linkedin className="h-4 w-4" />
 				</button>
 				<button className="rounded-md bg-blue-50 p-2 text-blue-600 hover:bg-blue-100">
-					<TwitterIcon className="h-4 w-4" />
+					<Twitter className="h-4 w-4" />
 				</button>
 				<button className="rounded-md bg-blue-50 p-2 text-blue-600 hover:bg-blue-100">
-					<MailIcon className="h-4 w-4" />
+					<Mail className="h-4 w-4" />
 				</button>
 			</div>
 
@@ -62,6 +59,23 @@ export const EmailSenderDetailsPane = ({
 						12 previous email threads
 					</span>
 				</div>
+			</div>
+
+			<div
+				className="group flex cursor-pointer items-center gap-2"
+				onClick={() => {
+					window.open(
+						`https://${getDomainFromEmail(email.messages[0].sender.email)}`,
+						"_blank"
+					)
+				}}
+			>
+				<div className="rounded-full bg-slate-400 p-1 transition-colors group-hover:bg-slate-600">
+					<Link className="h-2 w-2 text-white" />
+				</div>
+				<span className="text-xs font-medium text-slate-600">
+					{getDomainFromEmail(email.messages[0].sender.email)}
+				</span>
 			</div>
 
 			<SuperhumanFooter />

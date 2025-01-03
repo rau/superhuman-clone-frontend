@@ -856,41 +856,49 @@ const SHORTCUT_SECTIONS: ShortcutSection[] = [
 
 export const ShortcutsPane = () => {
 	const [search, setSearch] = useState("")
+	const { selectedThreads, selectedFolder } = useUIStore()
 
-	const filteredSections = SHORTCUT_SECTIONS.map((section) => ({
-		...section,
-		shortcuts: section.shortcuts.filter((shortcut) =>
-			shortcut.label.toLowerCase().includes(search.toLowerCase())
-		),
-	})).filter((section) => section.shortcuts.length > 0)
+	const hasSelectedThreads =
+		selectedThreads[selectedFolder?.id || "INBOX"]?.size > 0
+
+	const filteredSections = SHORTCUT_SECTIONS.filter((section) => {
+		if (hasSelectedThreads) {
+			return ["Navigation", "Actions"].includes(section.title)
+		}
+		return true
+	})
+		.map((section) => ({
+			...section,
+			shortcuts: section.shortcuts.filter((shortcut) =>
+				shortcut.label.toLowerCase().includes(search.toLowerCase())
+			),
+		}))
+		.filter((section) => section.shortcuts.length > 0)
 
 	return (
-		<>
-			<div className="fixed inset-0 bg-black/80" />
-			<div className="fixed right-0 top-0 z-50 flex h-screen w-[400px] flex-col bg-white">
-				<SearchBar search={search} setSearch={setSearch} />
-				<div className="flex-1 overflow-y-auto">
-					<div className="flex flex-col gap-4 p-6">
-						{filteredSections.map((section) => (
-							<div key={section.title}>
-								<h2 className="mb-2 text-xs font-bold">
-									{section.title}
-								</h2>
-								<div className="flex flex-col gap-1">
-									{section.shortcuts.map((shortcut) => (
-										<ShortcutItem
-											key={shortcut.label}
-											label={shortcut.label}
-											keys={shortcut.keys}
-											searchTerm={search}
-										/>
-									))}
-								</div>
+		<div className="fixed right-0 top-0 z-50 flex h-screen w-[400px] flex-col bg-white">
+			<SearchBar search={search} setSearch={setSearch} />
+			<div className="flex-1 overflow-y-auto">
+				<div className="flex flex-col gap-4 p-6">
+					{filteredSections.map((section) => (
+						<div key={section.title}>
+							<h2 className="mb-2 text-xs font-bold">
+								{section.title}
+							</h2>
+							<div className="flex flex-col gap-1">
+								{section.shortcuts.map((shortcut) => (
+									<ShortcutItem
+										key={shortcut.label}
+										label={shortcut.label}
+										keys={shortcut.keys}
+										searchTerm={search}
+									/>
+								))}
 							</div>
-						))}
-					</div>
+						</div>
+					))}
 				</div>
 			</div>
-		</>
+		</div>
 	)
 }

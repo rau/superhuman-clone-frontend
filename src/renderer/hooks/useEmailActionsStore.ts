@@ -1,11 +1,11 @@
 import { create } from "zustand"
 
-type ActionType = "done" | "star" | "read" | "trash" | "spam"
+type ActionType = "done" | "star" | "read" | "trash" | "spam" | "modifyLabels"
 
 interface Action {
 	type: ActionType
-	email: EmailThread
-	previousValue: boolean
+	emails: EmailThread[]
+	previousValues: any[]
 }
 
 interface EmailActionsState {

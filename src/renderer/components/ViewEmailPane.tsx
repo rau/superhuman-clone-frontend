@@ -1,7 +1,9 @@
 import { ComposePaneOverlay } from "@/components/ComposePaneOverlay"
+import { EmailSenderDetailsPane } from "@/components/EmailSenderDetailsPane"
 import { KeyboardTooltip } from "@/components/KeyboardTooltip"
+import { TopActionsBar } from "@/components/TopActionsBar"
+import { Button } from "@/components/ui/Button"
 import { useFolderEmails, useMarkEmailDone } from "@/hooks/dataHooks"
-import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts"
 import { useUIStore } from "@/hooks/useUIStore"
 import { parseEmailBody } from "@/libs/emailUtils"
 import { cn } from "@/libs/utils"
@@ -16,9 +18,6 @@ import {
 	Share,
 } from "lucide-react"
 import { useEffect, useState } from "react"
-import { EmailSenderDetailsPane } from "./EmailSenderDetailsPane"
-import { TopActionsBar } from "./TopActionsBar"
-import { Button } from "./ui/Button"
 
 const EmailMessage = ({
 	message,
@@ -64,16 +63,19 @@ const EmailMessage = ({
 
 export const ViewEmailPane = () => {
 	const { selectedFolder, selectedIndices, setSelectedIndex } = useUIStore()
-	const selectedIndex = selectedIndices[selectedFolder?.id || "inbox"] || 0
+	const selectedIndex = selectedIndices[selectedFolder?.id || "INBOX"] || 0
 	const { data: emails } = useFolderEmails()
 	const email = emails?.[selectedIndex]
 	const { mutate: handleMarkDone } = useMarkEmailDone()
-	const [showReplyPane, setShowReplyPane] = useState(false)
-	const [selectedMessageIndex, setSelectedMessageIndex] = useState(0)
+	const {
+		selectedMessageIndex,
+		setSelectedMessageIndex,
+		showReplyPane,
+		setShowReplyPane,
+		collapsedMessages,
+		setCollapsedMessages,
+	} = useUIStore()
 	const { isShowingEmail, setIsShowingEmail } = useUIStore()
-	const [collapsedMessages, setCollapsedMessages] = useState<
-		Record<number, boolean>
-	>({})
 
 	useEffect(() => {
 		if (email?.messages) {
@@ -88,68 +90,6 @@ export const ViewEmailPane = () => {
 			)
 		}
 	}, [email])
-
-	const handlePrevEmail = () => {
-		if (selectedIndex > 0) {
-			setSelectedIndex(selectedFolder?.id || "inbox", selectedIndex - 1)
-		}
-	}
-
-	const handleNextEmail = () => {
-		if (emails && selectedIndex < emails.length - 1) {
-			setSelectedIndex(selectedFolder?.id || "inbox", selectedIndex + 1)
-		}
-	}
-
-	useKeyboardShortcuts([
-		{
-			key: "n",
-			handler: () => {
-				setSelectedMessageIndex(
-					Math.min(
-						selectedMessageIndex + 1,
-						(email?.messages?.length || 0) - 1
-					)
-				)
-			},
-			mode: "email",
-		},
-		{
-			key: "p",
-			handler: () => {
-				setSelectedMessageIndex(Math.max(selectedMessageIndex - 1, 0))
-			},
-			mode: "email",
-		},
-		{
-			key: "r",
-			handler: () => setShowReplyPane(true),
-			mode: "email",
-		},
-		{
-			key: "Escape",
-			handler: () => setIsShowingEmail(false),
-			mode: "email",
-		},
-		{
-			key: "o",
-			handler: () => setCollapsedMessages({}),
-			shift: true,
-			mode: "email",
-		},
-		{
-			key: "o",
-			handler: () => toggleMessage(selectedMessageIndex),
-			mode: "email",
-		},
-	])
-
-	const toggleMessage = (index: number) => {
-		setCollapsedMessages((prev) => ({
-			...prev,
-			[index]: !prev[index],
-		}))
-	}
 
 	if (!isShowingEmail) return null
 
@@ -187,7 +127,17 @@ export const ViewEmailPane = () => {
 							]}
 							delayDuration={150}
 						>
-							<Button variant="ghost" onClick={handlePrevEmail}>
+							<Button
+								variant="ghost"
+								onClick={() => {
+									if (selectedIndex > 0) {
+										setSelectedIndex(
+											selectedFolder?.id || "INBOX",
+											selectedIndex - 1
+										)
+									}
+								}}
+							>
 								<ChevronUp className="h-4 w-4" />
 							</Button>
 						</KeyboardTooltip>
@@ -200,7 +150,20 @@ export const ViewEmailPane = () => {
 							]}
 							delayDuration={150}
 						>
-							<Button variant="ghost" onClick={handleNextEmail}>
+							<Button
+								variant="ghost"
+								onClick={() => {
+									if (
+										emails &&
+										selectedIndex < emails.length - 1
+									) {
+										setSelectedIndex(
+											selectedFolder?.id || "INBOX",
+											selectedIndex + 1
+										)
+									}
+								}}
+							>
 								<ChevronDown className="h-4 w-4" />
 							</Button>
 						</KeyboardTooltip>
@@ -234,7 +197,10 @@ export const ViewEmailPane = () => {
 							]}
 						>
 							<button
-								onClick={() => handleMarkDone(email)}
+								onClick={() => {
+									if (!email) return
+									handleMarkDone([email])
+								}}
 								className="rounded p-1 text-slate-400 hover:bg-green-50 hover:text-green-600"
 							>
 								<Check className="h-4 w-4" />
@@ -280,10 +246,10 @@ export const ViewEmailPane = () => {
 							)}
 						>
 							<TopActionsBar
+								index={i}
 								message={message}
 								setShowReplyPane={setShowReplyPane}
 								isCollapsed={collapsedMessages[i]}
-								onToggle={() => toggleMessage(i)}
 							/>
 							<EmailMessage
 								message={message}

@@ -1,4 +1,5 @@
 import { KeyboardTooltip } from "@/components/KeyboardTooltip"
+import { useUIStore } from "@/hooks/useUIStore"
 import { formatEmailParticipant, formatRecipients } from "@/libs/emailUtils"
 import { decodeHtml } from "@/libs/utils"
 import { format } from "date-fns"
@@ -12,21 +13,28 @@ import {
 import { useState } from "react"
 
 interface TopActionsBarProps {
+	index: number
 	message: EmailMessage
 	setShowReplyPane: (show: boolean) => void
 	isCollapsed: boolean
-	onToggle: () => void
 }
 
 export const TopActionsBar = ({
+	index,
 	message,
 	setShowReplyPane,
 	isCollapsed,
-	onToggle,
 }: TopActionsBarProps) => {
+	const { collapsedMessages, setCollapsedMessages } = useUIStore()
 	const [showDetails, setShowDetails] = useState(false)
 	const senderName = formatEmailParticipant(message.sender).split(" ")[0]
 	const recipientText = formatRecipients(message)
+
+	const onToggle = () => {
+		const next: Record<number, boolean> = { ...collapsedMessages }
+		next[index] = !collapsedMessages[index]
+		setCollapsedMessages(next)
+	}
 
 	if (isCollapsed) {
 		return (

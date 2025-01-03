@@ -63,7 +63,7 @@ export const searchEmails = async (
 		from: query.match(/from:([^\s]+)/)?.[1] || "",
 		to: query.match(/to:([^\s]+)/)?.[1] || "",
 		subject: query.match(/subject:([^\s]+)/)?.[1] || "",
-		in: query.match(/in:([^\s]+)/)?.[1] || "inbox",
+		in: query.match(/in:([^\s]+)/)?.[1] || "INBOX",
 	}
 
 	Object.entries(filters).forEach(([key, value]) => {
@@ -77,36 +77,39 @@ export const searchEmails = async (
 	return data
 }
 
-export const markEmailDone = async (email: EmailThread, accountId: string) => {
+export const markEmailDone = async (
+	emails: EmailThread[],
+	accountId: string
+) => {
 	await fetchWithAxios(`markdone/`, {
 		method: "POST",
 		accountId: accountId,
-		data: { email_id: email.id },
+		data: { email_ids: emails.map((e) => e.id) },
 	})
-	return email
+	return emails
 }
 
 export const markEmailUndone = async (
-	email: EmailThread,
+	emails: EmailThread[],
 	accountId: string
 ) => {
 	const { data } = await fetchWithAxios(`markundone/`, {
 		method: "POST",
 		accountId: accountId,
-		data: { email_id: email.id },
+		data: { email_ids: emails.map((e) => e.id) },
 	})
 	return data
 }
 
 export const markEmailRead = (
-	email: EmailThread,
+	emails: EmailThread[],
 	accountId: string,
 	read: boolean
 ) =>
 	fetchWithAxios("read/", {
 		method: "POST",
 		accountId: accountId,
-		data: { email_id: email.id, read },
+		data: { email_ids: emails.map((e) => e.id), read },
 	})
 
 export const fetchFolders = async (accountId: string): Promise<Folder[]> => {
@@ -154,37 +157,54 @@ export const signOutAccount = async (accountId: string) => {
 }
 
 export const starEmail = async (
-	email: EmailThread,
+	emails: EmailThread[],
 	accountId: string,
 	star: boolean
 ) => {
 	await fetchWithAxios("star/", {
 		method: "POST",
 		accountId: accountId,
-		data: { email_id: email.id, star },
+		data: { email_ids: emails.map((e) => e.id), star },
 	})
 }
 
 export const trashEmail = async (
-	email: EmailThread,
+	emails: EmailThread[],
 	accountId: string,
 	trash: boolean
 ) => {
 	await fetchWithAxios("trash/", {
 		method: "POST",
 		accountId: accountId,
-		data: { email_id: email.id, trash: trash },
+		data: { email_ids: emails.map((e) => e.id), trash },
 	})
 }
 
 export const spamEmail = async (
-	email: EmailThread,
+	emails: EmailThread[],
 	accountId: string,
 	spam: boolean
 ) => {
 	await fetchWithAxios("spam/", {
 		method: "POST",
 		accountId: accountId,
-		data: { email_id: email.id, spam },
+		data: { email_ids: emails.map((e) => e.id), spam },
+	})
+}
+
+export const modifyLabels = async (
+	accountId: string,
+	threads: EmailThread[],
+	addLabels: string[],
+	removeLabels: string[]
+) => {
+	await fetchWithAxios("modify-labels/", {
+		method: "POST",
+		accountId: accountId,
+		data: {
+			thread_ids: threads.map((t) => t.id),
+			add_labels: addLabels,
+			remove_labels: removeLabels,
+		},
 	})
 }

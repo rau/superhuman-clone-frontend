@@ -3,61 +3,103 @@ import { EmailSenderDetailsPane } from "@/components/EmailSenderDetailsPane"
 import { KeyboardTooltip } from "@/components/KeyboardTooltip"
 import { SettingsPane } from "@/components/SettingsPane"
 import { ShortcutsPane } from "@/components/ShortcutsPane"
-import { Button } from "@/components/ui/Button"
 import { EmptyState } from "@/components/ui/EmptyState"
 import { Loader } from "@/components/ui/Loader"
 import { SidebarTrigger } from "@/components/ui/Sidebar"
 import { useFolderEmails } from "@/hooks/dataHooks"
-import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts"
 import { useUIStore } from "@/hooks/useUIStore"
 import { cn } from "@/libs/utils"
-import { Pencil, Search } from "lucide-react"
+import { Pencil, Search, Square, SquareCheckBig } from "lucide-react"
 import { useEffect } from "react"
 
-const ComposeButton = ({ onClick }: { onClick: () => void }) => (
-	<KeyboardTooltip
-		tooltips={[
-			{
-				keys: ["C"],
-				label: "New message",
-			},
-		]}
-		delayDuration={150}
-	>
-		<Button onClick={onClick} className="flex items-center gap-2">
-			<span>Compose</span>
-			<Pencil className="h-4 w-4" />
-		</Button>
-	</KeyboardTooltip>
-)
+const SelectAllButton = () => {
+	const { selectedFolder, selectedThreads, setSelectedThreads } = useUIStore()
+	const { data: emails } = useFolderEmails()
 
-const SearchButton = ({ onClick }: { onClick: () => void }) => (
-	<KeyboardTooltip
-		tooltips={[
-			{
-				keys: ["/"],
-				label: "Search",
-			},
-		]}
-		delayDuration={150}
-	>
-		<Button
-			onClick={onClick}
-			variant="ghost"
-			size="icon"
-			className="hover:bg-transparent"
+	return (
+		<KeyboardTooltip
+			tooltips={[
+				{
+					keys: ["⌘", "shift", "A"],
+					label: "Select all",
+				},
+				{
+					keys: ["⌘", "A"],
+					label: "Select all from here",
+				},
+			]}
 		>
-			<Search className="h-4 w-4" />
-		</Button>
-	</KeyboardTooltip>
-)
+			<button
+				onClick={() => {
+					const allThreadIds = new Set(
+						emails?.map((email) => email.id)
+					)
+					const currentSelected =
+						selectedThreads[selectedFolder?.id || "INBOX"]
+					const allSelected = currentSelected?.size === emails?.length
+					setSelectedThreads(
+						selectedFolder?.id || "INBOX",
+						allSelected ? new Set() : allThreadIds
+					)
+				}}
+				className="flex h-7 w-7 items-center justify-center rounded hover:bg-slate-100"
+			>
+				{selectedThreads[selectedFolder?.id || "INBOX"]?.size ===
+				emails?.length ? (
+					<SquareCheckBig className="h-4 w-4 text-slate-600" />
+				) : (
+					<Square className="h-4 w-4 text-slate-600" />
+				)}
+			</button>
+		</KeyboardTooltip>
+	)
+}
+
+const ComposeButton = () => {
+	const { setIsComposing } = useUIStore()
+
+	return (
+		<KeyboardTooltip
+			tooltips={[
+				{
+					keys: ["C"],
+					label: "New message",
+				},
+			]}
+			delayDuration={150}
+		>
+			<Pencil
+				className="h-4 w-4 text-slate-400 transition-colors duration-100 hover:cursor-pointer hover:text-slate-900"
+				onClick={() => setIsComposing(true)}
+			/>
+		</KeyboardTooltip>
+	)
+}
+
+const SearchButton = () => {
+	const { setIsSearching } = useUIStore()
+
+	return (
+		<KeyboardTooltip
+			tooltips={[
+				{
+					keys: ["/"],
+					label: "Search",
+				},
+			]}
+			delayDuration={150}
+		>
+			<Search
+				className="h-4 w-4 text-slate-400 transition-colors duration-100 hover:cursor-pointer hover:text-slate-900"
+				onClick={() => setIsSearching(true)}
+			/>
+		</KeyboardTooltip>
+	)
+}
 
 export const EmailsContainer = () => {
 	const { data: emails, isLoading } = useFolderEmails()
 	const {
-		isComposing,
-		setIsComposing,
-		setIsSearching,
 		setIsShowingEmail,
 		selectedFolder,
 		selectedIndices,
@@ -65,43 +107,16 @@ export const EmailsContainer = () => {
 		isSettingsOpen,
 		isShortcutsPaneOpen,
 		isQuickTipsOpen,
+		selectedThreads,
 	} = useUIStore()
 
-	const selectedIndex = selectedIndices[selectedFolder?.id || "inbox"] || 0
+	const selectedIndex = selectedIndices[selectedFolder?.id || "INBOX"] || 0
+	const hasSelectedThreads =
+		selectedThreads[selectedFolder?.id || "INBOX"]?.size > 0
 
 	useEffect(() => {
-		setSelectedIndex(selectedFolder?.id || "inbox", 0)
+		setSelectedIndex(selectedFolder?.id || "INBOX", 0)
 	}, [selectedFolder])
-
-	useKeyboardShortcuts([
-		{
-			key: "Enter",
-			handler: () => setIsShowingEmail(true),
-			mode: "global",
-		},
-		{
-			key: "ArrowDown",
-			handler: () => {
-				if (!emails?.length) return
-				setSelectedIndex(
-					selectedFolder?.id || "inbox",
-					Math.min(selectedIndex + 1, emails.length - 1)
-				)
-			},
-			mode: "global",
-		},
-		{
-			key: "ArrowUp",
-			handler: () => {
-				if (!emails?.length) return
-				setSelectedIndex(
-					selectedFolder?.id || "inbox",
-					Math.max(selectedIndex - 1, 0)
-				)
-			},
-			mode: "global",
-		},
-	])
 
 	const showEmptyState = !isLoading && (!emails || emails.length === 0)
 	const showEmails = !isLoading && emails && emails.length > 0
@@ -109,10 +124,14 @@ export const EmailsContainer = () => {
 	return (
 		<div className="max-w-screen flex h-full w-screen flex-1">
 			<div className="relative flex flex-1 flex-col overflow-hidden border-r border-slate-200 bg-white p-4">
-				<div className="flex h-14 items-center justify-between border-b border-slate-200 px-4">
+				<div className="flex h-14 items-center justify-between px-4">
 					<div className="flex items-center gap-2">
-						<SidebarTrigger />
-						<h2 className="text-base font-semibold text-slate-900">
+						{hasSelectedThreads ? (
+							<SelectAllButton />
+						) : (
+							<SidebarTrigger />
+						)}
+						<h2 className="text-base font-semibold normal-case text-slate-900">
 							{selectedFolder?.name || "Inbox"}
 						</h2>
 						<span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">
@@ -120,8 +139,8 @@ export const EmailsContainer = () => {
 						</span>
 					</div>
 					<div className="flex items-center gap-2">
-						<SearchButton onClick={() => setIsSearching(true)} />
-						<ComposeButton onClick={() => setIsComposing(true)} />
+						<ComposeButton />
+						<SearchButton />
 					</div>
 				</div>
 
@@ -140,7 +159,7 @@ export const EmailsContainer = () => {
 								isSelected={index === selectedIndex}
 								onClick={() => {
 									setSelectedIndex(
-										selectedFolder?.id || "inbox",
+										selectedFolder?.id || "INBOX",
 										index
 									)
 									setIsShowingEmail(true)
@@ -156,7 +175,7 @@ export const EmailsContainer = () => {
 					isQuickTipsOpen ? "h-[calc(100vh-40px)]" : "h-screen"
 				)}
 			>
-				{isShortcutsPaneOpen ? (
+				{isShortcutsPaneOpen || hasSelectedThreads ? (
 					<ShortcutsPane />
 				) : isSettingsOpen ? (
 					<SettingsPane />

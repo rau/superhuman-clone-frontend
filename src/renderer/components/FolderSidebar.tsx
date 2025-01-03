@@ -7,14 +7,15 @@ import {
 	SidebarMenuItem,
 	useSidebar,
 } from "@/components/ui/Sidebar"
-import { useCreateDoneFolder, useFolders } from "@/hooks/dataHooks"
+import { useAccounts, useCreateDoneFolder, useFolders } from "@/hooks/dataHooks"
+import { useAccountStore } from "@/hooks/useAccountStore"
 import { useUIStore } from "@/hooks/useUIStore"
 import { ChevronRight } from "lucide-react"
 
 const SYSTEM_FOLDERS = [
 	{
-		id: "inbox",
-		name: "Inbox",
+		id: "INBOX",
+		name: "INBOX",
 		type: "system",
 		messageCount: 0,
 	},
@@ -63,6 +64,11 @@ export const FolderSidebar = () => {
 	const { data: fetchedFolders } = useFolders()
 	const { setOpen } = useSidebar()
 	const { mutate: createFolder } = useCreateDoneFolder()
+	const { selectedAccountId } = useAccountStore()
+	const { data: accounts } = useAccounts()
+	const selectedAccount = accounts?.find(
+		(acc) => acc.id === selectedAccountId
+	)
 
 	const filteredCustomFolders = fetchedFolders?.filter(
 		(folder) =>
@@ -74,7 +80,7 @@ export const FolderSidebar = () => {
 	)
 
 	return (
-		<SidebarMenu className="h-full overflow-y-auto">
+		<SidebarMenu className="z-50 h-full overflow-y-auto">
 			<Button
 				onClick={() => setIsAccountDialogOpen(true)}
 				variant="ghost"
@@ -82,13 +88,13 @@ export const FolderSidebar = () => {
 			>
 				<Avatar>
 					<AvatarFallback className="bg-blue-100 text-blue-700">
-						R
+						{selectedAccount?.name?.[0] || "?"}
 					</AvatarFallback>
 				</Avatar>
 				<div className="flex flex-1 items-center justify-between">
 					<div className="flex flex-col">
 						<span className="text-sm font-medium">
-							rdaga@college.harvard.edu
+							{selectedAccount?.email || "Select Account"}
 						</span>
 					</div>
 					<ChevronRight className="h-4 w-4" />

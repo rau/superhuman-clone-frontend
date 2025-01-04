@@ -1,10 +1,3 @@
-// React/Next
-// Components
-// Hooks
-// Libraries
-// Icons
-// Types
-
 import { AISettingsDialog } from "@/components/AISettingsDialog"
 import { ComposePaneOverlay } from "@/components/ComposePaneOverlay"
 import { DownloadsDialog } from "@/components/DownloadsDialog"
@@ -57,7 +50,6 @@ export default function Home() {
 			<ImageSettingsDialog />
 			<ThemeDialog />
 			<MoveToDialog />
-
 			<ComposePaneOverlay />
 			<SearchPane />
 			<ViewEmailPane />

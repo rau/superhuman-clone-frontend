@@ -30,6 +30,7 @@ declare global {
 		snippet: string
 		body: string
 		read: boolean
+		attachments: EmailAttachment[]
 	}
 
 	type EmailParticipant = {
@@ -55,6 +56,13 @@ declare global {
 		name: string
 		size: number
 		path: string
+	}
+
+	type EmailAttachment = {
+		id: string
+		filename: string
+		mimeType: string
+		size: number
 	}
 
 	type Folder = {

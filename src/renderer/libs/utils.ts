@@ -8,5 +8,5 @@ export function cn(...inputs: ClassValue[]) {
 export const decodeHtml = (html: string) => {
 	const txt = document.createElement("textarea")
 	txt.innerHTML = html
-	return txt.value
+	return txt.value.trim()
 }

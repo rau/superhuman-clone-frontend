@@ -1,34 +1,36 @@
-export const parseEmailBody = (body: string) => {
-	const quoteContainer = body.match(
-		/<div class="gmail_quote[^>]*>([\s\S]*?)<\/div>/i
+import { format } from "date-fns"
+
+export const parseEmailBody = (html: string) => {
+	const standardQuoteRegex = /<blockquote.*?>/i
+	const standardMatch = html.match(standardQuoteRegex)
+
+	const outlookDividerRegex =
+		/<div style="border:none;border-top:solid #E1E1E1 1.0pt;padding:3.0pt 0in 0in 0in">/i
+	const outlookMatch = html.match(outlookDividerRegex)
+
+	const gmailQuoteRegex = /<div[^>]*class="[^"]*gmail_quote[^"]*"[^>]*>/i
+	const gmailMatch = html.match(gmailQuoteRegex)
+
+	const firstQuoteIndex = standardMatch?.index ?? Infinity
+	const firstOutlookIndex = outlookMatch?.index ?? Infinity
+	const firstGmailIndex = gmailMatch?.index ?? Infinity
+
+	if (
+		firstQuoteIndex === Infinity &&
+		firstOutlookIndex === Infinity &&
+		firstGmailIndex === Infinity
+	) {
+		return { mainContent: html, quotedContent: null }
+	}
+
+	const splitIndex = Math.min(
+		firstQuoteIndex,
+		firstOutlookIndex,
+		firstGmailIndex
 	)
-
-	if (quoteContainer) {
-		const mainContent = body.slice(0, quoteContainer.index).trim()
-		const quotedContent = quoteContainer[0]
-		return { mainContent, quotedContent }
-	}
-
-	const quotePatterns = [
-		/<blockquote[^>]*class="?gmail_quote"?[^>]*>/i,
-		/^>+\s*/gm,
-		/<hr[^>]*class="?gmail_quote"?[^>]*>/i,
-		/On.*wrote:/i,
-	]
-
-	for (const pattern of quotePatterns) {
-		const match = body.search(pattern)
-		if (match !== -1) {
-			return {
-				mainContent: body.slice(0, match).trim(),
-				quotedContent: body.slice(match).trim(),
-			}
-		}
-	}
-
 	return {
-		mainContent: body,
-		quotedContent: "",
+		mainContent: html.slice(0, splitIndex),
+		quotedContent: html.slice(splitIndex),
 	}
 }
 
@@ -51,7 +53,7 @@ export const formatRecipients = (message: EmailMessage) => {
 
 export const formatEmailParticipant = (participant: EmailParticipant) => {
 	if (participant.is_me) return "Me"
-	return participant.name || participant.email
+	return participant.name?.split(" ")[0] || participant.email
 }
 
 export const getSelectedEmails = (
@@ -74,4 +76,26 @@ export const getSelectedEmails = (
 
 export const getDomainFromEmail = (email: string) => {
 	return email.split("@")[1]
+}
+
+export const groupEmailsByDate = (emails: EmailThread[]) => {
+	const today = new Date()
+	const groups: { [key: string]: EmailThread[] } = {}
+
+	emails?.forEach((email) => {
+		const date = new Date(email.messages[email.messages.length - 1].date)
+		const isToday = date.toDateString() === today.toDateString()
+
+		let key = ""
+		if (isToday) key = "Today"
+		else if (date > new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000))
+			key = format(date, "MMMM do, yyyy")
+		else if (date > new Date(today.getTime() - 90 * 24 * 60 * 60 * 1000))
+			key = format(date, "MMMM yyyy")
+		else key = "Previous 3 months"
+
+		groups[key] = [...(groups[key] || []), email]
+	})
+
+	return groups
 }

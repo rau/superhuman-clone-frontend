@@ -277,17 +277,34 @@ export const useAppShortcuts = () => {
 		},
 		{
 			key: "Enter",
-			handler: () => setIsShowingEmail(true),
+			handler: () => {
+				if (isShowingEmail && collapsedMessages[selectedMessageIndex]) {
+					const next = { ...collapsedMessages }
+					next[selectedMessageIndex] = false
+					setCollapsedMessages(next)
+					return
+				}
+				setIsShowingEmail(true)
+			},
 			mode: "global",
 		},
 		{
 			key: "ArrowDown",
 			handler: () => {
 				if (!emails?.length) return
-				setSelectedIndex(
-					selectedFolder?.id || "INBOX",
-					Math.min(selectedIndex + 1, emails.length - 1)
-				)
+				if (isShowingEmail) {
+					setSelectedMessageIndex(
+						Math.min(
+							selectedMessageIndex + 1,
+							(email?.messages?.length || 0) - 1
+						)
+					)
+				} else {
+					setSelectedIndex(
+						selectedFolder?.id || "INBOX",
+						Math.min(selectedIndex + 1, emails.length - 1)
+					)
+				}
 			},
 			mode: "global",
 		},
@@ -295,10 +312,16 @@ export const useAppShortcuts = () => {
 			key: "ArrowUp",
 			handler: () => {
 				if (!emails?.length) return
-				setSelectedIndex(
-					selectedFolder?.id || "INBOX",
-					Math.max(selectedIndex - 1, 0)
-				)
+				if (isShowingEmail) {
+					setSelectedMessageIndex(
+						Math.max(selectedMessageIndex - 1, 0)
+					)
+				} else {
+					setSelectedIndex(
+						selectedFolder?.id || "INBOX",
+						Math.max(selectedIndex - 1, 0)
+					)
+				}
 			},
 			mode: "global",
 		},

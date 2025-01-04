@@ -5,11 +5,17 @@ import { SettingsPane } from "@/components/SettingsPane"
 import { ShortcutsPane } from "@/components/ShortcutsPane"
 import { EmptyState } from "@/components/ui/EmptyState"
 import { Loader } from "@/components/ui/Loader"
-import { SidebarTrigger } from "@/components/ui/Sidebar"
+import { useSidebar } from "@/components/ui/Sidebar"
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from "@/components/ui/Tooltip"
 import { useFolderEmails } from "@/hooks/dataHooks"
 import { useUIStore } from "@/hooks/useUIStore"
+import { groupEmailsByDate } from "@/libs/emailUtils"
 import { cn } from "@/libs/utils"
-import { Pencil, Search, Square, SquareCheckBig } from "lucide-react"
+import { Menu, Pencil, Search, Square, SquareCheckBig } from "lucide-react"
 import { useEffect } from "react"
 
 const SelectAllButton = () => {
@@ -42,7 +48,7 @@ const SelectAllButton = () => {
 						allSelected ? new Set() : allThreadIds
 					)
 				}}
-				className="flex h-7 w-7 items-center justify-center rounded hover:bg-slate-100"
+				className="flex items-center justify-center rounded hover:bg-slate-100"
 			>
 				{selectedThreads[selectedFolder?.id || "INBOX"]?.size ===
 				emails?.length ? (
@@ -109,6 +115,7 @@ export const EmailsContainer = () => {
 		isQuickTipsOpen,
 		selectedThreads,
 	} = useUIStore()
+	const { toggleSidebar } = useSidebar()
 
 	const selectedIndex = selectedIndices[selectedFolder?.id || "INBOX"] || 0
 	const hasSelectedThreads =
@@ -123,20 +130,41 @@ export const EmailsContainer = () => {
 
 	return (
 		<div className="max-w-screen flex h-full w-screen flex-1">
-			<div className="relative flex flex-1 flex-col overflow-hidden border-r border-slate-200 bg-white p-4">
-				<div className="flex h-14 items-center justify-between px-4">
+			<div className="relative flex flex-1 flex-col overflow-hidden border-r border-slate-200 bg-white">
+				<div className="flex items-center justify-between pb-2 pr-4 pt-4">
 					<div className="flex items-center gap-2">
-						{hasSelectedThreads ? (
-							<SelectAllButton />
-						) : (
-							<SidebarTrigger />
-						)}
-						<h2 className="text-base font-semibold normal-case text-slate-900">
-							{selectedFolder?.name || "Inbox"}
-						</h2>
-						<span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">
-							{emails?.length || 0}
-						</span>
+						<div className="w-10 pl-4">
+							{hasSelectedThreads ? (
+								<SelectAllButton />
+							) : (
+								<Tooltip>
+									<TooltipTrigger asChild>
+										<Menu
+											onClick={() => toggleSidebar()}
+											className="h-4 w-4 cursor-pointer text-slate-500"
+										/>
+									</TooltipTrigger>
+									<TooltipContent>
+										<p>Folders</p>
+									</TooltipContent>
+								</Tooltip>
+							)}
+						</div>
+						<div className="flex items-baseline gap-2">
+							<span className="text-sm font-medium text-slate-700">
+								{(selectedFolder?.name || "inbox")
+									.toLowerCase()
+									.charAt(0)
+									.toUpperCase() +
+									(
+										selectedFolder?.name.toLowerCase() ||
+										"inbox"
+									).slice(1)}
+							</span>
+							<span className="text-xs text-slate-400">
+								{emails?.length || 0}
+							</span>
+						</div>
 					</div>
 					<div className="flex items-center gap-2">
 						<ComposeButton />
@@ -152,30 +180,50 @@ export const EmailsContainer = () => {
 					)}
 					{showEmptyState && <EmptyState />}
 					{showEmails &&
-						emails.map((email, index) => (
-							<EmailRow
-								key={email.id}
-								email={email}
-								isSelected={index === selectedIndex}
-								onClick={() => {
-									setSelectedIndex(
-										selectedFolder?.id || "INBOX",
-										index
-									)
-									setIsShowingEmail(true)
-								}}
-							/>
-						))}
+						Object.entries(groupEmailsByDate(emails)).map(
+							([date, groupEmails]) => (
+								<div key={date}>
+									{date !== "Today" && (
+										<>
+											<div className="flex w-full flex-row pb-2 pt-2">
+												<div className="h-px w-[4.25rem] pt-2" />
+												<span className="text-xs text-slate-400">
+													{date}
+												</span>
+											</div>
+										</>
+									)}
+									{groupEmails.map((email, index) => (
+										<EmailRow
+											key={email.id}
+											email={email}
+											isSelected={
+												emails.indexOf(email) ===
+												selectedIndex
+											}
+											onClick={() => {
+												setSelectedIndex(
+													selectedFolder?.id ||
+														"INBOX",
+													emails.indexOf(email)
+												)
+												setIsShowingEmail(true)
+											}}
+										/>
+									))}
+								</div>
+							)
+						)}
 				</div>
 			</div>
 
 			<div
 				className={cn(
-					"w-[400px] bg-slate-50",
+					"w-1/5 bg-[#FBFDFF]",
 					isQuickTipsOpen ? "h-[calc(100vh-40px)]" : "h-screen"
 				)}
 			>
-				{isShortcutsPaneOpen || hasSelectedThreads ? (
+				{isShortcutsPaneOpen ? (
 					<ShortcutsPane />
 				) : isSettingsOpen ? (
 					<SettingsPane />

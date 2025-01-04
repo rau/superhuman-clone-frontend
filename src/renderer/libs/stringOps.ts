@@ -67,5 +67,9 @@ export const getUniqueSenderNames = (messages: EmailMessage[]): string => {
 			.map((m) => m.sender.name)
 			.filter(Boolean)
 	)
-	return Array.from(uniqueNames).join(", ")
+	return uniqueNames.size >= 2
+		? Array.from(uniqueNames)
+				.map((name) => name?.split(" ")[0])
+				.join(", ")
+		: Array.from(uniqueNames).join(", ")
 }

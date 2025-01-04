@@ -1,7 +1,7 @@
 import { KeyboardTooltip } from "@/components/KeyboardTooltip"
 import { useUIStore } from "@/hooks/useUIStore"
 import { formatEmailParticipant, formatRecipients } from "@/libs/emailUtils"
-import { decodeHtml } from "@/libs/utils"
+import { cn, decodeHtml } from "@/libs/utils"
 import { format } from "date-fns"
 import {
 	ArrowLeft,
@@ -39,7 +39,9 @@ export const TopActionsBar = ({
 	if (isCollapsed) {
 		return (
 			<div
-				className="flex w-full flex-row items-center justify-between border-slate-200 py-1 hover:cursor-pointer"
+				className={cn(
+					"flex w-full flex-row items-center justify-between border-slate-200 py-1 hover:cursor-pointer"
+				)}
 				onClick={() => {
 					onToggle()
 				}}

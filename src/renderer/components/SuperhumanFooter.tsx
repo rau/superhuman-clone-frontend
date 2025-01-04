@@ -10,7 +10,7 @@ export const SuperhumanFooter = () => {
 
 	return (
 		<div className="mt-auto flex flex-col">
-			<Separator />
+			{isSettingsOpen && <Separator />}
 			<div className="mt-2 flex flex-row items-center justify-between gap-2">
 				<span className="text-sm font-medium text-slate-700">
 					Superhuman

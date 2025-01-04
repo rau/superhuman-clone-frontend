@@ -1,12 +1,12 @@
 import { ActionUndoToast } from "@/components/ActionUndoToast"
 import { KeyboardTooltip } from "@/components/KeyboardTooltip"
 
-import { useMarkEmailDone, useStarEmail } from "@/hooks/dataHooks"
+import { useMarkEmailDone } from "@/hooks/dataHooks"
 import { useUIStore } from "@/hooks/useUIStore"
 import { getUniqueSenderNames } from "@/libs/stringOps"
 import { cn, decodeHtml } from "@/libs/utils"
 import { format } from "date-fns"
-import { Check, Clock, Copy, SquareCheckBig, Star } from "lucide-react"
+import { Check, Clock, Copy, Paperclip, SquareCheckBig } from "lucide-react"
 import { toast } from "react-toastify"
 
 interface EmailRowProps {
@@ -17,7 +17,6 @@ interface EmailRowProps {
 
 export const EmailRow = ({ email, isSelected, onClick }: EmailRowProps) => {
 	const { mutateAsync: markDone } = useMarkEmailDone()
-	const { mutate: handleStar } = useStarEmail()
 	const { selectedThreads, selectedFolder, toggleThreadSelection } =
 		useUIStore()
 	const isThreadSelected = selectedThreads[
@@ -27,20 +26,32 @@ export const EmailRow = ({ email, isSelected, onClick }: EmailRowProps) => {
 	return (
 		<div
 			onClick={onClick}
-			className="group relative flex h-fit w-full max-w-full cursor-pointer items-center gap-4 overflow-hidden border-b border-slate-100 px-2 py-2 hover:bg-slate-50"
+			className={cn(
+				"group relative z-10 flex h-fit w-full max-w-full cursor-pointer items-center gap-4 overflow-hidden py-1 pr-2 hover:bg-slate-50"
+			)}
 		>
+			<div
+				className={cn(
+					"absolute left-0 top-0 z-50 h-full w-[2px]",
+					isSelected
+						? isThreadSelected
+							? "bg-white"
+							: "bg-[#AFB1DC]"
+						: "bg-transparent"
+				)}
+			/>
 			<div
 				className={cn(
 					"absolute inset-0 transition-transform duration-300 ease-out",
 					isThreadSelected
-						? "translate-x-0 bg-blue-300"
+						? "translate-x-0 bg-[#54ACDB]"
 						: isSelected
-							? "translate-x-0 bg-blue-50"
-							: "-translate-x-full bg-blue-50"
+							? "translate-x-0 bg-[#F4F6FC]"
+							: "-translate-x-full bg-[#F4F6FC]"
 				)}
 			/>
-			<div className="relative flex w-full items-center gap-4">
-				<div className="flex flex-row items-center gap-2">
+			<div className="relative flex w-full items-center gap-4 pl-3">
+				<div className="flex w-10 flex-row items-center gap-2">
 					<div className="h-4 w-4">
 						<SquareCheckBig
 							onClick={(e) => {
@@ -51,59 +62,103 @@ export const EmailRow = ({ email, isSelected, onClick }: EmailRowProps) => {
 								)
 							}}
 							className={cn(
-								"h-4 w-4 cursor-pointer text-slate-50 hover:text-slate-200",
+								"w-w h-4 cursor-pointer text-slate-50 hover:text-slate-200",
 								isThreadSelected ? "block" : "hidden"
 							)}
 						/>
 					</div>
-					<div
-						className={cn(
-							"h-1 w-1 rounded-full transition-all duration-200",
-							email.messages[0].read
-								? "scale-0 opacity-0"
-								: "scale-100 bg-blue-500 opacity-100"
-						)}
-					/>
-					<Star
-						onClick={(e) => {
-							e.stopPropagation()
-							handleStar({ email: email, star: !email.starred })
-						}}
-						className={cn(
-							"h-4 w-4 cursor-pointer transition-all duration-200",
-							email.starred
-								? "rotate-[720deg] scale-100 fill-yellow-400 text-yellow-400"
-								: "scale-0"
-						)}
-					/>
+
+					<div className="flex">
+						<div
+							className={cn(
+								"h-2 w-2 rounded-full transition-all duration-200",
+								email.starred
+									? "scale-100 bg-yellow-400 opacity-100"
+									: "scale-0 opacity-0"
+							)}
+						/>
+						<div
+							className={cn(
+								"-ml-[1px] h-2 w-2 rounded-full transition-all duration-200",
+								email.messages[0].read
+									? "scale-0 opacity-0"
+									: "scale-100 bg-blue-500 opacity-100"
+							)}
+						/>
+					</div>
 				</div>
 
-				<div className="w-[300px] overflow-hidden truncate">
-					<span className="truncate text-xs font-medium">
+				<div className="w-[250px] truncate">
+					<span
+						className={cn(
+							"truncate text-xs font-medium",
+							isThreadSelected && "text-white"
+						)}
+					>
 						{getUniqueSenderNames(email.messages)}
 					</span>
 				</div>
-				<div className="flex flex-1 flex-row gap-2 overflow-hidden">
-					<span className="w-full truncate text-xs font-medium">
+				<div className="flex flex-1 gap-2 truncate">
+					<span
+						className={cn(
+							"w-[350px] truncate text-xs",
+							isThreadSelected && "text-white"
+						)}
+					>
 						{email.subject}
 					</span>
-					<span className="truncate text-xs text-slate-500">
+					<span
+						className={cn(
+							"truncate text-xs text-slate-500",
+							isThreadSelected && "text-white"
+						)}
+					>
 						{decodeHtml(email.snippet)}
 					</span>
 				</div>
-				<div className="flex w-[200px] items-center justify-end gap-2">
-					<span
+				<div className="flex w-fit min-w-[100px] items-center justify-end">
+					<div
 						className={cn(
-							"text-xs text-slate-500",
-							isSelected && "hidden"
+							"flex items-center gap-1",
+							isSelected && !isThreadSelected && "hidden",
+							"group-hover:hidden"
 						)}
 					>
-						{format(email.messages[0].date, "LLL d")}
-					</span>
+						{email.messages.some(
+							(m) => m.attachments?.length > 0
+						) && <Paperclip className="h-3 w-3 text-slate-500" />}
+						<span
+							className={cn(
+								"text-xs",
+								isThreadSelected
+									? "text-white"
+									: "text-slate-500"
+							)}
+						>
+							{new Date().toDateString() ===
+							new Date(
+								email.messages[email.messages.length - 1].date
+							).toDateString()
+								? format(
+										email.messages[
+											email.messages.length - 1
+										].date,
+										"h:mm a"
+									)
+								: format(
+										email.messages[
+											email.messages.length - 1
+										].date,
+										"LLL d"
+									)}
+						</span>
+					</div>
 					<div
 						className={cn(
 							"ml-4 hidden items-center gap-1",
-							isSelected ? "flex" : "group-hover:flex"
+							isSelected && !isThreadSelected
+								? "flex"
+								: "group-hover:flex"
 						)}
 					>
 						<KeyboardTooltip
@@ -117,7 +172,7 @@ export const EmailRow = ({ email, isSelected, onClick }: EmailRowProps) => {
 							<button
 								onClick={(e) => {
 									e.stopPropagation()
-									markDone(email).then(() => {
+									markDone([email]).then(() => {
 										toast(
 											<ActionUndoToast action="Marked as Done" />,
 											{
@@ -130,7 +185,12 @@ export const EmailRow = ({ email, isSelected, onClick }: EmailRowProps) => {
 								}}
 								className="rounded p-1 text-slate-400 hover:bg-green-50 hover:text-green-600"
 							>
-								<Check className="h-4 w-4" />
+								<Check
+									className={cn(
+										"h-4 w-4",
+										isThreadSelected && "text-white"
+									)}
+								/>
 							</button>
 						</KeyboardTooltip>
 
@@ -143,7 +203,12 @@ export const EmailRow = ({ email, isSelected, onClick }: EmailRowProps) => {
 							]}
 						>
 							<button className="rounded p-1 text-slate-400 hover:bg-orange-50 hover:text-orange-600">
-								<Clock className="h-4 w-4" />
+								<Clock
+									className={cn(
+										"h-4 w-4",
+										isThreadSelected && "text-white"
+									)}
+								/>
 							</button>
 						</KeyboardTooltip>
 
@@ -156,7 +221,12 @@ export const EmailRow = ({ email, isSelected, onClick }: EmailRowProps) => {
 							]}
 						>
 							<button className="rounded p-1 text-slate-400 hover:bg-blue-50 hover:text-blue-600">
-								<Copy className="h-4 w-4" />
+								<Copy
+									className={cn(
+										"h-4 w-4",
+										isThreadSelected && "text-white"
+									)}
+								/>
 							</button>
 						</KeyboardTooltip>
 					</div>

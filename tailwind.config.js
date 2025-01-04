@@ -11,6 +11,10 @@ module.exports = {
 				"2xl": "1400px",
 			},
 		},
+		fontSize: {
+			xs: "0.65rem",
+			sm: "0.8rem",
+		},
 		extend: {
 			colors: {
 				border: "hsl(var(--border))",
@@ -63,6 +67,10 @@ module.exports = {
 				lg: "var(--radius)",
 				md: "calc(var(--radius) - 2px)",
 				sm: "calc(var(--radius) - 4px)",
+			},
+			boxShadow: {
+				superhuman:
+					"0 2px 6px rgba(0, 0, 0, 0.06), 0 6px 12px rgba(0, 0, 0, 0.04)",
 			},
 			keyframes: {
 				"accordion-down": {

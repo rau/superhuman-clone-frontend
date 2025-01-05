@@ -5,11 +5,10 @@ import {
 	DialogTitle,
 } from "@/components/ui/Dialog"
 import { useFolderEmails, useFolders, useModifyLabels } from "@/hooks/dataHooks"
-import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts"
 import { useUIStore } from "@/hooks/useUIStore"
 import { getSelectedEmails } from "@/libs/emailUtils"
 import { cn } from "@/libs/utils"
-import { useEffect, useRef } from "react"
+import { useEffect } from "react"
 
 const MoveToDialog = () => {
 	const {
@@ -19,10 +18,9 @@ const MoveToDialog = () => {
 		selectedThreads,
 		selectedIndices,
 	} = useUIStore()
+	const { moveToDialogIndex, setMoveToDialogIndex } = useUIStore()
 	const { data: folders } = useFolders()
 	const { data: emails } = useFolderEmails()
-	const { moveToDialogIndex, setMoveToDialogIndex } = useUIStore()
-	const scrollRef = useRef<HTMLDivElement>(null)
 	const { mutate: modifyLabels } = useModifyLabels()
 	const selectedEmails = getSelectedEmails(
 		selectedThreads,
@@ -49,30 +47,10 @@ const MoveToDialog = () => {
 		const cycledIndex = (newIndex + folders.length) % folders.length
 		setMoveToDialogIndex(cycledIndex)
 
-		const element = scrollRef.current?.children[cycledIndex] as HTMLElement
+		const element = document.getElementById("move-to-dialog-scroll")
+			?.children[cycledIndex] as HTMLElement
 		element?.scrollIntoView({ block: "nearest" })
 	}
-
-	useKeyboardShortcuts([
-		{
-			key: "ArrowDown",
-			handler: () => handleIndexChange(moveToDialogIndex + 1),
-			mode: "dialog",
-		},
-		{
-			key: "ArrowUp",
-			handler: () => handleIndexChange(moveToDialogIndex - 1),
-			mode: "dialog",
-		},
-		{
-			key: "Enter",
-			handler: () => {
-				if (!folders?.length) return
-				handleMove(folders[moveToDialogIndex])
-			},
-			mode: "dialog",
-		},
-	])
 
 	return (
 		<Dialog open={isMoveToDialogOpen} onOpenChange={setIsMoveToDialogOpen}>
@@ -83,7 +61,7 @@ const MoveToDialog = () => {
 
 				<div className="w-full">
 					<div
-						ref={scrollRef}
+						id="move-to-dialog-scroll"
 						className="max-h-[400px] w-full overflow-y-auto [&::-webkit-scrollbar]:!w-0"
 					>
 						{folders?.map((folder, index) => (

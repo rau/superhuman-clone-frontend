@@ -13,20 +13,20 @@ interface ComposeState {
 	showCcBcc: boolean
 	showSuggestions: boolean
 	selectedContactIndex: number
-	activeField: "to" | "cc" | "bcc"
+	activeField: RecipientField
 
-	setQuery: (value: string, field: "to" | "cc" | "bcc") => void
-	addContact: (contact: Contact, field: "to" | "cc" | "bcc") => void
-	removeContact: (email: string, field: "to" | "cc" | "bcc") => void
+	setQuery: (value: string, field: RecipientField) => void
+	addContact: (contact: Contact, field: RecipientField) => void
+	removeContact: (email: string, field: RecipientField) => void
 	setSubject: (subject: string) => void
 	setMessage: (message: string) => void
 	addAttachment: (attachment: Attachment) => void
 	removeAttachment: (path: string) => void
-	toggleCcBcc: () => void
 	reset: () => void
 	setSelectedContactIndex: (index: number) => void
-	setActiveField: (field: "to" | "cc" | "bcc") => void
+	setActiveField: (field: RecipientField) => void
 	setShowSuggestions: (show: boolean) => void
+	setShowCcBcc: (show: boolean) => void
 }
 
 export const useComposeStore = create<ComposeState>((set) => ({
@@ -40,6 +40,7 @@ export const useComposeStore = create<ComposeState>((set) => ({
 	bccContacts: [],
 	attachments: [],
 	showCcBcc: false,
+
 	showSuggestions: false,
 	selectedContactIndex: 0,
 	activeField: "to",
@@ -103,7 +104,7 @@ export const useComposeStore = create<ComposeState>((set) => ({
 		set((state) => ({
 			attachments: state.attachments.filter((a) => a.path !== path),
 		})),
-	toggleCcBcc: () => set((state) => ({ showCcBcc: !state.showCcBcc })),
+	setShowCcBcc: (show) => set({ showCcBcc: show }),
 	reset: () =>
 		set({
 			toQuery: "",

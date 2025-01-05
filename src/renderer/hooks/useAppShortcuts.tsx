@@ -1,17 +1,23 @@
 import { ActionUndoToast } from "@/components/ActionUndoToast"
+import { useSidebar } from "@/components/ui/Sidebar"
 import {
 	useAccounts,
+	useContacts,
 	useFolderEmails,
+	useFolders,
 	useMarkEmailDone,
 	useMarkEmailRead,
+	useModifyLabels,
 	useSpamEmail,
 	useStarEmail,
 	useTrashEmail,
 } from "@/hooks/dataHooks"
 import { useAccountStore } from "@/hooks/useAccountStore"
+import { useComposeStore } from "@/hooks/useComposeStore"
 import { useEmailActionsStore } from "@/hooks/useEmailActionsStore"
 import { useUIStore } from "@/hooks/useUIStore"
 import { useUndo } from "@/hooks/useUndo"
+import { filterContacts } from "@/libs/contactUtils"
 import { getSelectedEmails } from "@/libs/emailUtils"
 import { useEffect } from "react"
 import { toast } from "react-toastify"
@@ -23,6 +29,7 @@ interface ShortcutConfig {
 	shift?: boolean
 	ctrl?: boolean
 	mode: ShortcutMode
+	disabledModes?: ShortcutMode[]
 }
 
 export const useAppShortcuts = () => {
@@ -50,13 +57,32 @@ export const useAppShortcuts = () => {
 		setCollapsedMessages,
 	} = useUIStore()
 
+	const {
+		showSuggestions,
+		selectedContactIndex,
+		setSelectedContactIndex,
+		activeField,
+		addContact,
+		toQuery,
+		ccQuery,
+		bccQuery,
+		toContacts,
+		ccContacts,
+		bccContacts,
+		setQuery,
+		setShowSuggestions,
+	} = useComposeStore()
+
 	const { lastAction } = useEmailActionsStore()
 	const { data: emails } = useFolderEmails()
+	const { data: contacts } = useContacts()
+	const { data: folders } = useFolders()
 	const { mutateAsync: markDone } = useMarkEmailDone()
 	const { mutateAsync: starEmail } = useStarEmail()
 	const { mutateAsync: markEmailRead } = useMarkEmailRead()
 	const { mutateAsync: trashEmail } = useTrashEmail()
 	const { mutateAsync: spamEmail } = useSpamEmail()
+	const { mutate: modifyLabels } = useModifyLabels()
 	const { data: accounts } = useAccounts()
 	const { setSelectedAccountId } = useAccountStore()
 	const selectedIndex = selectedIndices[selectedFolder?.id || "INBOX"] || 0
@@ -64,6 +90,7 @@ export const useAppShortcuts = () => {
 	const email = emails?.[selectedIndex]
 
 	const { handleUndo } = useUndo()
+	const { setOpen } = useSidebar()
 	const selectedEmails = getSelectedEmails(
 		selectedThreads,
 		selectedFolder,
@@ -77,6 +104,25 @@ export const useAppShortcuts = () => {
 		setCollapsedMessages(next)
 	}
 
+	const handleMove = (targetFolder: Folder) => {
+		modifyLabels({
+			threads: selectedEmails,
+			addLabels: [targetFolder.id],
+			removeLabels: [selectedFolder?.id || "INBOX"],
+		})
+		setIsMoveToDialogOpen(false)
+	}
+
+	const handleIndexChange = (newIndex: number) => {
+		if (!folders?.length) return
+		const cycledIndex = (newIndex + folders.length) % folders.length
+		setMoveToDialogIndex(cycledIndex)
+
+		const element = document.getElementById("move-to-dialog-scroll")
+			?.children[cycledIndex] as HTMLElement
+		element?.scrollIntoView({ block: "nearest" })
+	}
+
 	const getCurrentMode = (): ShortcutMode => {
 		if (isMoveToDialogOpen) return "dialog"
 		if (isComposing) return "compose"
@@ -85,11 +131,26 @@ export const useAppShortcuts = () => {
 		return "global"
 	}
 
+	const filteredContacts = filterContacts(
+		contacts,
+		activeField === "to"
+			? toQuery
+			: activeField === "cc"
+				? ccQuery
+				: bccQuery,
+		activeField === "to"
+			? toContacts
+			: activeField === "cc"
+				? ccContacts
+				: bccContacts
+	)
+
 	const shortcuts: ShortcutConfig[] = [
 		{
 			key: "c",
 			handler: () => setIsComposing(true),
 			mode: "global",
+			disabledModes: ["compose"],
 		},
 		{
 			key: "Escape",
@@ -107,6 +168,7 @@ export const useAppShortcuts = () => {
 				setIsSearching(false)
 				setIsComposing(false)
 				setIsShowingEmail(false)
+				setOpen(false)
 			},
 			mode: "global",
 		},
@@ -136,6 +198,7 @@ export const useAppShortcuts = () => {
 				}
 			},
 			mode: "global",
+			disabledModes: ["compose"],
 		},
 		{
 			key: "k",
@@ -148,6 +211,7 @@ export const useAppShortcuts = () => {
 				}
 			},
 			mode: "global",
+			disabledModes: ["compose"],
 		},
 		{
 			key: "x",
@@ -160,6 +224,7 @@ export const useAppShortcuts = () => {
 				}
 			},
 			mode: "global",
+			disabledModes: ["compose"],
 		},
 		...(accounts?.map((account, index) => ({
 			key: index.toString(),
@@ -193,6 +258,7 @@ export const useAppShortcuts = () => {
 				}
 			},
 			mode: "global",
+			disabledModes: ["compose"],
 		},
 		{
 			key: "e",
@@ -208,6 +274,7 @@ export const useAppShortcuts = () => {
 				}
 			},
 			mode: "global",
+			disabledModes: ["compose"],
 		},
 
 		{
@@ -236,6 +303,7 @@ export const useAppShortcuts = () => {
 				}
 			},
 			mode: "global",
+			disabledModes: ["compose"],
 		},
 		{
 			key: "#",
@@ -255,6 +323,7 @@ export const useAppShortcuts = () => {
 			},
 			mode: "global",
 			shift: true,
+			disabledModes: ["compose"],
 		},
 		{
 			key: "!",
@@ -274,10 +343,31 @@ export const useAppShortcuts = () => {
 			},
 			mode: "global",
 			shift: true,
+			disabledModes: ["compose"],
 		},
 		{
 			key: "Enter",
 			handler: () => {
+				if (isMoveToDialogOpen) {
+					if (!folders?.length) return
+					handleMove(folders[moveToDialogIndex])
+					return
+				}
+				if (
+					isComposing &&
+					showSuggestions &&
+					filteredContacts?.length &&
+					filteredContacts[selectedContactIndex]
+				) {
+					addContact(
+						filteredContacts[selectedContactIndex],
+						activeField
+					)
+					setQuery("", activeField)
+					setShowSuggestions(false)
+					return
+				}
+				if (isComposing) return
 				if (isShowingEmail && collapsedMessages[selectedMessageIndex]) {
 					const next = { ...collapsedMessages }
 					next[selectedMessageIndex] = false
@@ -291,8 +381,19 @@ export const useAppShortcuts = () => {
 		{
 			key: "ArrowDown",
 			handler: () => {
-				if (!emails?.length) return
-				if (isShowingEmail) {
+				if (
+					isComposing &&
+					showSuggestions &&
+					filteredContacts?.length
+				) {
+					setSelectedContactIndex(
+						(selectedContactIndex + 1) % filteredContacts.length
+					)
+					return
+				} else if (isMoveToDialogOpen) {
+					handleIndexChange(moveToDialogIndex + 1)
+					return
+				} else if (isShowingEmail) {
 					setSelectedMessageIndex(
 						Math.min(
 							selectedMessageIndex + 1,
@@ -302,7 +403,7 @@ export const useAppShortcuts = () => {
 				} else {
 					setSelectedIndex(
 						selectedFolder?.id || "INBOX",
-						Math.min(selectedIndex + 1, emails.length - 1)
+						Math.min(selectedIndex + 1, (emails?.length || 0) - 1)
 					)
 				}
 			},
@@ -311,8 +412,20 @@ export const useAppShortcuts = () => {
 		{
 			key: "ArrowUp",
 			handler: () => {
-				if (!emails?.length) return
-				if (isShowingEmail) {
+				if (
+					isComposing &&
+					showSuggestions &&
+					filteredContacts?.length
+				) {
+					setSelectedContactIndex(
+						(selectedContactIndex - 1 + filteredContacts.length) %
+							filteredContacts.length
+					)
+					return
+				} else if (isMoveToDialogOpen) {
+					handleIndexChange(moveToDialogIndex - 1)
+					return
+				} else if (isShowingEmail) {
 					setSelectedMessageIndex(
 						Math.max(selectedMessageIndex - 1, 0)
 					)
@@ -340,6 +453,7 @@ export const useAppShortcuts = () => {
 			meta: true,
 			shift: true,
 			mode: "global",
+			disabledModes: ["compose"],
 		},
 		{
 			key: "a",
@@ -352,11 +466,13 @@ export const useAppShortcuts = () => {
 			},
 			meta: true,
 			mode: "global",
+			disabledModes: ["compose"],
 		},
 		{
 			key: "v",
 			handler: () => setIsMoveToDialogOpen(true),
 			mode: "global",
+			disabledModes: ["compose"],
 		},
 		{
 			key: "n",
@@ -369,6 +485,7 @@ export const useAppShortcuts = () => {
 				)
 			},
 			mode: "email",
+			disabledModes: ["compose"],
 		},
 		{
 			key: "p",
@@ -376,16 +493,13 @@ export const useAppShortcuts = () => {
 				setSelectedMessageIndex(Math.max(selectedMessageIndex - 1, 0))
 			},
 			mode: "email",
+			disabledModes: ["compose"],
 		},
 		{
 			key: "r",
 			handler: () => setShowReplyPane(true),
 			mode: "email",
-		},
-		{
-			key: "Escape",
-			handler: () => setIsShowingEmail(false),
-			mode: "email",
+			disabledModes: ["compose"],
 		},
 		{
 			key: "o",
@@ -398,6 +512,30 @@ export const useAppShortcuts = () => {
 			handler: () => toggleMessage(selectedMessageIndex),
 			mode: "email",
 		},
+		{
+			key: "b",
+			handler: () => {
+				const bccField = document.querySelector(
+					"[data-bcc-field]"
+				) as HTMLElement
+				bccField?.focus()
+			},
+			meta: true,
+			shift: true,
+			mode: "compose",
+		},
+		{
+			key: "c",
+			handler: () => {
+				const ccField = document.querySelector(
+					"[data-cc-field]"
+				) as HTMLElement
+				ccField?.focus()
+			},
+			meta: true,
+			shift: true,
+			mode: "compose",
+		},
 	]
 
 	useEffect(() => {
@@ -405,30 +543,28 @@ export const useAppShortcuts = () => {
 			const currentMode = getCurrentMode()
 			let handled = false
 
-			shortcuts.forEach(({ key, handler, meta, shift, ctrl, mode }) => {
-				if (handled) return
-				if (
-					mode !== currentMode &&
-					(mode !== "global" || currentMode === "dialog")
-				)
-					return
+			shortcuts.forEach(
+				({ key, handler, meta, shift, ctrl, disabledModes = [] }) => {
+					if (handled) return
+					if (disabledModes.includes(currentMode)) return
 
-				const metaMatch = meta ? e.metaKey : !e.metaKey
-				const shiftMatch = shift ? e.shiftKey : !e.shiftKey
-				const ctrlMatch = ctrl ? e.ctrlKey : !e.ctrlKey
+					const metaMatch = meta ? e.metaKey : !e.metaKey
+					const shiftMatch = shift ? e.shiftKey : !e.shiftKey
+					const ctrlMatch = ctrl ? e.ctrlKey : !e.ctrlKey
 
-				if (
-					e.key.toLowerCase() === key.toLowerCase() &&
-					metaMatch &&
-					shiftMatch &&
-					ctrlMatch
-				) {
-					e.preventDefault()
-					e.stopPropagation()
-					handler(e)
-					handled = true
+					if (
+						e.key.toLowerCase() === key.toLowerCase() &&
+						metaMatch &&
+						shiftMatch &&
+						ctrlMatch
+					) {
+						e.preventDefault()
+						e.stopPropagation()
+						handler(e)
+						handled = true
+					}
 				}
-			})
+			)
 		}
 
 		window.addEventListener("keydown", handleKeyDown)

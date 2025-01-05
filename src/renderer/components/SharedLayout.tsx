@@ -1,7 +1,4 @@
-// React/Next
-import { Outlet } from "react-router-dom"
-// Components
-import { AccountPickerDialog } from "@/components/AccountPickerDialog"
+import { AccountPickerDialog } from "@/components/dialogs/AccountPickerDialog"
 import { FolderSidebar } from "@/components/FolderSidebar"
 import {
 	Sidebar,
@@ -9,10 +6,7 @@ import {
 	SidebarProvider,
 	useSidebar,
 } from "@/components/ui/Sidebar"
-// Hooks
-// Libraries
-// Icons
-// Types
+import { Outlet } from "react-router-dom"
 
 const SharedLayoutContent = () => {
 	const { setOpen } = useSidebar()

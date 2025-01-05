@@ -1,22 +1,13 @@
-import { ComposePaneOverlay } from "@/components/ComposePaneOverlay"
+import { BackNavigationSection } from "@/components/BackNavigationSection"
+import { ComposePaneOverlay } from "@/components/compose/ComposePaneOverlay"
 import { EmailSenderDetailsPane } from "@/components/EmailSenderDetailsPane"
 import { KeyboardTooltip } from "@/components/KeyboardTooltip"
 import { TopActionsBar } from "@/components/TopActionsBar"
-import { Button } from "@/components/ui/Button"
 import { useFolderEmails, useMarkEmailDone } from "@/hooks/dataHooks"
 import { useUIStore } from "@/hooks/useUIStore"
 import { parseEmailBody } from "@/libs/emailUtils"
 import { cn } from "@/libs/utils"
-import {
-	ArrowLeft,
-	Check,
-	ChevronDown,
-	ChevronUp,
-	Clock,
-	Copy,
-	Ellipsis,
-	Share,
-} from "lucide-react"
+import { Check, Clock, Copy, Ellipsis, Share } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 
 const EmailMessage = ({
@@ -153,79 +144,21 @@ export const ViewEmailPane = () => {
 
 	return (
 		<div className="absolute inset-0 z-50 flex flex-row bg-white">
-			<div className="flex w-1/5 flex-col bg-slate-50 p-4">
-				<div className="flex flex-row gap-2">
-					<KeyboardTooltip
-						tooltips={[
-							{
-								keys: ["Esc"],
-								label: "Close",
-							},
-						]}
-						delayDuration={150}
-					>
-						<Button
-							onClick={() => setIsShowingEmail(false)}
-							variant="ghost"
-							className="rounded-full bg-white shadow-md"
-						>
-							<ArrowLeft className="h-4 w-4" />
-						</Button>
-					</KeyboardTooltip>
-
-					<div className="flex flex-row gap-2 rounded-full bg-white shadow-md">
-						<KeyboardTooltip
-							tooltips={[
-								{
-									keys: ["K"],
-									label: "Previous conversation",
-								},
-							]}
-							delayDuration={150}
-						>
-							<Button
-								variant="ghost"
-								onClick={() => {
-									if (selectedIndex > 0) {
-										setSelectedIndex(
-											selectedFolder?.id || "INBOX",
-											selectedIndex - 1
-										)
-									}
-								}}
-							>
-								<ChevronUp className="h-4 w-4" />
-							</Button>
-						</KeyboardTooltip>
-						<KeyboardTooltip
-							tooltips={[
-								{
-									keys: ["J"],
-									label: "Next conversation",
-								},
-							]}
-							delayDuration={150}
-						>
-							<Button
-								variant="ghost"
-								onClick={() => {
-									if (
-										emails &&
-										selectedIndex < emails.length - 1
-									) {
-										setSelectedIndex(
-											selectedFolder?.id || "INBOX",
-											selectedIndex + 1
-										)
-									}
-								}}
-							>
-								<ChevronDown className="h-4 w-4" />
-							</Button>
-						</KeyboardTooltip>
-					</div>
-				</div>
-			</div>
+			<BackNavigationSection
+				onClose={() => setIsShowingEmail(false)}
+				onPrevious={() =>
+					setSelectedIndex(
+						selectedFolder?.id || "INBOX",
+						selectedIndex - 1
+					)
+				}
+				onNext={() =>
+					setSelectedIndex(
+						selectedFolder?.id || "INBOX",
+						selectedIndex + 1
+					)
+				}
+			/>
 			<div className="flex w-3/5 flex-col">
 				<div className="flex w-full flex-col items-center">
 					<div
@@ -338,7 +271,7 @@ export const ViewEmailPane = () => {
 							{showReplyPane && (
 								<ComposePaneOverlay
 									isReply={true}
-									replyToEmail={email}
+									replyToEmail={email.messages[i]}
 								/>
 							)}
 						</div>

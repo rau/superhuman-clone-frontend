@@ -27,7 +27,7 @@ export const EmailRow = ({ email, isSelected, onClick }: EmailRowProps) => {
 		<div
 			onClick={onClick}
 			className={cn(
-				"group relative z-10 flex h-fit w-full max-w-full cursor-pointer items-center gap-4 overflow-hidden py-1 pr-2 hover:bg-slate-50"
+				"group relative z-0 flex h-fit w-full max-w-full cursor-pointer items-center gap-4 overflow-hidden py-1 pr-2 hover:bg-slate-50"
 			)}
 		>
 			<div

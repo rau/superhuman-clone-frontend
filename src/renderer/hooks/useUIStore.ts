@@ -24,6 +24,8 @@ interface UIState {
 	collapsedMessages: Record<number, boolean>
 	setCollapsedMessages: (value: Record<number, boolean>) => void
 
+	showEmptySubjectDialog: boolean
+	setShowEmptySubjectDialog: (value: boolean) => void
 	setIsSearching: (isSearching: boolean) => void
 	setIsShowingEmail: (isShowingEmail: boolean) => void
 	setIsComposing: (isComposing: boolean) => void
@@ -73,6 +75,7 @@ export const useUIStore = create<UIState>((set) => ({
 	isMoveToDialogOpen: false,
 	moveToDialogIndex: 0,
 	showReplyPane: false,
+	showEmptySubjectDialog: false,
 	selectedMessageIndex: 0,
 	collapsedMessages: {},
 	setIsSearching: (isSearching) => set({ isSearching }),
@@ -127,4 +130,6 @@ export const useUIStore = create<UIState>((set) => ({
 	setSelectedMessageIndex: (index) => set({ selectedMessageIndex: index }),
 	setShowReplyPane: (value) => set({ showReplyPane: value }),
 	setCollapsedMessages: (value) => set({ collapsedMessages: value }),
+	setShowEmptySubjectDialog: (value) => set({ showEmptySubjectDialog: value }),
+
 }))

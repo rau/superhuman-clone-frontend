@@ -1,5 +1,5 @@
 import { KeyboardTooltip } from "@/components/KeyboardTooltip"
-import { useComposeStore } from "@/hooks/useZustand"
+import { useComposeStore } from "@/hooks/useComposeStore"
 import { cn } from "@/libs/utils"
 import { Paperclip, Trash2 } from "lucide-react"
 import TextareaAutosize from "react-textarea-autosize"

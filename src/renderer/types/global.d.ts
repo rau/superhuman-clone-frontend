@@ -49,7 +49,6 @@ declare global {
 		email: string
 		name?: string
 		interactionCount?: number
-		lastInteraction?: Date
 	}
 
 	type Attachment = {
@@ -81,6 +80,7 @@ declare global {
 	}
 
 	type ShortcutMode = "global" | "compose" | "search" | "email" | "dialog"
+	type RecipientField = "to" | "cc" | "bcc"
 }
 
 export {}

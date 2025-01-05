@@ -17,10 +17,45 @@ export const fetchContacts = async (accountId: string): Promise<Contact[]> => {
 		accountId: accountId,
 	})
 
-	return data.map((contact: any) => ({
-		...contact,
-		lastInteraction: new Date(contact.lastInteraction),
-	}))
+	const contactMap = new Map<string, Contact>()
+	data.filter((contact: Contact) => contact.email.includes("@")).forEach(
+		(contact: Contact) => {
+			const email = contact.email.toLowerCase()
+			const existing = contactMap.get(email)
+			if (existing) {
+				existing.interactionCount =
+					(existing.interactionCount || 0) +
+					(contact.interactionCount || 0)
+				if (contact.name) {
+					existing.name = contact.name
+						.split(" ")
+						.map(
+							(word) =>
+								word.charAt(0).toUpperCase() +
+								word.slice(1).toLowerCase()
+						)
+						.join(" ")
+				}
+			} else {
+				contactMap.set(email, {
+					...contact,
+					email,
+					name: contact.name
+						? contact.name
+								.split(" ")
+								.map(
+									(word) =>
+										word.charAt(0).toUpperCase() +
+										word.slice(1).toLowerCase()
+								)
+								.join(" ")
+						: undefined,
+				})
+			}
+		}
+	)
+
+	return Array.from(contactMap.values())
 }
 
 export interface SendEmailPayload {

@@ -99,3 +99,37 @@ export const groupEmailsByDate = (emails: EmailThread[]) => {
 
 	return groups
 }
+
+export const mergeDraftsAndEmails = (
+	drafts: EmailThread[],
+	emails: EmailThread[]
+): EmailThread[] => {
+	return [...drafts, ...emails].sort(
+		(a, b) => b.last_message_timestamp - a.last_message_timestamp
+	)
+}
+
+export const formatSender = (sender: EmailParticipant) => {
+	const match = sender.name?.match(/(.*?)\s*<(.+?)>/)
+	if (!match) return sender.email
+
+	const [_, name, email] = match
+	return name.trim() || email
+}
+
+export const getUniqueSenderNames = (messages: EmailMessage[]): string => {
+	const uniqueNames = new Set(
+		messages
+			.filter((m) => !m.sender.is_me)
+			.map((m) => m.sender.name)
+			.filter(Boolean)
+	)
+
+	if (uniqueNames.size === 0) return "Me"
+
+	return uniqueNames.size >= 2
+		? Array.from(uniqueNames)
+				.map((name) => name?.split(" ")[0])
+				.join(", ")
+		: Array.from(uniqueNames).join(", ")
+}

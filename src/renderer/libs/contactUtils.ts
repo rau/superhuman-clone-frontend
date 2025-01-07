@@ -1,7 +1,7 @@
 export const filterContacts = (
-	contacts: Contact[] | undefined,
+	contacts: EmailParticipant[] | undefined,
 	query: string,
-	existingContacts: Contact[],
+	existingContacts: EmailParticipant[],
 	maxResults = 5
 ) => {
 	return (

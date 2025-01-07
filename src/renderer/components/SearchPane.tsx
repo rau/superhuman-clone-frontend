@@ -56,7 +56,7 @@ const Header = () => {
 					autoFocus
 					type="text"
 					placeholder="Search"
-					className="w-full bg-transparent text-lg outline-none"
+					className="text-lg w-full bg-transparent outline-none"
 					value={query}
 					onChange={(e) => setQuery(e.target.value)}
 					onKeyDown={handleKeyDown}
@@ -74,7 +74,7 @@ const Header = () => {
 
 const SearchTips = () => (
 	<div className="flex h-full w-1/4 flex-col gap-3 border-l border-slate-200 bg-slate-50 p-4 text-xs shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.05)]">
-		<h3 className="pb-4 text-lg font-medium text-slate-900">Tips</h3>
+		<h3 className="text-lg pb-4 font-medium text-slate-900">Tips</h3>
 		<div className="flex flex-col gap-2.5">
 			<div className="flex">
 				<span className="w-48 font-medium">from:nicole</span>

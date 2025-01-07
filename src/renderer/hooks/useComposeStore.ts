@@ -1,14 +1,17 @@
 import { create } from "zustand"
 
 interface ComposeState {
+	draftId?: string
+	setDraftId: (id: string) => void
+
 	toQuery: string
 	ccQuery: string
 	bccQuery: string
 	subject: string
 	message: string
-	toContacts: Contact[]
-	ccContacts: Contact[]
-	bccContacts: Contact[]
+	toContacts: EmailParticipant[]
+	ccContacts: EmailParticipant[]
+	bccContacts: EmailParticipant[]
 	attachments: Attachment[]
 	showCcBcc: boolean
 	showSuggestions: boolean
@@ -16,7 +19,7 @@ interface ComposeState {
 	activeField: RecipientField
 
 	setQuery: (value: string, field: RecipientField) => void
-	addContact: (contact: Contact, field: RecipientField) => void
+	addContact: (contact: EmailParticipant, field: RecipientField) => void
 	removeContact: (email: string, field: RecipientField) => void
 	setSubject: (subject: string) => void
 	setMessage: (message: string) => void
@@ -27,9 +30,15 @@ interface ComposeState {
 	setActiveField: (field: RecipientField) => void
 	setShowSuggestions: (show: boolean) => void
 	setShowCcBcc: (show: boolean) => void
+
+	setToContacts: (contacts: EmailParticipant[]) => void
+	setCcContacts: (contacts: EmailParticipant[]) => void
+	setBccContacts: (contacts: EmailParticipant[]) => void
 }
 
 export const useComposeStore = create<ComposeState>((set) => ({
+	draftId: undefined,
+	setDraftId: (id) => set({ draftId: id }),
 	toQuery: "",
 	ccQuery: "",
 	bccQuery: "",
@@ -124,4 +133,7 @@ export const useComposeStore = create<ComposeState>((set) => ({
 	setSelectedContactIndex: (index) => set({ selectedContactIndex: index }),
 	setActiveField: (field) => set({ activeField: field }),
 	setShowSuggestions: (show) => set({ showSuggestions: show }),
+	setToContacts: (contacts) => set({ toContacts: contacts }),
+	setCcContacts: (contacts) => set({ ccContacts: contacts }),
+	setBccContacts: (contacts) => set({ bccContacts: contacts }),
 }))

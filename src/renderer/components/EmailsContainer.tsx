@@ -1,16 +1,11 @@
 import { EmailRow } from "@/components/EmailRow"
 import { EmailSenderDetailsPane } from "@/components/EmailSenderDetailsPane"
-import { KeyboardTooltip } from "@/components/KeyboardTooltip"
 import { SettingsPane } from "@/components/SettingsPane"
 import { ShortcutsPane } from "@/components/ShortcutsPane"
 import { EmptyState } from "@/components/ui/EmptyState"
+import { IconButton } from "@/components/ui/IconButton"
 import { Loader } from "@/components/ui/Loader"
 import { useSidebar } from "@/components/ui/Sidebar"
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipTrigger,
-} from "@/components/ui/Tooltip"
 import { useFolderEmails } from "@/hooks/dataHooks"
 import { useUIStore } from "@/hooks/useUIStore"
 import { groupEmailsByDate } from "@/libs/emailUtils"
@@ -23,8 +18,24 @@ const SelectAllButton = () => {
 	const { data: emails } = useFolderEmails()
 
 	return (
-		<KeyboardTooltip
-			tooltips={[
+		<IconButton
+			icon={
+				selectedThreads[selectedFolder?.id || "INBOX"]?.size ===
+				emails?.length
+					? SquareCheckBig
+					: Square
+			}
+			onClick={() => {
+				const allThreadIds = new Set(emails?.map((email) => email.id))
+				const currentSelected =
+					selectedThreads[selectedFolder?.id || "INBOX"]
+				const allSelected = currentSelected?.size === emails?.length
+				setSelectedThreads(
+					selectedFolder?.id || "INBOX",
+					allSelected ? new Set() : allThreadIds
+				)
+			}}
+			keyboardShortcuts={[
 				{
 					keys: ["⌘", "shift", "A"],
 					label: "Select all",
@@ -34,72 +45,7 @@ const SelectAllButton = () => {
 					label: "Select all from here",
 				},
 			]}
-		>
-			<button
-				onClick={() => {
-					const allThreadIds = new Set(
-						emails?.map((email) => email.id)
-					)
-					const currentSelected =
-						selectedThreads[selectedFolder?.id || "INBOX"]
-					const allSelected = currentSelected?.size === emails?.length
-					setSelectedThreads(
-						selectedFolder?.id || "INBOX",
-						allSelected ? new Set() : allThreadIds
-					)
-				}}
-				className="flex items-center justify-center rounded hover:bg-slate-100"
-			>
-				{selectedThreads[selectedFolder?.id || "INBOX"]?.size ===
-				emails?.length ? (
-					<SquareCheckBig className="h-4 w-4 text-slate-600" />
-				) : (
-					<Square className="h-4 w-4 text-slate-600" />
-				)}
-			</button>
-		</KeyboardTooltip>
-	)
-}
-
-const ComposeButton = () => {
-	const { setIsComposing } = useUIStore()
-
-	return (
-		<KeyboardTooltip
-			tooltips={[
-				{
-					keys: ["C"],
-					label: "New message",
-				},
-			]}
-			delayDuration={150}
-		>
-			<Pencil
-				className="h-4 w-4 text-slate-400 transition-colors duration-100 hover:cursor-pointer hover:text-slate-900"
-				onClick={() => setIsComposing(true)}
-			/>
-		</KeyboardTooltip>
-	)
-}
-
-const SearchButton = () => {
-	const { setIsSearching } = useUIStore()
-
-	return (
-		<KeyboardTooltip
-			tooltips={[
-				{
-					keys: ["/"],
-					label: "Search",
-				},
-			]}
-			delayDuration={150}
-		>
-			<Search
-				className="h-4 w-4 text-slate-400 transition-colors duration-100 hover:cursor-pointer hover:text-slate-900"
-				onClick={() => setIsSearching(true)}
-			/>
-		</KeyboardTooltip>
+		/>
 	)
 }
 
@@ -114,6 +60,8 @@ export const EmailsContainer = () => {
 		isShortcutsPaneOpen,
 		isQuickTipsOpen,
 		selectedThreads,
+		setIsComposing,
+		setIsSearching,
 	} = useUIStore()
 	const { toggleSidebar } = useSidebar()
 
@@ -137,17 +85,11 @@ export const EmailsContainer = () => {
 							{hasSelectedThreads ? (
 								<SelectAllButton />
 							) : (
-								<Tooltip>
-									<TooltipTrigger asChild>
-										<Menu
-											onClick={() => toggleSidebar()}
-											className="h-4 w-4 cursor-pointer text-slate-500"
-										/>
-									</TooltipTrigger>
-									<TooltipContent>
-										<p>Folders</p>
-									</TooltipContent>
-								</Tooltip>
+								<IconButton
+									icon={Menu}
+									onClick={() => toggleSidebar()}
+									tooltipLabel="Folders"
+								/>
 							)}
 						</div>
 						<div className="flex items-baseline gap-2">
@@ -167,8 +109,26 @@ export const EmailsContainer = () => {
 						</div>
 					</div>
 					<div className="flex items-center gap-2">
-						<ComposeButton />
-						<SearchButton />
+						<IconButton
+							icon={Pencil}
+							onClick={() => setIsComposing(true)}
+							keyboardShortcuts={[
+								{
+									keys: ["C"],
+									label: "New message",
+								},
+							]}
+						/>
+						<IconButton
+							icon={Search}
+							onClick={() => setIsSearching(true)}
+							keyboardShortcuts={[
+								{
+									keys: ["/"],
+									label: "Search",
+								},
+							]}
+						/>
 					</div>
 				</div>
 
@@ -201,14 +161,6 @@ export const EmailsContainer = () => {
 												emails.indexOf(email) ===
 												selectedIndex
 											}
-											onClick={() => {
-												setSelectedIndex(
-													selectedFolder?.id ||
-														"INBOX",
-													emails.indexOf(email)
-												)
-												setIsShowingEmail(true)
-											}}
 										/>
 									))}
 								</div>
@@ -220,7 +172,7 @@ export const EmailsContainer = () => {
 			<div
 				className={cn(
 					"w-1/5 bg-[#FBFDFF]",
-					isQuickTipsOpen ? "h-[calc(100vh-40px)]" : "h-screen"
+					isQuickTipsOpen ? "h-[calc(100vh-20px)]" : "h-screen"
 				)}
 			>
 				{isShortcutsPaneOpen ? (

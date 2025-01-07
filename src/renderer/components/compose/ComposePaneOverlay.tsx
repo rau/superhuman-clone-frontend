@@ -6,15 +6,16 @@ import { EmailSenderDetailsPane } from "@/components/EmailSenderDetailsPane"
 import { KeyboardTooltip } from "@/components/KeyboardTooltip"
 import {
 	sendEmailMutation,
-	useContacts,
+	useCreateDraft,
 	useFolderEmails,
 } from "@/hooks/dataHooks"
 import { useComposeStore } from "@/hooks/useComposeStore"
 import { useUIStore } from "@/hooks/useUIStore"
-import { filterContacts } from "@/libs/contactUtils"
+import { debounce } from "@/libs/utils"
 import { Braces, Calendar, File, Paperclip, Trash2, X } from "lucide-react"
 import { useEffect } from "react"
 import TextareaAutosize from "react-textarea-autosize"
+import { toast } from "react-toastify"
 
 const MessageArea = () => {
 	const { message, setMessage } = useComposeStore()
@@ -30,17 +31,6 @@ const MessageArea = () => {
 					minRows={12}
 					maxRows={24}
 				/>
-			</div>
-			<div className="flex items-center gap-2 border-t py-2 text-sm text-slate-500">
-				<span>Hit</span>
-				<kbd className="rounded bg-slate-100 px-1.5 py-0.5 text-xs">
-					Shift
-				</kbd>
-				<span>+</span>
-				<kbd className="rounded bg-slate-100 px-1.5 py-0.5 text-xs">
-					Enter
-				</kbd>
-				<span>to add a new line</span>
 			</div>
 		</div>
 	)
@@ -81,7 +71,7 @@ const MessageActions = ({
 					))}
 				</div>
 			)}
-			<div className="flex items-center justify-between pb-1 pt-4">
+			<div className="flex items-center justify-between">
 				<div className="flex items-center gap-2">
 					<KeyboardTooltip
 						tooltips={[
@@ -236,8 +226,8 @@ export const ComposePaneOverlay = ({
 	isReply?: boolean
 	replyToEmail?: EmailMessage
 }) => {
-	const { data: contacts } = useContacts()
 	const { data: emails } = useFolderEmails()
+	const { mutateAsync: createDraft } = useCreateDraft()
 	const { selectedFolder, selectedIndices } = useUIStore()
 	const selectedIndex = selectedIndices[selectedFolder?.id || "INBOX"] || 0
 	const email = emails?.[selectedIndex]
@@ -245,34 +235,21 @@ export const ComposePaneOverlay = ({
 	const { isComposing, setIsComposing, setShowEmptySubjectDialog } =
 		useUIStore()
 	const {
-		toQuery,
-		ccQuery,
-		bccQuery,
 		subject,
 		message,
 		toContacts,
 		ccContacts,
 		bccContacts,
 		attachments,
-		showSuggestions,
-		selectedContactIndex,
-		activeField,
-		addAttachment,
 		reset,
+		draftId,
+		setDraftId,
+		setMessage,
+		setSubject,
+		setToContacts,
+		setCcContacts,
+		setBccContacts,
 	} = useComposeStore()
-
-	const handleAttach = async () => {
-		const result = await window.electron.openFile()
-		if (!result.canceled && result.filePaths.length > 0) {
-			const filePath = result.filePaths[0]
-			const stats = await window.electron.getFileStats(filePath)
-			addAttachment({
-				name: filePath.split("/").pop()!,
-				size: stats.size,
-				path: filePath,
-			})
-		}
-	}
 
 	const handleSend = () => {
 		if (!subject.trim()) {
@@ -299,48 +276,47 @@ export const ComposePaneOverlay = ({
 			.then(() => reset())
 	}
 
-	const filteredContacts = filterContacts(
-		contacts,
-		activeField === "to"
-			? toQuery
-			: activeField === "cc"
-				? ccQuery
-				: bccQuery,
-		activeField === "to"
-			? toContacts
-			: activeField === "cc"
-				? ccContacts
-				: bccContacts
-	)
+	useEffect(() => {
+		const debouncedSaveDraft = debounce(() => {
+			if (message || subject) {
+				createDraft(
+					{
+						to: toContacts,
+						cc: ccContacts,
+						bcc: bccContacts,
+						subject,
+						body: message,
+						draftId: draftId,
+					},
+					{
+						onSuccess: (data) => {
+							if (!draftId) {
+								setDraftId(data.draft_id)
+							} else {
+								toast.success("Draft saved")
+							}
+						},
+					}
+				)
+			}
+		}, 1000)
+
+		debouncedSaveDraft()
+		return () => debouncedSaveDraft.cancel()
+	}, [message, subject, toContacts, draftId])
 
 	useEffect(() => {
-		const handleKeyDown = (e: KeyboardEvent) => {
-			if (!showSuggestions || !filteredContacts?.length) {
-				if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
-					e.preventDefault()
-					handleSend()
-					return
-				}
-
-				if (e.metaKey && e.shiftKey) {
-					if (e.key === ",") {
-						e.preventDefault()
-						setIsComposing(false)
-						return
-					}
-
-					if (e.key === "u" || e.key === "U") {
-						e.preventDefault()
-						handleAttach()
-						return
-					}
-				}
+		if (draftId) {
+			const draft = emails?.find((e) => e.id === draftId)
+			if (draft) {
+				setMessage(draft.messages[0].body)
+				setSubject(draft.subject)
+				setToContacts(draft.messages[0].to.to || [])
+				setCcContacts(draft.messages[0].to.cc || [])
+				setBccContacts(draft.messages[0].to.bcc || [])
 			}
 		}
-
-		window.addEventListener("keydown", handleKeyDown)
-		return () => window.removeEventListener("keydown", handleKeyDown)
-	}, [showSuggestions, filteredContacts, selectedContactIndex])
+	}, [draftId])
 
 	if (!isComposing) return null
 
@@ -370,7 +346,7 @@ export const ComposePaneOverlay = ({
 			<BackNavigationSection onClose={() => setIsComposing(false)} />
 			<div className="flex w-3/5 flex-col items-center">
 				<h2 className="text-lg w-3/5 p-4 font-medium">New Message</h2>
-				<div className="flex w-3/5 flex-col rounded-2xl p-4 shadow-2xl">
+				<div className="flex w-3/5 flex-col rounded-2xl px-4 pt-4 shadow-2xl">
 					<div className="flex flex-col gap-2">
 						<RecipientFields />
 						<SubjectField />

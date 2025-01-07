@@ -1,8 +1,7 @@
 import { KeyboardTooltip } from "@/components/KeyboardTooltip"
-import { Button } from "@/components/ui/Button"
+import { IconButton } from "@/components/ui/IconButton"
 import { Separator } from "@/components/ui/Separator"
 import { useUIStore } from "@/hooks/useUIStore"
-import { cn } from "@/libs/utils"
 import { Calendar, CircleHelp, Gift, Settings } from "lucide-react"
 
 export const SuperhumanFooter = () => {
@@ -15,7 +14,7 @@ export const SuperhumanFooter = () => {
 				<span className="text-sm font-medium text-slate-700">
 					Superhuman
 				</span>
-				<div className="flex flex-row gap-0">
+				<div className="flex flex-row items-center gap-0">
 					<KeyboardTooltip
 						tooltips={[
 							{
@@ -24,30 +23,20 @@ export const SuperhumanFooter = () => {
 							},
 						]}
 					>
-						<Button variant="ghost" size="icon">
-							<span>AI</span>
-						</Button>
+						<span className="mr-1 text-[16px] font-medium text-slate-400 transition-colors duration-100 hover:cursor-pointer hover:text-slate-900">
+							ai
+						</span>
 					</KeyboardTooltip>
-					<Button variant="ghost" size="icon">
-						<Gift className="h-4 w-4" />
-					</Button>
-					<Button variant="ghost" size="icon">
-						<CircleHelp className="h-4 w-4" />
-					</Button>
-					<Button variant="ghost" size="icon">
-						<Calendar className="h-4 w-4" />
-					</Button>
-					<Button variant="ghost" size="icon">
-						<Settings
-							onClick={() => {
-								setIsSettingsOpen(!isSettingsOpen)
-							}}
-							className={cn(
-								"h-4 w-4",
-								isSettingsOpen && "text-red-500"
-							)}
-						/>
-					</Button>
+
+					<IconButton icon={Gift} />
+					<IconButton icon={CircleHelp} />
+					<IconButton icon={Calendar} />
+					<IconButton
+						icon={Settings}
+						onClick={() => {
+							setIsSettingsOpen(!isSettingsOpen)
+						}}
+					/>
 				</div>
 			</div>
 		</div>

@@ -1,3 +1,4 @@
+import { mergeDraftsAndEmails } from "@/libs/emailUtils"
 import { fetchWithAxios } from "@/libs/fetch"
 
 export const initiateGoogleAuth = async () => {
@@ -11,57 +12,59 @@ export const initiateGoogleAuth = async () => {
 	}
 }
 
-export const fetchContacts = async (accountId: string): Promise<Contact[]> => {
+export const fetchContacts = async (
+	accountId: string
+): Promise<EmailParticipant[]> => {
 	const { data } = await fetchWithAxios("contacts/", {
 		method: "GET",
 		accountId: accountId,
 	})
 
-	const contactMap = new Map<string, Contact>()
-	data.filter((contact: Contact) => contact.email.includes("@")).forEach(
-		(contact: Contact) => {
-			const email = contact.email.toLowerCase()
-			const existing = contactMap.get(email)
-			if (existing) {
-				existing.interactionCount =
-					(existing.interactionCount || 0) +
-					(contact.interactionCount || 0)
-				if (contact.name) {
-					existing.name = contact.name
-						.split(" ")
-						.map(
-							(word) =>
-								word.charAt(0).toUpperCase() +
-								word.slice(1).toLowerCase()
-						)
-						.join(" ")
-				}
-			} else {
-				contactMap.set(email, {
-					...contact,
-					email,
-					name: contact.name
-						? contact.name
-								.split(" ")
-								.map(
-									(word) =>
-										word.charAt(0).toUpperCase() +
-										word.slice(1).toLowerCase()
-								)
-								.join(" ")
-						: undefined,
-				})
+	const contactMap = new Map<string, EmailParticipant>()
+	data.filter((contact: EmailParticipant) =>
+		contact.email.includes("@")
+	).forEach((contact: EmailParticipant) => {
+		const email = contact.email.toLowerCase()
+		const existing = contactMap.get(email)
+		if (existing) {
+			existing.interactionCount =
+				(existing.interactionCount || 0) +
+				(contact.interactionCount || 0)
+			if (contact.name) {
+				existing.name = contact.name
+					.split(" ")
+					.map(
+						(word) =>
+							word.charAt(0).toUpperCase() +
+							word.slice(1).toLowerCase()
+					)
+					.join(" ")
 			}
+		} else {
+			contactMap.set(email, {
+				...contact,
+				email,
+				name: contact.name
+					? contact.name
+							.split(" ")
+							.map(
+								(word) =>
+									word.charAt(0).toUpperCase() +
+									word.slice(1).toLowerCase()
+							)
+							.join(" ")
+					: undefined,
+			})
 		}
-	)
+	})
 
 	return Array.from(contactMap.values())
 }
 
 export interface SendEmailPayload {
-	to: Contact[]
-	cc: Contact[]
-	bcc: Contact[]
+	to: EmailParticipant[]
+	cc: EmailParticipant[]
+	bcc: EmailParticipant[]
 	subject: string
 	body: string
 	attachments: Attachment[]
@@ -166,7 +169,14 @@ export const fetchFolderEmails = async (
 			accountId: accountId,
 		}
 	)
-	return data
+	const { data: drafts } = await fetchWithAxios("drafts/list/", {
+		method: "GET",
+		accountId: accountId,
+	})
+
+	console.log("drafts", drafts)
+
+	return mergeDraftsAndEmails(drafts, data)
 }
 
 export const createDoneFolder = async (accountId: string) => {
@@ -241,5 +251,37 @@ export const modifyLabels = async (
 			add_labels: addLabels,
 			remove_labels: removeLabels,
 		},
+	})
+}
+
+export const createDraft = async (
+	accountId: string,
+	to: EmailParticipant[],
+	cc: EmailParticipant[],
+	bcc: EmailParticipant[],
+	subject: string,
+	body: string,
+	draftId?: string
+) => {
+	const { data } = await fetchWithAxios("drafts/", {
+		method: "POST",
+		accountId: accountId,
+		data: {
+			to: to.map((c) => c.email),
+			cc: cc.map((c) => c.email),
+			bcc: bcc.map((c) => c.email),
+			subject: subject,
+			body: body,
+			draft_id: draftId,
+		},
+	})
+	return data
+}
+
+export const discardDraft = async (draftIds: string[], accountId: string) => {
+	await fetchWithAxios(`drafts/discard/`, {
+		method: "POST",
+		accountId: accountId,
+		data: { draft_ids: draftIds },
 	})
 }

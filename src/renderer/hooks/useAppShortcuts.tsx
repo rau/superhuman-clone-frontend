@@ -1,8 +1,10 @@
 import { ActionUndoToast } from "@/components/ActionUndoToast"
 import { useSidebar } from "@/components/ui/Sidebar"
 import {
+	sendEmailMutation,
 	useAccounts,
 	useContacts,
+	useDiscardDraft,
 	useFolderEmails,
 	useFolders,
 	useMarkEmailDone,
@@ -55,6 +57,7 @@ export const useAppShortcuts = () => {
 		setShowReplyPane,
 		collapsedMessages,
 		setCollapsedMessages,
+		setShowEmptySubjectDialog,
 	} = useUIStore()
 
 	const {
@@ -71,6 +74,13 @@ export const useAppShortcuts = () => {
 		bccContacts,
 		setQuery,
 		setShowSuggestions,
+		setDraftId,
+		draftId,
+		addAttachment,
+		subject,
+		attachments,
+		message,
+		reset,
 	} = useComposeStore()
 
 	const { lastAction } = useEmailActionsStore()
@@ -82,6 +92,8 @@ export const useAppShortcuts = () => {
 	const { mutateAsync: markEmailRead } = useMarkEmailRead()
 	const { mutateAsync: trashEmail } = useTrashEmail()
 	const { mutateAsync: spamEmail } = useSpamEmail()
+	const { mutateAsync: discardDraft } = useDiscardDraft()
+	const { mutateAsync: sendEmail } = sendEmailMutation()
 	const { mutate: modifyLabels } = useModifyLabels()
 	const { data: accounts } = useAccounts()
 	const { setSelectedAccountId } = useAccountStore()
@@ -121,6 +133,31 @@ export const useAppShortcuts = () => {
 		const element = document.getElementById("move-to-dialog-scroll")
 			?.children[cycledIndex] as HTMLElement
 		element?.scrollIntoView({ block: "nearest" })
+	}
+
+	const handleSend = () => {
+		if (!subject.trim()) {
+			setShowEmptySubjectDialog(true)
+			return
+		}
+		sendEmail(
+			{
+				to: toContacts,
+				cc: ccContacts,
+				bcc: bccContacts,
+				subject,
+				body: message,
+				attachments,
+				replyToEmail: undefined,
+			},
+			{
+				onSuccess: () => {
+					setIsComposing(false)
+				},
+			}
+		)
+			.catch(() => {})
+			.then(() => reset())
 	}
 
 	const getCurrentMode = (): ShortcutMode => {
@@ -374,6 +411,11 @@ export const useAppShortcuts = () => {
 					setCollapsedMessages(next)
 					return
 				}
+				if (emails?.[selectedIndex].is_draft) {
+					setDraftId(emails[selectedIndex].id)
+					setIsComposing(true)
+					return
+				}
 				setIsShowingEmail(true)
 			},
 			mode: "global",
@@ -506,11 +548,13 @@ export const useAppShortcuts = () => {
 			handler: () => setCollapsedMessages({}),
 			shift: true,
 			mode: "email",
+			disabledModes: ["compose"],
 		},
 		{
 			key: "o",
 			handler: () => toggleMessage(selectedMessageIndex),
 			mode: "email",
+			disabledModes: ["compose"],
 		},
 		{
 			key: "b",
@@ -533,6 +577,56 @@ export const useAppShortcuts = () => {
 				ccField?.focus()
 			},
 			meta: true,
+			shift: true,
+			mode: "compose",
+		},
+		{
+			key: ",",
+			handler: () => {
+				setIsComposing(false)
+				discardDraft([draftId || ""])
+					.then(() => toast.success("Draft discarded"))
+					.catch(() => {})
+			},
+			meta: true,
+			shift: true,
+			mode: "compose",
+		},
+		{
+			key: "u",
+			handler: async () => {
+				const result = await window.electron.openFile()
+				if (!result.canceled && result.filePaths.length > 0) {
+					const filePath = result.filePaths[0]
+					const stats = await window.electron.getFileStats(filePath)
+					addAttachment({
+						name: filePath.split("/").pop()!,
+						size: stats.size,
+						path: filePath,
+					})
+				}
+			},
+			mode: "compose",
+			meta: true,
+			shift: true,
+		},
+		{
+			key: "Enter",
+			handler: (e: KeyboardEvent) => {
+				if (e.metaKey || e.ctrlKey) {
+					handleSend()
+				}
+			},
+			meta: true,
+			mode: "compose",
+		},
+		{
+			key: "Enter",
+			handler: (e: KeyboardEvent) => {
+				if (e.metaKey || e.ctrlKey) {
+					handleSend()
+				}
+			},
 			shift: true,
 			mode: "compose",
 		},

@@ -1,9 +1,10 @@
 import { ActionUndoToast } from "@/components/ActionUndoToast"
 import { KeyboardTooltip } from "@/components/KeyboardTooltip"
 
-import { useMarkEmailDone } from "@/hooks/dataHooks"
+import { useFolderEmails, useMarkEmailDone } from "@/hooks/dataHooks"
+import { useComposeStore } from "@/hooks/useComposeStore"
 import { useUIStore } from "@/hooks/useUIStore"
-import { getUniqueSenderNames } from "@/libs/stringOps"
+import { getUniqueSenderNames } from "@/libs/emailUtils"
 import { cn, decodeHtml } from "@/libs/utils"
 import { format } from "date-fns"
 import { Check, Clock, Copy, Paperclip, SquareCheckBig } from "lucide-react"
@@ -12,20 +13,39 @@ import { toast } from "react-toastify"
 interface EmailRowProps {
 	email: EmailThread
 	isSelected?: boolean
-	onClick?: () => void
 }
 
-export const EmailRow = ({ email, isSelected, onClick }: EmailRowProps) => {
+export const EmailRow = ({ email, isSelected }: EmailRowProps) => {
+	const { setSelectedIndex, setIsShowingEmail } = useUIStore()
+	const { data: emails } = useFolderEmails()
 	const { mutateAsync: markDone } = useMarkEmailDone()
-	const { selectedThreads, selectedFolder, toggleThreadSelection } =
-		useUIStore()
+	const {
+		selectedThreads,
+		selectedFolder,
+		toggleThreadSelection,
+		setIsComposing,
+	} = useUIStore()
 	const isThreadSelected = selectedThreads[
 		selectedFolder?.id || "INBOX"
 	]?.has(email.id)
+	const { reset, setDraftId } = useComposeStore()
+
+	const handleClick = () => {
+		if (!emails || !selectedFolder) return
+		if (email.is_draft) {
+			reset()
+			setIsComposing(true)
+			setDraftId(email.id)
+			return
+		} else {
+			setSelectedIndex(selectedFolder.id, emails.indexOf(email))
+			setIsShowingEmail(true)
+		}
+	}
 
 	return (
 		<div
-			onClick={onClick}
+			onClick={handleClick}
 			className={cn(
 				"group relative z-0 flex h-fit w-full max-w-full cursor-pointer items-center gap-4 overflow-hidden py-1 pr-2 hover:bg-slate-50"
 			)}
@@ -95,6 +115,9 @@ export const EmailRow = ({ email, isSelected, onClick }: EmailRowProps) => {
 							isThreadSelected && "text-white"
 						)}
 					>
+						<span className="text-green-500">
+							{email.is_draft && "Draft to "}
+						</span>
 						{getUniqueSenderNames(email.messages)}
 					</span>
 				</div>

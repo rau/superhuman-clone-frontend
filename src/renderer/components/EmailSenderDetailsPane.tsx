@@ -1,7 +1,6 @@
 import { SuperhumanFooter } from "@/components/SuperhumanFooter"
 import { Avatar, AvatarFallback } from "@/components/ui/Avatar"
-import { getDomainFromEmail } from "@/libs/emailUtils"
-import { formatSender } from "@/libs/stringOps"
+import { formatSender, getDomainFromEmail } from "@/libs/emailUtils"
 import { Link, Mail } from "lucide-react"
 
 interface EmailSenderDetailsPaneProps {

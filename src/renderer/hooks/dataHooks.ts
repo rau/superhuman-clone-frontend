@@ -3,6 +3,8 @@ import { useEmailActionsStore } from "@/hooks/useEmailActionsStore"
 import { useUIStore } from "@/hooks/useUIStore"
 import {
 	createDoneFolder,
+	createDraft,
+	discardDraft,
 	fetchAccounts,
 	fetchContacts,
 	fetchFolderEmails,
@@ -23,7 +25,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 export const useContacts = () => {
 	const { selectedAccountId } = useAccountStore()
-	return useQuery<Contact[]>({
+	return useQuery<EmailParticipant[]>({
 		queryKey: ["contacts", selectedAccountId],
 		queryFn: () => fetchContacts(selectedAccountId || ""),
 		enabled: !!selectedAccountId,
@@ -522,6 +524,110 @@ export const useModifyLabels = () => {
 			)
 		},
 		onSettled: () => {
+			queryClient.invalidateQueries({
+				queryKey: ["emails", selectedFolder?.id, selectedAccountId],
+			})
+		},
+	})
+}
+
+export const useCreateDraft = () => {
+	const queryClient = useQueryClient()
+	const { selectedAccountId } = useAccountStore()
+	const { selectedFolder } = useUIStore()
+	return useMutation({
+		mutationFn: ({
+			to,
+			cc,
+			bcc,
+			subject,
+			body,
+			draftId,
+		}: {
+			to: EmailParticipant[]
+			cc: EmailParticipant[]
+			bcc: EmailParticipant[]
+			subject: string
+			body: string
+			draftId?: string
+		}) =>
+			createDraft(
+				selectedAccountId || "",
+				to,
+				cc,
+				bcc,
+				subject,
+				body,
+				draftId
+			),
+		onMutate: async ({ to, cc, bcc, subject, body, draftId }) => {
+			await queryClient.cancelQueries({
+				queryKey: ["emails", selectedFolder?.id, selectedAccountId],
+			})
+
+			const previousEmails = queryClient.getQueryData<EmailThread[]>([
+				"emails",
+				selectedFolder?.id,
+				selectedAccountId,
+			])
+
+			queryClient.setQueryData<EmailThread[]>(
+				["emails", selectedFolder?.id, selectedAccountId],
+				(old) =>
+					old?.map((thread) => {
+						if (thread.id === draftId) {
+							return {
+								...thread,
+								messages: [
+									{
+										...thread.messages[0],
+										to: { to: to, cc: cc, bcc: bcc },
+										subject,
+										body,
+									},
+								],
+							}
+						}
+						return thread
+					})
+			)
+
+			return { previousEmails }
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({
+				queryKey: ["emails", selectedFolder?.id, selectedAccountId],
+			})
+		},
+	})
+}
+
+export const useDiscardDraft = () => {
+	const queryClient = useQueryClient()
+	const { selectedAccountId } = useAccountStore()
+	const { selectedFolder } = useUIStore()
+	return useMutation({
+		mutationFn: (draftIds: string[]) =>
+			discardDraft(draftIds, selectedAccountId || ""),
+		onMutate: async (draftIds) => {
+			await queryClient.cancelQueries({
+				queryKey: ["emails", selectedFolder?.id, selectedAccountId],
+			})
+
+			const previousEmails = queryClient.getQueryData<EmailThread[]>([
+				"emails",
+				selectedFolder?.id,
+				selectedAccountId,
+			])
+
+			queryClient.setQueryData<EmailThread[]>(
+				["emails", selectedFolder?.id, selectedAccountId],
+				(old) => old?.filter((e) => !draftIds.includes(e.id))
+			)
+
+			return { previousEmails }
+		},
+		onSuccess: () => {
 			queryClient.invalidateQueries({
 				queryKey: ["emails", selectedFolder?.id, selectedAccountId],
 			})

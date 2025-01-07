@@ -17,6 +17,7 @@ declare global {
 		snippet: string
 		last_message_timestamp: number
 		starred: boolean
+		is_draft: boolean
 	}
 
 	type EmailMessage = {
@@ -37,18 +38,13 @@ declare global {
 		email: string
 		name?: string
 		is_me: boolean
+		interactionCount?: number
 	}
 
 	type EmailParticipants = {
 		bcc?: EmailParticipant[]
 		cc?: EmailParticipant[]
 		to?: EmailParticipant[]
-	}
-
-	type Contact = {
-		email: string
-		name?: string
-		interactionCount?: number
 	}
 
 	type Attachment = {

@@ -10,3 +10,26 @@ export const decodeHtml = (html: string) => {
 	txt.innerHTML = html
 	return txt.value.trim()
 }
+
+export const debounce = <T extends (...args: any[]) => any>(
+	func: T,
+	wait: number
+) => {
+	let timeout: NodeJS.Timeout
+
+	const executedFunction = function (...args: Parameters<T>) {
+		const later = () => {
+			clearTimeout(timeout)
+			func(...args)
+		}
+
+		clearTimeout(timeout)
+		timeout = setTimeout(later, wait)
+	}
+
+	executedFunction.cancel = () => {
+		clearTimeout(timeout)
+	}
+
+	return executedFunction
+}

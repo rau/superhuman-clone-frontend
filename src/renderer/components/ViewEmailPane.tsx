@@ -140,8 +140,6 @@ export const ViewEmailPane = () => {
 
 	if (!isShowingEmail) return null
 
-	console.log(showReplyPane, isComposing)
-
 	return (
 		<div className="absolute inset-0 z-50 flex flex-row bg-white">
 			<BackNavigationSection

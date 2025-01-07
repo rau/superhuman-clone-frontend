@@ -1,49 +1,39 @@
 import { useUIStore } from "@/hooks/useUIStore"
 import { X } from "lucide-react"
+import { IconButton } from "./ui/IconButton"
+
+const tipItems = [
+	{ key: "E", text: "to Mark Done" },
+	{ key: "H", text: "to set a reminder" },
+	{ key: "C", text: "to compose" },
+	{ key: "/", text: "to search" },
+]
+
+const tipItemsDiv = tipItems.map((item, index) => (
+	<div className="flex items-center gap-1">
+		<kbd className="rounded bg-[#ABB7C5] px-[4px] py-[1px] text-xs font-medium text-white">
+			{item.key}
+		</kbd>
+		<span className="text-xs">{item.text}</span>
+		{index < tipItems.length - 1 && <span className="text-xs">&#183;</span>}
+	</div>
+))
 
 export const TipBar = () => {
 	const { isQuickTipsOpen, setIsQuickTipsOpen } = useUIStore()
 	if (!isQuickTipsOpen) return null
 
 	return (
-		<div className="mt-auto flex h-[40px] items-center justify-center bg-slate-800 px-4 text-white">
-			<div className="flex items-center gap-6">
-				<span className="text-sm">Hit</span>
-				<div className="flex items-center gap-6">
-					<div className="flex items-center gap-2">
-						<kbd className="rounded border border-slate-200 px-1.5 py-0.5 text-xs font-medium">
-							E
-						</kbd>
-						<span className="text-slate-300">to Mark Done</span>
-					</div>
-					<div className="flex items-center gap-2">
-						<kbd className="rounded border border-slate-200 px-1.5 py-0.5 text-xs font-medium">
-							H
-						</kbd>
-						<span className="text-slate-300">
-							to set a reminder
-						</span>
-					</div>
-					<div className="flex items-center gap-2">
-						<kbd className="rounded border border-slate-200 px-1.5 py-0.5 text-xs font-medium">
-							C
-						</kbd>
-						<span className="text-slate-300">to compose</span>
-					</div>
-					<div className="flex items-center gap-2">
-						<kbd className="rounded border border-slate-200 px-1.5 py-0.5 text-xs font-medium">
-							/
-						</kbd>
-						<span className="text-slate-300">to search</span>
-					</div>
-				</div>
+		<div className="flex h-[24px] items-center justify-center bg-[#F2F4FA]">
+			<div className="flex items-center gap-2">
+				<span className="text-xs">Hit</span>
+				{tipItemsDiv}
 			</div>
-			<button
+			<IconButton
+				icon={X}
 				onClick={() => setIsQuickTipsOpen(false)}
-				className="absolute right-4 rounded p-1 hover:bg-slate-700"
-			>
-				<X className="h-4 w-4" />
-			</button>
+				className="absolute right-4"
+			/>
 		</div>
 	)
 }

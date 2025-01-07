@@ -9,7 +9,7 @@ const ContactChip = ({
 	contact,
 	field,
 }: {
-	contact: Contact
+	contact: EmailParticipant
 	field: RecipientField
 }) => {
 	const { removeContact } = useComposeStore()
@@ -33,7 +33,7 @@ const ContactSuggestion = ({
 	contact,
 }: {
 	index: number
-	contact: Contact
+	contact: EmailParticipant
 }) => {
 	const {
 		selectedContactIndex,
@@ -45,7 +45,6 @@ const ContactSuggestion = ({
 	} = useComposeStore()
 
 	const handleAddContact = () => {
-		console.log("adding contact")
 		addContact(contact, activeField)
 		setShowSuggestions(false)
 		setQuery("", activeField)
@@ -118,7 +117,6 @@ const RecipientFields = () => {
 	const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
 		if (e.key === "Backspace" && e.currentTarget.value === "") {
 			e.preventDefault()
-			console.log("backspace + activeField: ", activeField)
 			const contacts =
 				activeField === "to"
 					? toContacts

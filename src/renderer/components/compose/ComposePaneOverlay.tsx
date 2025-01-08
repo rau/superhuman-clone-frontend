@@ -278,32 +278,55 @@ export const ComposePaneOverlay = ({
 
 	useEffect(() => {
 		const debouncedSaveDraft = debounce(() => {
-			if (message || subject) {
-				createDraft(
-					{
-						to: toContacts,
-						cc: ccContacts,
-						bcc: bccContacts,
-						subject,
-						body: message,
-						draftId: draftId,
-					},
-					{
-						onSuccess: (data) => {
-							if (!draftId) {
-								setDraftId(data.draft_id)
-							} else {
-								toast.success("Draft saved")
-							}
-						},
-					}
-				)
+			if (
+				!message &&
+				!subject &&
+				!toContacts.length &&
+				!ccContacts.length &&
+				!bccContacts.length
+			) {
+				return
 			}
-		}, 1000)
+
+			const draft = emails?.find((e) => e.id === draftId)
+			if (
+				draft &&
+				draft.messages[0].body === message &&
+				draft.subject === subject &&
+				JSON.stringify(draft.messages[0].to.to) ===
+					JSON.stringify(toContacts) &&
+				JSON.stringify(draft.messages[0].to.cc) ===
+					JSON.stringify(ccContacts) &&
+				JSON.stringify(draft.messages[0].to.bcc) ===
+					JSON.stringify(bccContacts)
+			) {
+				return
+			}
+
+			createDraft(
+				{
+					to: toContacts,
+					cc: ccContacts,
+					bcc: bccContacts,
+					subject,
+					body: message,
+					draftId: draftId,
+				},
+				{
+					onSuccess: (data) => {
+						if (!draftId) {
+							setDraftId(data.draft_id)
+						} else {
+							toast.success("Draft saved")
+						}
+					},
+				}
+			)
+		}, 3000)
 
 		debouncedSaveDraft()
 		return () => debouncedSaveDraft.cancel()
-	}, [message, subject, toContacts, draftId])
+	}, [message, subject, toContacts, ccContacts, bccContacts])
 
 	useEffect(() => {
 		if (draftId) {

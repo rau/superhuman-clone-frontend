@@ -267,14 +267,15 @@ export const createDraft = async (
 		method: "POST",
 		accountId: accountId,
 		data: {
-			to: to.map((c) => c.email),
-			cc: cc.map((c) => c.email),
-			bcc: bcc.map((c) => c.email),
+			to: to,
+			cc: cc,
+			bcc: bcc,
 			subject: subject,
 			body: body,
 			draft_id: draftId,
 		},
 	})
+
 	return data
 }
 

@@ -49,6 +49,12 @@ export const EmailRow = ({ email, isSelected }: EmailRowProps) => {
 			className={cn(
 				"group relative z-0 flex h-fit w-full max-w-full cursor-pointer items-center gap-4 overflow-hidden py-1 pr-2 hover:bg-slate-50"
 			)}
+			onMouseEnter={() =>
+				setSelectedIndex(
+					selectedFolder?.id || "INBOX",
+					emails?.indexOf(email) ?? 0
+				)
+			}
 		>
 			<div
 				className={cn(

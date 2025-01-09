@@ -1,9 +1,11 @@
 import { BackNavigationSection } from "@/components/BackNavigationSection"
 import RecipientFields from "@/components/compose/RecipientFields"
 import { SendEmptySubjectDialog } from "@/components/compose/SendEmptySubjectDialog"
+import { SendNoRecipientsDialog } from "@/components/compose/SendNoRecipientsDialog"
 import { SubjectField } from "@/components/compose/SubjectField"
 import { EmailSenderDetailsPane } from "@/components/EmailSenderDetailsPane"
 import { KeyboardTooltip } from "@/components/KeyboardTooltip"
+import { IconButton } from "@/components/ui/IconButton"
 import {
 	sendEmailMutation,
 	useCreateDraft,
@@ -11,8 +13,8 @@ import {
 } from "@/hooks/dataHooks"
 import { useComposeStore } from "@/hooks/useComposeStore"
 import { useUIStore } from "@/hooks/useUIStore"
-import { debounce } from "@/libs/utils"
-import { Braces, Calendar, File, Paperclip, Trash2, X } from "lucide-react"
+import { debounce, handleAttach } from "@/libs/utils"
+import { Braces, Calendar, Paperclip, Trash2, X } from "lucide-react"
 import { useEffect } from "react"
 import TextareaAutosize from "react-textarea-autosize"
 import { toast } from "react-toastify"
@@ -44,20 +46,7 @@ const MessageActions = ({
 	isSending: boolean
 }) => {
 	const { attachments, addAttachment } = useComposeStore()
-	const { setIsComposing } = useUIStore()
-
-	const handleAttach = async () => {
-		const result = await window.electron.openFile()
-		if (!result.canceled && result.filePaths.length > 0) {
-			const filePath = result.filePaths[0]
-			const stats = await window.electron.getFileStats(filePath)
-			addAttachment({
-				name: filePath.split("/").pop()!,
-				size: stats.size,
-				path: filePath,
-			})
-		}
-	}
+	const { setIsComposing, setIsFileDialogOpen } = useUIStore()
 
 	return (
 		<div className="flex flex-col border-t border-slate-200">
@@ -169,7 +158,9 @@ const MessageActions = ({
 						delayDuration={150}
 					>
 						<button
-							onClick={handleAttach}
+							onClick={() =>
+								handleAttach(setIsFileDialogOpen, addAttachment)
+							}
 							className="rounded-md p-2 text-slate-500 hover:text-slate-700"
 						>
 							<Paperclip className="h-4 w-4" />
@@ -197,24 +188,41 @@ const MessageActions = ({
 	)
 }
 
-const AttachmentChip = ({ attachment }: { attachment: Attachment }) => {
-	const { removeAttachment } = useComposeStore()
+const AttachmentChip = ({ attachment }: { attachment: DraftAttachment }) => {
+	const {
+		attachmentsToDelete,
+		setAttachmentsToDelete,
+		attachments,
+		setAttachments,
+	} = useComposeStore()
 
 	return (
-		<div className="flex items-center gap-2 rounded-md border border-slate-200 px-2 py-1">
-			<File className="h-4 w-4 text-slate-500" />
+		<div
+			className="group relative flex w-[150px] rounded-md bg-[#DCE2EA] px-2 pb-12 pt-1 transition-colors duration-200 hover:bg-[#404040]/90"
+			key={attachment.name}
+		>
 			<div className="flex flex-col">
-				<span className="text-sm">{attachment.name}</span>
-				<span className="text-xs text-slate-500">
-					{Math.round(attachment.size / 1024)}kb
-				</span>
+				<span className="text-xs">{attachment.name}</span>
 			</div>
-			<button
-				onClick={() => removeAttachment(attachment.path)}
-				className="ml-2 rounded-full p-1 hover:bg-slate-100"
-			>
-				<X className="h-3 w-3" />
-			</button>
+			<span className="absolute bottom-1 left-1 rounded-sm bg-white px-1 py-[2px] text-xs uppercase group-hover:opacity-10">
+				{attachment.name.substring(
+					attachment.name.lastIndexOf(".") + 1
+				)}
+			</span>
+			<IconButton
+				icon={X}
+				onClick={() => {
+					setAttachmentsToDelete([
+						...attachmentsToDelete,
+						attachment.name,
+					])
+					setAttachments(
+						attachments.filter((a) => a.name !== attachment.name)
+					)
+				}}
+				className="invisible absolute right-1 top-1 group-hover:visible"
+				variant="inverse"
+			/>
 		</div>
 	)
 }
@@ -232,8 +240,12 @@ export const ComposePaneOverlay = ({
 	const selectedIndex = selectedIndices[selectedFolder?.id || "INBOX"] || 0
 	const email = emails?.[selectedIndex]
 	const { mutateAsync: sendEmail, isPending } = sendEmailMutation()
-	const { isComposing, setIsComposing, setShowEmptySubjectDialog } =
-		useUIStore()
+	const {
+		isComposing,
+		setIsComposing,
+		setShowEmptySubjectDialog,
+		setShowNoRecipientsDialog,
+	} = useUIStore()
 	const {
 		subject,
 		message,
@@ -242,6 +254,7 @@ export const ComposePaneOverlay = ({
 		bccContacts,
 		attachments,
 		reset,
+		attachmentsToDelete,
 		draftId,
 		setDraftId,
 		setMessage,
@@ -249,11 +262,17 @@ export const ComposePaneOverlay = ({
 		setToContacts,
 		setCcContacts,
 		setBccContacts,
+		setAttachments,
+		setAttachmentsToDelete,
 	} = useComposeStore()
 
 	const handleSend = () => {
 		if (!subject.trim()) {
 			setShowEmptySubjectDialog(true)
+			return
+		}
+		if (!toContacts.length && !ccContacts.length && !bccContacts.length) {
+			setShowNoRecipientsDialog(true)
 			return
 		}
 		sendEmail(
@@ -311,6 +330,8 @@ export const ComposePaneOverlay = ({
 					subject,
 					body: message,
 					draftId: draftId,
+					attachmentsToDelete: attachmentsToDelete,
+					attachments,
 				},
 				{
 					onSuccess: (data) => {
@@ -326,7 +347,7 @@ export const ComposePaneOverlay = ({
 
 		debouncedSaveDraft()
 		return () => debouncedSaveDraft.cancel()
-	}, [message, subject, toContacts, ccContacts, bccContacts])
+	}, [message, subject, toContacts, ccContacts, bccContacts, attachments])
 
 	useEffect(() => {
 		if (draftId) {
@@ -337,9 +358,22 @@ export const ComposePaneOverlay = ({
 				setToContacts(draft.messages[0].to.to || [])
 				setCcContacts(draft.messages[0].to.cc || [])
 				setBccContacts(draft.messages[0].to.bcc || [])
+				setAttachments(
+					(draft.messages[0].attachments || []).map((a) => {
+						console.log("Attachment being mapped", a)
+						return {
+							name: a.filename,
+							size: a.size,
+							path: "",
+							type: a.mime_type,
+						}
+					})
+				)
 			}
 		}
 	}, [draftId])
+
+	console.log(attachments)
 
 	if (!isComposing) return null
 
@@ -366,6 +400,7 @@ export const ComposePaneOverlay = ({
 					)
 				}}
 			/>
+			<SendNoRecipientsDialog />
 			<BackNavigationSection onClose={() => setIsComposing(false)} />
 			<div className="flex w-3/5 flex-col items-center">
 				<h2 className="text-lg w-3/5 p-4 font-medium">New Message</h2>

@@ -47,16 +47,18 @@ declare global {
 		to?: EmailParticipant[]
 	}
 
-	type Attachment = {
+	type DraftAttachment = {
 		name: string
 		size: number
 		path: string
+		content?: string
+		type: string
 	}
 
 	type EmailAttachment = {
 		id: string
 		filename: string
-		mimeType: string
+		mime_type: string
 		size: number
 	}
 

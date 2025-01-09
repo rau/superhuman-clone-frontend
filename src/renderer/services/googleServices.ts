@@ -67,7 +67,7 @@ export interface SendEmailPayload {
 	bcc: EmailParticipant[]
 	subject: string
 	body: string
-	attachments: Attachment[]
+	attachments: DraftAttachment[]
 	replyToEmail?: EmailMessage
 }
 
@@ -261,6 +261,8 @@ export const createDraft = async (
 	bcc: EmailParticipant[],
 	subject: string,
 	body: string,
+	attachments: DraftAttachment[],
+	attachmentsToDelete: string[],
 	draftId?: string
 ) => {
 	const { data } = await fetchWithAxios("drafts/", {
@@ -272,7 +274,9 @@ export const createDraft = async (
 			bcc: bcc,
 			subject: subject,
 			body: body,
+			attachments: attachments,
 			draft_id: draftId,
+			attachments_to_delete: attachmentsToDelete,
 		},
 	})
 

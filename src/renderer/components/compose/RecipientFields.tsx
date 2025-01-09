@@ -154,8 +154,8 @@ const RecipientFields = () => {
 				<div className="flex flex-row items-center">
 					<div className="to-container flex flex-1 flex-wrap items-center py-1">
 						<span className="w-[50px] text-sm font-medium">To</span>
-						{toContacts.map((contact) => (
-							<div className="flex items-center">
+						{toContacts.map((contact, index) => (
+							<div className="flex items-center" key={index}>
 								<ContactChip
 									key={contact.email}
 									contact={contact}

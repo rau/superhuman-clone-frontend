@@ -10,7 +10,7 @@ const tipItems = [
 ]
 
 const tipItemsDiv = tipItems.map((item, index) => (
-	<div className="flex items-center gap-1">
+	<div className="flex items-center gap-1" key={item.key}>
 		<kbd className="rounded bg-[#ABB7C5] px-[4px] py-[1px] text-xs font-medium text-white">
 			{item.key}
 		</kbd>

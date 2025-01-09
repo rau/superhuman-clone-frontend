@@ -28,12 +28,11 @@ export const EmailRow = ({ email, isSelected }: EmailRowProps) => {
 	const isThreadSelected = selectedThreads[
 		selectedFolder?.id || "INBOX"
 	]?.has(email.id)
-	const { reset, setDraftId } = useComposeStore()
+	const { setDraftId } = useComposeStore()
 
 	const handleClick = () => {
 		if (!emails || !selectedFolder) return
 		if (email.is_draft) {
-			reset()
 			setIsComposing(true)
 			setDraftId(email.id)
 			return

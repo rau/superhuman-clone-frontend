@@ -4,6 +4,7 @@ import { DownloadsDialog } from "@/components/dialogs/DownloadsDialog"
 import { MoveToDialog } from "@/components/dialogs/MoveToDialog"
 import { ThemeDialog } from "@/components/dialogs/ThemeDialog"
 import { EmailsContainer } from "@/components/EmailsContainer"
+import { FileDialogOverlay } from "@/components/FileDialogOverlay"
 import { ImageSettingsDialog } from "@/components/ImageSettingsDialog"
 import { SearchPane } from "@/components/SearchPane"
 import { SignInPane } from "@/components/SignInPane"
@@ -19,7 +20,7 @@ export default function Home() {
 	const { data: accounts, isLoading } = useAccounts()
 	const { data: emails } = useFolderEmails()
 	const { setSelectedAccountId } = useAccountStore()
-	const { isSignInOpen } = useUIStore()
+	const { isSignInOpen, isFileDialogOpen } = useUIStore()
 
 	useEffect(() => {
 		if (accounts && accounts.length > 0) {
@@ -36,7 +37,6 @@ export default function Home() {
 	if (accounts?.length === 0 || isSignInOpen) {
 		return <SignInPane />
 	}
-
 	console.log(emails)
 
 	return (
@@ -53,6 +53,7 @@ export default function Home() {
 			<ComposePaneOverlay />
 			<SearchPane />
 			<ViewEmailPane />
+			<FileDialogOverlay />
 		</div>
 	)
 }

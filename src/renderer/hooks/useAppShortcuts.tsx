@@ -21,6 +21,7 @@ import { useUIStore } from "@/hooks/useUIStore"
 import { useUndo } from "@/hooks/useUndo"
 import { filterContacts } from "@/libs/contactUtils"
 import { getSelectedEmails } from "@/libs/emailUtils"
+import { handleAttach } from "@/libs/utils"
 import { useEffect } from "react"
 import { toast } from "react-toastify"
 
@@ -58,6 +59,7 @@ export const useAppShortcuts = () => {
 		collapsedMessages,
 		setCollapsedMessages,
 		setShowEmptySubjectDialog,
+		setIsFileDialogOpen,
 	} = useUIStore()
 
 	const {
@@ -595,16 +597,7 @@ export const useAppShortcuts = () => {
 		{
 			key: "u",
 			handler: async () => {
-				const result = await window.electron.openFile()
-				if (!result.canceled && result.filePaths.length > 0) {
-					const filePath = result.filePaths[0]
-					const stats = await window.electron.getFileStats(filePath)
-					addAttachment({
-						name: filePath.split("/").pop()!,
-						size: stats.size,
-						path: filePath,
-					})
-				}
+				handleAttach(setIsFileDialogOpen, addAttachment)
 			},
 			mode: "compose",
 			meta: true,

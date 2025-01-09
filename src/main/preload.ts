@@ -31,6 +31,7 @@ contextBridge.exposeInMainWorld("electron", {
 	openFile: () => ipcRenderer.invoke("open-file"),
 	getFileStats: (path: string) => ipcRenderer.invoke("get-file-stats", path),
 	showOpenDialog: () => ipcRenderer.invoke("show-open-dialog"),
+	readFile: (path: string) => ipcRenderer.invoke("read-file", path),
 	auth: {
 		signInWithGoogle: async () => {
 			try {

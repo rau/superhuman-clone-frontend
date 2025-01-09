@@ -23,9 +23,13 @@ interface UIState {
 	setShowReplyPane: (value: boolean) => void
 	collapsedMessages: Record<number, boolean>
 	setCollapsedMessages: (value: Record<number, boolean>) => void
+	isFileDialogOpen: boolean
+	setIsFileDialogOpen: (value: boolean) => void
 
 	showEmptySubjectDialog: boolean
+	showNoRecipientsDialog: boolean
 	setShowEmptySubjectDialog: (value: boolean) => void
+	setShowNoRecipientsDialog: (value: boolean) => void
 	setIsSearching: (isSearching: boolean) => void
 	setIsShowingEmail: (isShowingEmail: boolean) => void
 	setIsComposing: (isComposing: boolean) => void
@@ -76,8 +80,10 @@ export const useUIStore = create<UIState>((set) => ({
 	moveToDialogIndex: 0,
 	showReplyPane: false,
 	showEmptySubjectDialog: false,
+	showNoRecipientsDialog: false,
 	selectedMessageIndex: 0,
 	collapsedMessages: {},
+	isFileDialogOpen: false,
 	setIsSearching: (isSearching) => set({ isSearching }),
 	setIsShowingEmail: (isShowingEmail) => set({ isShowingEmail }),
 	setIsComposing: (isComposing) => set({ isComposing }),
@@ -130,6 +136,9 @@ export const useUIStore = create<UIState>((set) => ({
 	setSelectedMessageIndex: (index) => set({ selectedMessageIndex: index }),
 	setShowReplyPane: (value) => set({ showReplyPane: value }),
 	setCollapsedMessages: (value) => set({ collapsedMessages: value }),
-	setShowEmptySubjectDialog: (value) => set({ showEmptySubjectDialog: value }),
-
+	setShowEmptySubjectDialog: (value) =>
+		set({ showEmptySubjectDialog: value }),
+	setIsFileDialogOpen: (value) => set({ isFileDialogOpen: value }),
+	setShowNoRecipientsDialog: (value) =>
+		set({ showNoRecipientsDialog: value }),
 }))

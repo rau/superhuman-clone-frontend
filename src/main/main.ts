@@ -48,11 +48,19 @@ ipcMain.on("open-external-url", (_, url) => {
 	shell.openExternal(url)
 })
 
-ipcMain.handle("show-open-dialog", async () => {
-	const result = await dialog.showOpenDialog({
-		properties: ["openDirectory"],
-	})
+ipcMain.handle("show-open-dialog", async (event) => {
+	const parentWindow = BrowserWindow.fromWebContents(event.sender)
+	const result = await dialog.showOpenDialog(
+		parentWindow || BrowserWindow.getFocusedWindow()!,
+		{
+			properties: ["openFile", "multiSelections"],
+		}
+	)
 	return result
+})
+
+ipcMain.handle("read-file", async (_, path) => {
+	return fs.readFile(path, { encoding: "base64" })
 })
 
 if (process.env.NODE_ENV === "production") {
@@ -95,8 +103,8 @@ const createWindow = async () => {
 
 	mainWindow = new BrowserWindow({
 		show: false,
-		width: 1024,
-		height: 728,
+		width: 1920,
+		height: 1080,
 		icon: getAssetPath("icon.png"),
 		webPreferences: {
 			preload: app.isPackaged

@@ -543,12 +543,16 @@ export const useCreateDraft = () => {
 			subject,
 			body,
 			draftId,
+			attachments,
+			attachmentsToDelete,
 		}: {
 			to: EmailParticipant[]
 			cc: EmailParticipant[]
 			bcc: EmailParticipant[]
 			subject: string
 			body: string
+			attachments: DraftAttachment[]
+			attachmentsToDelete: string[]
 			draftId?: string
 		}) =>
 			createDraft(
@@ -558,9 +562,19 @@ export const useCreateDraft = () => {
 				bcc,
 				subject,
 				body,
+				attachments,
+				attachmentsToDelete,
 				draftId
 			),
-		onMutate: async ({ to, cc, bcc, subject, body, draftId }) => {
+		onMutate: async ({
+			to,
+			cc,
+			bcc,
+			subject,
+			body,
+			draftId,
+			attachmentsToDelete,
+		}) => {
 			await queryClient.cancelQueries({
 				queryKey: ["emails", selectedFolder?.id, selectedAccountId],
 			})

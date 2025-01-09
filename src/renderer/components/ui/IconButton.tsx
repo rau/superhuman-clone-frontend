@@ -15,7 +15,7 @@ interface IconButtonProps {
 		keys: string[]
 		label: string
 	}>
-	variant?: "default" | "danger" | "success" | "warning"
+	variant?: "default" | "danger" | "success" | "warning" | "inverse"
 	size?: "sm" | "md"
 	disabled?: boolean
 	className?: string
@@ -45,6 +45,7 @@ export const IconButton = ({
 					"text-slate-400 hover:bg-green-50 hover:text-green-600",
 				variant === "warning" &&
 					"text-slate-400 hover:bg-orange-50 hover:text-orange-600",
+				variant === "inverse" && "text-white hover:text-slate-200",
 				disabled && "cursor-not-allowed opacity-50",
 				className
 			)}

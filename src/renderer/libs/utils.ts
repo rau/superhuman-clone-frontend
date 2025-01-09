@@ -33,3 +33,24 @@ export const debounce = <T extends (...args: any[]) => any>(
 
 	return executedFunction
 }
+
+export const handleAttach = async (
+	setIsFileDialogOpen: (isOpen: boolean) => void,
+	addAttachment: (attachment: DraftAttachment) => void
+) => {
+	setIsFileDialogOpen(true)
+	const result = await window.electron.openFile()
+	setIsFileDialogOpen(false)
+	if (!result.canceled && result.filePaths.length > 0) {
+		const filePath = result.filePaths[0]
+		const stats = await window.electron.getFileStats(filePath)
+		const content = await window.electron.readFile(filePath)
+		addAttachment({
+			name: filePath.split("/").pop()!,
+			size: stats.size,
+			path: filePath,
+			content: content,
+			type: "file",
+		})
+	}
+}

@@ -106,6 +106,7 @@
     "react-chrono": "^2.6.1",
     "react-day-picker": "^8.10.1",
     "react-dom": "^18.2.0",
+    "react-hook-form": "^7.54.2",
     "react-hot-toast": "^2.4.1",
     "react-indiana-drag-scroll": "^2.2.0",
     "react-router-dom": "^6.16.0",

@@ -4,6 +4,11 @@ import { useComposeStore } from "@/hooks/useComposeStore"
 import { filterContacts } from "@/libs/contactUtils"
 import { cn } from "@/libs/utils"
 import { ChevronDown, ChevronUp, PictureInPicture2, X } from "lucide-react"
+import { useFormContext, UseFormReturn } from "react-hook-form"
+
+interface RecipientFieldsProps {
+	form: UseFormReturn<ComposeFormData>
+}
 
 const ContactChip = ({
 	contact,
@@ -12,7 +17,15 @@ const ContactChip = ({
 	contact: EmailParticipant
 	field: RecipientField
 }) => {
-	const { removeContact } = useComposeStore()
+	const { setValue, getValues } = useFormContext<ComposeFormData>()
+
+	const handleRemove = () => {
+		const contacts = getValues(field)
+		setValue(
+			field,
+			contacts.filter((c) => c.email !== contact.email)
+		)
+	}
 
 	return (
 		<div className="group flex items-center gap-1 hover:bg-slate-100">
@@ -22,7 +35,7 @@ const ContactChip = ({
 
 			<X
 				className="hidden h-3 w-3 text-slate-500 hover:cursor-pointer hover:text-slate-700 group-hover:block"
-				onClick={() => removeContact(contact.email, field)}
+				onClick={handleRemove}
 			/>
 		</div>
 	)
@@ -40,9 +53,13 @@ const ContactSuggestion = ({
 		setSelectedContactIndex,
 		setShowSuggestions,
 		setQuery,
-		addContact,
 		activeField,
 	} = useComposeStore()
+	const { setValue, getValues } = useFormContext<ComposeFormData>()
+
+	const addContact = (contact: EmailParticipant, field: RecipientField) => {
+		setValue(field, [...getValues(field), contact])
+	}
 
 	const handleAddContact = () => {
 		addContact(contact, activeField)
@@ -71,14 +88,10 @@ const ContactSuggestion = ({
 	)
 }
 
-const RecipientFields = () => {
+const RecipientFields = ({ form }: RecipientFieldsProps) => {
 	const { data: contacts } = useContacts()
 	const {
 		showSuggestions,
-		removeContact,
-		toContacts,
-		ccContacts,
-		bccContacts,
 		toQuery,
 		ccQuery,
 		bccQuery,
@@ -90,6 +103,10 @@ const RecipientFields = () => {
 		setQuery,
 		setSelectedContactIndex,
 	} = useComposeStore()
+
+	const { watch, setValue } = form
+	const { to, cc, bcc } = watch()
+
 	const filteredContacts = filterContacts(
 		contacts,
 		activeField === "to"
@@ -97,19 +114,15 @@ const RecipientFields = () => {
 			: activeField === "cc"
 				? ccQuery
 				: bccQuery,
-		activeField === "to"
-			? toContacts
-			: activeField === "cc"
-				? ccContacts
-				: bccContacts
+		activeField === "to" ? to : activeField === "cc" ? cc : bcc
 	)
 
 	const handleQueryChange = (value: string, field: RecipientField) => {
 		setQuery(value, field)
-		if (value === "") {
+		console.log("value", value)
+		if (value.length === 0) {
 			setShowSuggestions(false)
 		} else {
-			setShowSuggestions(true)
 			setSelectedContactIndex(0)
 		}
 	}
@@ -118,14 +131,10 @@ const RecipientFields = () => {
 		if (e.key === "Backspace" && e.currentTarget.value === "") {
 			e.preventDefault()
 			const contacts =
-				activeField === "to"
-					? toContacts
-					: activeField === "cc"
-						? ccContacts
-						: bccContacts
+				activeField === "to" ? to : activeField === "cc" ? cc : bcc
 			const lastContact = contacts[contacts.length - 1]
 			if (lastContact) {
-				removeContact(lastContact.email, activeField)
+				setValue(activeField, [...contacts.slice(0, -1)])
 			}
 		}
 	}
@@ -148,19 +157,17 @@ const RecipientFields = () => {
 		}
 	}
 
+	console.log("showSuggestions", showSuggestions)
+
 	return (
 		<div className="relative">
 			<div className="flex flex-col">
 				<div className="flex flex-row items-center">
 					<div className="to-container flex flex-1 flex-wrap items-center py-1">
 						<span className="w-[50px] text-sm font-medium">To</span>
-						{toContacts.map((contact, index) => (
+						{to.map((contact, index) => (
 							<div className="flex items-center" key={index}>
-								<ContactChip
-									key={contact.email}
-									contact={contact}
-									field="to"
-								/>
+								<ContactChip contact={contact} field="to" />
 								<span className="px-1 text-sm font-medium text-slate-400">
 									&#183;
 								</span>
@@ -232,10 +239,12 @@ const RecipientFields = () => {
 								<span className="w-[50px] text-sm font-medium">
 									Cc
 								</span>
-								{ccContacts.map((contact) => (
-									<div className="flex items-center">
+								{cc.map((contact, index) => (
+									<div
+										className="flex items-center"
+										key={index}
+									>
 										<ContactChip
-											key={contact.email}
 											contact={contact}
 											field="cc"
 										/>
@@ -263,10 +272,12 @@ const RecipientFields = () => {
 								<span className="w-[50px] text-sm font-medium">
 									Bcc
 								</span>
-								{bccContacts.map((contact) => (
-									<div className="flex items-center">
+								{bcc.map((contact, index) => (
+									<div
+										className="flex items-center"
+										key={index}
+									>
 										<ContactChip
-											key={contact.email}
 											contact={contact}
 											field="bcc"
 										/>

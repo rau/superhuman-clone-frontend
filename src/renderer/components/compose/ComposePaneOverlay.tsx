@@ -16,37 +16,34 @@ import { useUIStore } from "@/hooks/useUIStore"
 import { debounce, handleAttach } from "@/libs/utils"
 import { Braces, Calendar, Paperclip, Trash2, X } from "lucide-react"
 import { useEffect } from "react"
+import { FormProvider, useForm, useFormContext } from "react-hook-form"
 import TextareaAutosize from "react-textarea-autosize"
 import { toast } from "react-toastify"
 
-const MessageArea = () => {
-	const { message, setMessage } = useComposeStore()
-
-	return (
-		<div className="flex min-h-0 flex-1 flex-col">
-			<div className="flex-1 overflow-y-auto">
-				<TextareaAutosize
-					value={message}
-					onChange={(e) => setMessage(e.target.value)}
-					placeholder="Tip: Hit ⌘J for AI"
-					className="w-full resize-none pt-1 text-sm font-light outline-none"
-					minRows={12}
-					maxRows={24}
-				/>
-			</div>
-		</div>
-	)
-}
-
 const MessageActions = ({
-	onSend,
 	isSending,
+	attachments,
+	onDiscard,
 }: {
-	onSend: () => void
 	isSending: boolean
+	attachments: DraftAttachment[]
+	onDiscard: () => void
 }) => {
-	const { attachments, addAttachment } = useComposeStore()
-	const { setIsComposing, setIsFileDialogOpen } = useUIStore()
+	const { setIsFileDialogOpen } = useUIStore()
+	const { setValue, getValues } = useFormContext<ComposeFormData>()
+
+	const removeAttachment = (attachment: DraftAttachment) => {
+		setValue(
+			"attachments.current",
+			getValues("attachments.current").filter(
+				(a) => a.name !== attachment.name
+			)
+		)
+		setValue("attachments.toDelete", [
+			...getValues("attachments.toDelete"),
+			attachment,
+		])
+	}
 
 	return (
 		<div className="flex flex-col border-t border-slate-200">
@@ -56,6 +53,7 @@ const MessageActions = ({
 						<AttachmentChip
 							key={attachment.path}
 							attachment={attachment}
+							onRemove={() => removeAttachment(attachment)}
 						/>
 					))}
 				</div>
@@ -71,7 +69,7 @@ const MessageActions = ({
 						]}
 						delayDuration={150}
 					>
-						<button onClick={onSend} disabled={isSending}>
+						<button type="submit" disabled={isSending}>
 							<p className="text-sm font-medium">Send</p>
 						</button>
 					</KeyboardTooltip>
@@ -84,7 +82,7 @@ const MessageActions = ({
 						]}
 						delayDuration={150}
 					>
-						<button onClick={onSend} disabled={isSending}>
+						<button type="submit" disabled={isSending}>
 							<p className="text-sm font-medium text-slate-400">
 								Send later
 							</p>
@@ -99,7 +97,7 @@ const MessageActions = ({
 						]}
 						delayDuration={150}
 					>
-						<button onClick={onSend} disabled={isSending}>
+						<button type="submit" disabled={isSending}>
 							<p className="text-sm font-medium text-slate-400">
 								Remind me
 							</p>
@@ -159,7 +157,11 @@ const MessageActions = ({
 					>
 						<button
 							onClick={() =>
-								handleAttach(setIsFileDialogOpen, addAttachment)
+								handleAttach(
+									setIsFileDialogOpen,
+									setValue,
+									getValues
+								)
 							}
 							className="rounded-md p-2 text-slate-500 hover:text-slate-700"
 						>
@@ -176,7 +178,7 @@ const MessageActions = ({
 						delayDuration={150}
 					>
 						<button
-							onClick={() => setIsComposing(false)}
+							onClick={onDiscard}
 							className="rounded-md p-2 text-slate-500 hover:text-slate-700"
 						>
 							<Trash2 className="h-4 w-4" />
@@ -188,22 +190,20 @@ const MessageActions = ({
 	)
 }
 
-const AttachmentChip = ({ attachment }: { attachment: DraftAttachment }) => {
-	const {
-		attachmentsToDelete,
-		setAttachmentsToDelete,
-		attachments,
-		setAttachments,
-	} = useComposeStore()
-
+const AttachmentChip = ({
+	attachment,
+	onRemove,
+}: {
+	attachment: DraftAttachment
+	onRemove: () => void
+}) => {
 	return (
 		<div
 			className="group relative flex w-[150px] rounded-md bg-[#DCE2EA] px-2 pb-12 pt-1 transition-colors duration-200 hover:bg-[#404040]/90"
 			key={attachment.name}
 		>
-			<div className="flex flex-col">
-				<span className="text-xs">{attachment.name}</span>
-			</div>
+			<span className="text-xs">{attachment.name}</span>
+
 			<span className="absolute bottom-1 left-1 rounded-sm bg-white px-1 py-[2px] text-xs uppercase group-hover:opacity-10">
 				{attachment.name.substring(
 					attachment.name.lastIndexOf(".") + 1
@@ -211,15 +211,7 @@ const AttachmentChip = ({ attachment }: { attachment: DraftAttachment }) => {
 			</span>
 			<IconButton
 				icon={X}
-				onClick={() => {
-					setAttachmentsToDelete([
-						...attachmentsToDelete,
-						attachment.name,
-					])
-					setAttachments(
-						attachments.filter((a) => a.name !== attachment.name)
-					)
-				}}
+				onClick={onRemove}
 				className="invisible absolute right-1 top-1 group-hover:visible"
 				variant="inverse"
 			/>
@@ -236,183 +228,147 @@ export const ComposePaneOverlay = ({
 }) => {
 	const { data: emails } = useFolderEmails()
 	const { mutateAsync: createDraft } = useCreateDraft()
-	const { selectedFolder, selectedIndices } = useUIStore()
-	const selectedIndex = selectedIndices[selectedFolder?.id || "INBOX"] || 0
-	const email = emails?.[selectedIndex]
 	const { mutateAsync: sendEmail, isPending } = sendEmailMutation()
 	const {
+		selectedFolder,
+		selectedIndices,
 		isComposing,
 		setIsComposing,
 		setShowEmptySubjectDialog,
 		setShowNoRecipientsDialog,
 	} = useUIStore()
-	const {
-		subject,
-		message,
-		toContacts,
-		ccContacts,
-		bccContacts,
-		attachments,
-		reset,
-		attachmentsToDelete,
-		draftId,
-		setDraftId,
-		setMessage,
-		setSubject,
-		setToContacts,
-		setCcContacts,
-		setBccContacts,
-		setAttachments,
-		setAttachmentsToDelete,
-	} = useComposeStore()
+	const { draftId, setDraftId } = useComposeStore()
+	const selectedIndex = selectedIndices[selectedFolder?.id || "INBOX"] || 0
+	const email = emails?.[selectedIndex]
 
-	const handleSend = () => {
-		if (!subject.trim()) {
+	const form = useForm<ComposeFormData>({
+		defaultValues: {
+			to: [],
+			cc: [],
+			bcc: [],
+			subject: "",
+			message: "",
+			attachments: {
+				current: [],
+				toDelete: [],
+			},
+		},
+	})
+	const { handleSubmit, watch, setValue, getValues, register } = form
+	const formValues = watch()
+
+	const handleSend = handleSubmit((data: ComposeFormData) => {
+		if (!data.subject.trim()) {
 			setShowEmptySubjectDialog(true)
 			return
 		}
-		if (!toContacts.length && !ccContacts.length && !bccContacts.length) {
+		if (!data.to.length && !data.cc.length && !data.bcc.length) {
 			setShowNoRecipientsDialog(true)
 			return
 		}
-		sendEmail(
-			{
-				to: toContacts,
-				cc: ccContacts,
-				bcc: bccContacts,
-				subject,
-				body: message,
-				attachments,
-				replyToEmail: isReply ? replyToEmail : undefined,
-			},
-			{
-				onSuccess: () => {
-					setIsComposing(false)
-				},
-			}
-		)
+
+		sendEmail({
+			to: data.to,
+			cc: data.cc,
+			bcc: data.bcc,
+			subject: data.subject,
+			body: data.message,
+			attachments: data.attachments.current,
+			replyToEmail: isReply ? replyToEmail : undefined,
+		})
+			.then(() => {
+				setIsComposing(false)
+				form.reset()
+			})
 			.catch(() => {})
-			.then(() => reset())
-	}
+	})
 
 	useEffect(() => {
 		const debouncedSaveDraft = debounce(() => {
-			if (
-				!message &&
-				!subject &&
-				!toContacts.length &&
-				!ccContacts.length &&
-				!bccContacts.length
-			) {
+			const { message, subject, to, cc, bcc, attachments } = getValues()
+			if (!message && !subject && !to.length && !cc.length && !bcc.length)
 				return
-			}
 
-			const draft = emails?.find((e) => e.id === draftId)
-			if (
-				draft &&
-				draft.messages[0].body === message &&
-				draft.subject === subject &&
-				JSON.stringify(draft.messages[0].to.to) ===
-					JSON.stringify(toContacts) &&
-				JSON.stringify(draft.messages[0].to.cc) ===
-					JSON.stringify(ccContacts) &&
-				JSON.stringify(draft.messages[0].to.bcc) ===
-					JSON.stringify(bccContacts)
-			) {
-				return
-			}
-
-			createDraft(
-				{
-					to: toContacts,
-					cc: ccContacts,
-					bcc: bccContacts,
-					subject,
-					body: message,
-					draftId: draftId,
-					attachmentsToDelete: attachmentsToDelete,
-					attachments,
-				},
-				{
-					onSuccess: (data) => {
-						if (!draftId) {
-							setDraftId(data.draft_id)
-						} else {
-							toast.success("Draft saved")
-						}
-					},
-				}
-			)
+			createDraft({
+				to,
+				cc,
+				bcc,
+				subject,
+				body: message,
+				draftId,
+				attachmentsToDelete: attachments.toDelete,
+				attachmentsToAdd: attachments.toAdd,
+			}).then((data) => {
+				if (!draftId) setDraftId(data.draft_id)
+				else toast.success("Draft saved")
+			})
 		}, 3000)
 
 		debouncedSaveDraft()
 		return () => debouncedSaveDraft.cancel()
-	}, [message, subject, toContacts, ccContacts, bccContacts, attachments])
+	}, [formValues])
 
 	useEffect(() => {
 		if (draftId) {
 			const draft = emails?.find((e) => e.id === draftId)
 			if (draft) {
-				setMessage(draft.messages[0].body)
-				setSubject(draft.subject)
-				setToContacts(draft.messages[0].to.to || [])
-				setCcContacts(draft.messages[0].to.cc || [])
-				setBccContacts(draft.messages[0].to.bcc || [])
-				setAttachments(
-					(draft.messages[0].attachments || []).map((a) => {
-						console.log("Attachment being mapped", a)
-						return {
-							name: a.filename,
-							size: a.size,
-							path: "",
-							type: a.mime_type,
-						}
-					})
+				setValue("message", draft.messages[0].body)
+				setValue("subject", draft.subject)
+				setValue("to", draft.messages[0].to.to || [])
+				setValue("cc", draft.messages[0].to.cc || [])
+				setValue("bcc", draft.messages[0].to.bcc || [])
+				setValue(
+					"attachments.current",
+					draft.messages[0].attachments?.map((a) => ({
+						name: a.filename,
+						size: a.size,
+						path: "",
+						type: a.mime_type,
+					})) || []
 				)
 			}
 		}
 	}, [draftId])
 
-	console.log(attachments)
-
 	if (!isComposing) return null
 
 	return (
 		<div className="absolute inset-0 z-40 flex flex-row bg-white">
-			<SendEmptySubjectDialog
-				onConfirm={() => {
-					setShowEmptySubjectDialog(false)
-					sendEmail(
-						{
-							to: toContacts,
-							cc: ccContacts,
-							bcc: bccContacts,
-							subject,
-							body: message,
-							attachments,
-							replyToEmail: isReply ? replyToEmail : undefined,
-						},
-						{
-							onSuccess: () => {
-								setIsComposing(false)
-							},
-						}
-					)
-				}}
-			/>
+			<SendEmptySubjectDialog onConfirm={handleSend} />
 			<SendNoRecipientsDialog />
 			<BackNavigationSection onClose={() => setIsComposing(false)} />
-			<div className="flex w-3/5 flex-col items-center">
-				<h2 className="text-lg w-3/5 p-4 font-medium">New Message</h2>
-				<div className="flex w-3/5 flex-col rounded-2xl px-4 pt-4 shadow-2xl">
-					<div className="flex flex-col gap-2">
-						<RecipientFields />
-						<SubjectField />
-						<MessageArea />
+			<FormProvider {...form}>
+				<form
+					className="flex w-3/5 flex-col items-center"
+					onSubmit={handleSend}
+				>
+					<h2 className="text-lg w-3/5 p-4 font-medium">
+						New Message
+					</h2>
+					<div className="flex w-3/5 flex-col rounded-2xl px-4 pt-4 shadow-2xl">
+						<div className="flex flex-col gap-2">
+							<RecipientFields form={form} />
+							<SubjectField form={form} />
+							<div className="flex min-h-0 flex-1 flex-col">
+								<div className="flex-1 overflow-y-auto">
+									<TextareaAutosize
+										{...register("message")}
+										placeholder="Tip: Hit ⌘J for AI"
+										className="w-full resize-none pt-1 text-sm font-light outline-none"
+										minRows={12}
+										maxRows={24}
+									/>
+								</div>
+							</div>
+						</div>
+						<MessageActions
+							isSending={isPending}
+							attachments={formValues.attachments.current}
+							onDiscard={() => setIsComposing(false)}
+						/>
 					</div>
-					<MessageActions onSend={handleSend} isSending={isPending} />
-				</div>
-			</div>
+				</form>
+			</FormProvider>
 			<div className="flex w-1/5 flex-col bg-slate-50 p-4">
 				<EmailSenderDetailsPane email={email} />
 			</div>

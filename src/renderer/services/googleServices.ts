@@ -261,8 +261,8 @@ export const createDraft = async (
 	bcc: EmailParticipant[],
 	subject: string,
 	body: string,
-	attachments: DraftAttachment[],
-	attachmentsToDelete: string[],
+	attachmentsToAdd: DraftAttachment[],
+	attachmentsToDelete: DraftAttachment[],
 	draftId?: string
 ) => {
 	const { data } = await fetchWithAxios("drafts/", {
@@ -274,9 +274,9 @@ export const createDraft = async (
 			bcc: bcc,
 			subject: subject,
 			body: body,
-			attachments: attachments,
-			draft_id: draftId,
+			attachments_to_add: attachmentsToAdd,
 			attachments_to_delete: attachmentsToDelete,
+			draft_id: draftId,
 		},
 	})
 

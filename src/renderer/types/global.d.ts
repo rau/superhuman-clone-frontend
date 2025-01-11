@@ -79,6 +79,20 @@ declare global {
 
 	type ShortcutMode = "global" | "compose" | "search" | "email" | "dialog"
 	type RecipientField = "to" | "cc" | "bcc"
+
+	interface ComposeFormData {
+		to: EmailParticipant[]
+		cc: EmailParticipant[]
+		bcc: EmailParticipant[]
+		subject: string
+		message: string
+		attachments: {
+			current: DraftAttachment[]
+			toDelete: DraftAttachment[]
+			toAdd: DraftAttachment[]
+		}
+	}
 }
 
-export {}
+export { }
+

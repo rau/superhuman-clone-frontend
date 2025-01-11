@@ -543,16 +543,16 @@ export const useCreateDraft = () => {
 			subject,
 			body,
 			draftId,
-			attachments,
 			attachmentsToDelete,
+			attachmentsToAdd,
 		}: {
 			to: EmailParticipant[]
 			cc: EmailParticipant[]
 			bcc: EmailParticipant[]
 			subject: string
 			body: string
-			attachments: DraftAttachment[]
-			attachmentsToDelete: string[]
+			attachmentsToDelete: DraftAttachment[]
+			attachmentsToAdd: DraftAttachment[]
 			draftId?: string
 		}) =>
 			createDraft(
@@ -562,7 +562,7 @@ export const useCreateDraft = () => {
 				bcc,
 				subject,
 				body,
-				attachments,
+				attachmentsToAdd,
 				attachmentsToDelete,
 				draftId
 			),

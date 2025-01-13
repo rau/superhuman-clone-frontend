@@ -15,7 +15,9 @@ export const EmailSenderDetailsPane = ({
 	return (
 		<div className="flex h-full w-full flex-col gap-6 p-3">
 			<div className="flex w-full flex-col gap-4">
-				<span className="text-sm">{email.messages[0].sender.name}</span>
+				<span className="text-sm text-slate-700">
+					{email.messages[0].sender.name}
+				</span>
 				<div className="flex flex-row items-start gap-4">
 					<Avatar className="h-10 w-10">
 						<AvatarFallback className="bg-blue-100 text-blue-700">

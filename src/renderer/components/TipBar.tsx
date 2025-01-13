@@ -24,7 +24,7 @@ export const TipBar = () => {
 	if (!isQuickTipsOpen) return null
 
 	return (
-		<div className="flex h-[24px] items-center justify-center bg-[#F2F4FA]">
+		<div className="flex h-[24px] items-center justify-center bg-background">
 			<div className="flex items-center gap-2">
 				<span className="text-xs">Hit</span>
 				{tipItemsDiv}

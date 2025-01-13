@@ -12,7 +12,7 @@ const BackNavigationSection = ({
 	onNext?: () => void
 }) => {
 	return (
-		<div className="flex w-1/5 flex-col bg-slate-50 p-4">
+		<div className="flex w-1/5 flex-col bg-background p-4">
 			<div className="flex flex-row gap-2">
 				<KeyboardTooltip
 					tooltips={[
@@ -26,13 +26,13 @@ const BackNavigationSection = ({
 					<Button
 						onClick={onClose}
 						variant="ghost"
-						className="rounded-full bg-white shadow-md"
+						className="rounded-full bg-foreground shadow-md"
 					>
 						<ArrowLeft className="h-4 w-4" />
 					</Button>
 				</KeyboardTooltip>
 
-				<div className="flex flex-row gap-2 rounded-full bg-white shadow-md">
+				<div className="flex flex-row gap-2 rounded-full bg-foreground shadow-md">
 					<KeyboardTooltip
 						tooltips={[
 							{

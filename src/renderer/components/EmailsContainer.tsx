@@ -66,7 +66,6 @@ export const EmailsContainer = () => {
 	} = useUIStore()
 	const { toggleSidebar } = useSidebar()
 	const { theme } = useThemeStore()
-	console.log(theme)
 
 	const selectedIndex = selectedIndices[selectedFolder?.id || "INBOX"] || 0
 	const hasSelectedThreads =

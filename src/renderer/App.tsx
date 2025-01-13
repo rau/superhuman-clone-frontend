@@ -1,6 +1,7 @@
 import "@/App.css"
 import { ReactQueryClientProvider } from "@/components/ReactQueryClientProvider"
 import { SharedLayout } from "@/components/SharedLayout"
+import { ThemeProvider } from "@/components/ThemeProvider"
 import { TooltipProvider } from "@/components/ui/Tooltip"
 import { pagesData } from "@/pages/pagesData"
 import { Route, MemoryRouter as Router, Routes } from "react-router-dom"
@@ -13,16 +14,18 @@ export default function App() {
 
 	return (
 		<ReactQueryClientProvider>
-			<TooltipProvider>
-				<ToastContainer />
-				<Router>
-					<Routes>
-						<Route path="/" element={<SharedLayout />}>
-							{pageRoutes}
-						</Route>
-					</Routes>
-				</Router>
-			</TooltipProvider>
+			<ThemeProvider>
+				<TooltipProvider>
+					<ToastContainer />
+					<Router>
+						<Routes>
+							<Route path="/" element={<SharedLayout />}>
+								{pageRoutes}
+							</Route>
+						</Routes>
+					</Router>
+				</TooltipProvider>
+			</ThemeProvider>
 		</ReactQueryClientProvider>
 	)
 }

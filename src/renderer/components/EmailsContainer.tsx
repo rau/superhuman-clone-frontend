@@ -7,6 +7,7 @@ import { IconButton } from "@/components/ui/IconButton"
 import { Loader } from "@/components/ui/Loader"
 import { useSidebar } from "@/components/ui/Sidebar"
 import { useFolderEmails } from "@/hooks/dataHooks"
+import { useThemeStore } from "@/hooks/useThemeStore"
 import { useUIStore } from "@/hooks/useUIStore"
 import { groupEmailsByDate } from "@/libs/emailUtils"
 import { cn } from "@/libs/utils"
@@ -64,6 +65,8 @@ export const EmailsContainer = () => {
 		setIsSearching,
 	} = useUIStore()
 	const { toggleSidebar } = useSidebar()
+	const { theme } = useThemeStore()
+	console.log(theme)
 
 	const selectedIndex = selectedIndices[selectedFolder?.id || "INBOX"] || 0
 	const hasSelectedThreads =
@@ -78,7 +81,7 @@ export const EmailsContainer = () => {
 
 	return (
 		<div className="max-w-screen flex h-full w-screen flex-1">
-			<div className="relative flex flex-1 flex-col overflow-hidden border-r border-slate-200 bg-white">
+			<div className="relative flex flex-1 flex-col overflow-hidden border-r border-slate-200 bg-background">
 				<div className="flex items-center justify-between pb-2 pr-4 pt-4">
 					<div className="flex items-center gap-2">
 						<div className="w-10 pl-4">

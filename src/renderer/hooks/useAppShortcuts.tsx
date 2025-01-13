@@ -1,10 +1,7 @@
 import { ActionUndoToast } from "@/components/ActionUndoToast"
 import { useSidebar } from "@/components/ui/Sidebar"
 import {
-	sendEmailMutation,
 	useAccounts,
-	useContacts,
-	useDiscardDraft,
 	useFolderEmails,
 	useFolders,
 	useMarkEmailDone,
@@ -19,9 +16,7 @@ import { useComposeStore } from "@/hooks/useComposeStore"
 import { useEmailActionsStore } from "@/hooks/useEmailActionsStore"
 import { useUIStore } from "@/hooks/useUIStore"
 import { useUndo } from "@/hooks/useUndo"
-import { filterContacts } from "@/libs/contactUtils"
 import { getSelectedEmails } from "@/libs/emailUtils"
-import { handleAttach } from "@/libs/utils"
 import { useEffect } from "react"
 import { toast } from "react-toastify"
 
@@ -58,44 +53,18 @@ export const useAppShortcuts = () => {
 		setShowReplyPane,
 		collapsedMessages,
 		setCollapsedMessages,
-		setShowEmptySubjectDialog,
-		setIsFileDialogOpen,
 	} = useUIStore()
 
-	const {
-		showSuggestions,
-		selectedContactIndex,
-		setSelectedContactIndex,
-		activeField,
-		addContact,
-		toQuery,
-		ccQuery,
-		bccQuery,
-		toContacts,
-		ccContacts,
-		bccContacts,
-		setQuery,
-		setShowSuggestions,
-		setDraftId,
-		draftId,
-		addAttachment,
-		subject,
-		attachments,
-		message,
-		reset,
-	} = useComposeStore()
+	const { setDraftId } = useComposeStore()
 
 	const { lastAction } = useEmailActionsStore()
 	const { data: emails } = useFolderEmails()
-	const { data: contacts } = useContacts()
 	const { data: folders } = useFolders()
 	const { mutateAsync: markDone } = useMarkEmailDone()
 	const { mutateAsync: starEmail } = useStarEmail()
 	const { mutateAsync: markEmailRead } = useMarkEmailRead()
 	const { mutateAsync: trashEmail } = useTrashEmail()
 	const { mutateAsync: spamEmail } = useSpamEmail()
-	const { mutateAsync: discardDraft } = useDiscardDraft()
-	const { mutateAsync: sendEmail } = sendEmailMutation()
 	const { mutate: modifyLabels } = useModifyLabels()
 	const { data: accounts } = useAccounts()
 	const { setSelectedAccountId } = useAccountStore()
@@ -137,31 +106,6 @@ export const useAppShortcuts = () => {
 		element?.scrollIntoView({ block: "nearest" })
 	}
 
-	const handleSend = () => {
-		if (!subject.trim()) {
-			setShowEmptySubjectDialog(true)
-			return
-		}
-		sendEmail(
-			{
-				to: toContacts,
-				cc: ccContacts,
-				bcc: bccContacts,
-				subject,
-				body: message,
-				attachments,
-				replyToEmail: undefined,
-			},
-			{
-				onSuccess: () => {
-					setIsComposing(false)
-				},
-			}
-		)
-			.catch(() => {})
-			.then(() => reset())
-	}
-
 	const getCurrentMode = (): ShortcutMode => {
 		if (isMoveToDialogOpen) return "dialog"
 		if (isComposing) return "compose"
@@ -170,24 +114,13 @@ export const useAppShortcuts = () => {
 		return "global"
 	}
 
-	const filteredContacts = filterContacts(
-		contacts,
-		activeField === "to"
-			? toQuery
-			: activeField === "cc"
-				? ccQuery
-				: bccQuery,
-		activeField === "to"
-			? toContacts
-			: activeField === "cc"
-				? ccContacts
-				: bccContacts
-	)
-
 	const shortcuts: ShortcutConfig[] = [
 		{
 			key: "c",
-			handler: () => setIsComposing(true),
+			handler: () => {
+				setDraftId("")
+				setIsComposing(true)
+			},
 			mode: "global",
 			disabledModes: ["compose"],
 		},
@@ -225,6 +158,7 @@ export const useAppShortcuts = () => {
 			},
 			mode: "global",
 			meta: true,
+			disabledModes: ["compose"],
 		},
 		{
 			key: "j",
@@ -392,20 +326,6 @@ export const useAppShortcuts = () => {
 					handleMove(folders[moveToDialogIndex])
 					return
 				}
-				if (
-					isComposing &&
-					showSuggestions &&
-					filteredContacts?.length &&
-					filteredContacts[selectedContactIndex]
-				) {
-					addContact(
-						filteredContacts[selectedContactIndex],
-						activeField
-					)
-					setQuery("", activeField)
-					setShowSuggestions(false)
-					return
-				}
 				if (isComposing) return
 				if (isShowingEmail && collapsedMessages[selectedMessageIndex]) {
 					const next = { ...collapsedMessages }
@@ -425,16 +345,7 @@ export const useAppShortcuts = () => {
 		{
 			key: "ArrowDown",
 			handler: () => {
-				if (
-					isComposing &&
-					showSuggestions &&
-					filteredContacts?.length
-				) {
-					setSelectedContactIndex(
-						(selectedContactIndex + 1) % filteredContacts.length
-					)
-					return
-				} else if (isMoveToDialogOpen) {
+				if (isMoveToDialogOpen) {
 					handleIndexChange(moveToDialogIndex + 1)
 					return
 				} else if (isShowingEmail) {
@@ -456,17 +367,7 @@ export const useAppShortcuts = () => {
 		{
 			key: "ArrowUp",
 			handler: () => {
-				if (
-					isComposing &&
-					showSuggestions &&
-					filteredContacts?.length
-				) {
-					setSelectedContactIndex(
-						(selectedContactIndex - 1 + filteredContacts.length) %
-							filteredContacts.length
-					)
-					return
-				} else if (isMoveToDialogOpen) {
+				if (isMoveToDialogOpen) {
 					handleIndexChange(moveToDialogIndex - 1)
 					return
 				} else if (isShowingEmail) {
@@ -557,71 +458,6 @@ export const useAppShortcuts = () => {
 			handler: () => toggleMessage(selectedMessageIndex),
 			mode: "email",
 			disabledModes: ["compose"],
-		},
-		{
-			key: "b",
-			handler: () => {
-				const bccField = document.querySelector(
-					"[data-bcc-field]"
-				) as HTMLElement
-				bccField?.focus()
-			},
-			meta: true,
-			shift: true,
-			mode: "compose",
-		},
-		{
-			key: "c",
-			handler: () => {
-				const ccField = document.querySelector(
-					"[data-cc-field]"
-				) as HTMLElement
-				ccField?.focus()
-			},
-			meta: true,
-			shift: true,
-			mode: "compose",
-		},
-		{
-			key: ",",
-			handler: () => {
-				setIsComposing(false)
-				discardDraft([draftId || ""])
-					.then(() => toast.success("Draft discarded"))
-					.catch(() => {})
-			},
-			meta: true,
-			shift: true,
-			mode: "compose",
-		},
-		{
-			key: "u",
-			handler: async () => {
-				handleAttach(setIsFileDialogOpen, addAttachment)
-			},
-			mode: "compose",
-			meta: true,
-			shift: true,
-		},
-		{
-			key: "Enter",
-			handler: (e: KeyboardEvent) => {
-				if (e.metaKey || e.ctrlKey) {
-					handleSend()
-				}
-			},
-			meta: true,
-			mode: "compose",
-		},
-		{
-			key: "Enter",
-			handler: (e: KeyboardEvent) => {
-				if (e.metaKey || e.ctrlKey) {
-					handleSend()
-				}
-			},
-			shift: true,
-			mode: "compose",
 		},
 	]
 

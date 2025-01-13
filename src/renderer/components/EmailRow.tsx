@@ -4,7 +4,10 @@ import { KeyboardTooltip } from "@/components/KeyboardTooltip"
 import { useFolderEmails, useMarkEmailDone } from "@/hooks/dataHooks"
 import { useComposeStore } from "@/hooks/useComposeStore"
 import { useUIStore } from "@/hooks/useUIStore"
-import { getUniqueSenderNames } from "@/libs/emailUtils"
+import {
+	getUniqueSenderNames,
+	getUniqueSenderNamesForDraft,
+} from "@/libs/emailUtils"
 import { cn, decodeHtml } from "@/libs/utils"
 import { format } from "date-fns"
 import { Check, Clock, Copy, Paperclip, SquareCheckBig } from "lucide-react"
@@ -114,17 +117,26 @@ export const EmailRow = ({ email, isSelected }: EmailRowProps) => {
 				</div>
 
 				<div className="w-[250px] truncate">
-					<span
-						className={cn(
-							"truncate text-xs font-medium",
-							isThreadSelected && "text-white"
-						)}
-					>
-						<span className="text-green-500">
-							{email.is_draft && "Draft to "}
+					{email.is_draft ? (
+						<span
+							className={cn(
+								"truncate text-xs font-medium",
+								isThreadSelected && "text-white"
+							)}
+						>
+							<span className="text-green-500">Draft </span>
+							to {getUniqueSenderNamesForDraft(email.messages)}
 						</span>
-						{getUniqueSenderNames(email.messages)}
-					</span>
+					) : (
+						<span
+							className={cn(
+								"truncate text-xs font-medium",
+								isThreadSelected && "text-white"
+							)}
+						>
+							{getUniqueSenderNames(email.messages)}
+						</span>
+					)}
 				</div>
 				<div className="flex flex-1 gap-2 truncate">
 					<span

@@ -37,7 +37,6 @@ export default function Home() {
 	if (accounts?.length === 0 || isSignInOpen) {
 		return <SignInPane />
 	}
-	console.log(emails)
 
 	return (
 		<div className="relative flex h-screen flex-col">

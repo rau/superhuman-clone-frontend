@@ -1,10 +1,12 @@
 import { Dialog, DialogContent } from "@/components/ui/Dialog"
 import { Label } from "@/components/ui/Label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/RadioGroup"
+import { useThemeStore } from "@/hooks/useThemeStore"
 import { useUIStore } from "@/hooks/useUIStore"
 
 export const ThemeDialog = () => {
 	const { isThemeDialogOpen, setIsThemeDialogOpen } = useUIStore()
+	const { theme, setTheme } = useThemeStore()
 
 	return (
 		<Dialog open={isThemeDialogOpen} onOpenChange={setIsThemeDialogOpen}>
@@ -12,23 +14,23 @@ export const ThemeDialog = () => {
 				<div className="flex flex-col gap-6 p-6">
 					<h2 className="text-xl font-semibold">Theme</h2>
 					<RadioGroup
-						defaultValue="snow"
+						defaultValue={theme}
 						className="flex flex-col gap-4"
+						onValueChange={(value) =>
+							setTheme(value as "light" | "dark" | "system")
+						}
 					>
 						<div className="flex items-center gap-2">
-							<RadioGroupItem value="snow" id="snow" />
-							<Label htmlFor="snow">Snow</Label>
+							<RadioGroupItem value="light" id="light" />
+							<Label htmlFor="light">Snow</Label>
 						</div>
 						<div className="flex items-center gap-2">
-							<RadioGroupItem value="carbon" id="carbon" />
-							<Label htmlFor="carbon">Carbon</Label>
+							<RadioGroupItem value="dark" id="dark" />
+							<Label htmlFor="dark">Carbon</Label>
 						</div>
 						<div className="flex items-center gap-2">
-							<RadioGroupItem
-								value="match-macos"
-								id="match-macos"
-							/>
-							<Label htmlFor="match-macos">Match macOS</Label>
+							<RadioGroupItem value="system" id="system" />
+							<Label htmlFor="system">Match MacOS</Label>
 						</div>
 					</RadioGroup>
 					<p className="text-sm text-slate-600">

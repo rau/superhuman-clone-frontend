@@ -6,10 +6,10 @@ import {
 } from "@/components/ui/Tooltip"
 import { cn } from "@/libs/utils"
 import { LucideIcon } from "lucide-react"
+import { ComponentPropsWithoutRef } from "react"
 
-interface IconButtonProps {
+interface IconButtonProps extends ComponentPropsWithoutRef<"button"> {
 	icon: LucideIcon
-	onClick?: () => void
 	tooltipLabel?: string
 	keyboardShortcuts?: Array<{
 		keys: string[]
@@ -17,24 +17,19 @@ interface IconButtonProps {
 	}>
 	variant?: "default" | "danger" | "success" | "warning" | "inverse"
 	size?: "sm" | "md"
-	disabled?: boolean
-	className?: string
 }
 
 export const IconButton = ({
 	icon: Icon,
-	onClick,
-	keyboardShortcuts,
 	tooltipLabel,
+	keyboardShortcuts,
 	variant = "default",
 	size = "md",
-	disabled = false,
 	className,
+	...props
 }: IconButtonProps) => {
 	const button = (
 		<button
-			onClick={onClick}
-			disabled={disabled}
 			className={cn(
 				"rounded-md p-1 transition-colors duration-100",
 				size === "sm" && "p-1",
@@ -46,9 +41,11 @@ export const IconButton = ({
 				variant === "warning" &&
 					"text-slate-400 hover:bg-orange-50 hover:text-orange-600",
 				variant === "inverse" && "text-white hover:text-slate-200",
-				disabled && "cursor-not-allowed opacity-50",
+				props.disabled && "cursor-not-allowed opacity-50",
 				className
 			)}
+			{...props}
+			type={props.type || "button"}
 		>
 			<Icon className={cn("h-4 w-4", size === "sm" && "h-3 w-3")} />
 		</button>

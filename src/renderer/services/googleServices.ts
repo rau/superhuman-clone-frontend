@@ -75,6 +75,10 @@ export const sendEmail = async (
 	payload: SendEmailPayload,
 	accountId: string
 ) => {
+	console.log("sendEmail", payload)
+
+	return null
+
 	return fetchWithAxios("send-email/", {
 		method: "POST",
 		accountId: accountId,

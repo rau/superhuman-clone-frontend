@@ -7,43 +7,32 @@ import { EmailSenderDetailsPane } from "@/components/EmailSenderDetailsPane"
 import { KeyboardTooltip } from "@/components/KeyboardTooltip"
 import { IconButton } from "@/components/ui/IconButton"
 import {
-	sendEmailMutation,
 	useCreateDraft,
 	useFolderEmails,
+	useSendEmail,
 } from "@/hooks/dataHooks"
+import { useComposeShortcuts } from "@/hooks/useComposeShortcuts"
 import { useComposeStore } from "@/hooks/useComposeStore"
 import { useUIStore } from "@/hooks/useUIStore"
-import { debounce, handleAttach } from "@/libs/utils"
+import {
+	discardDraft,
+	sendEmail,
+	useAddAttachment,
+	useRemoveAttachment,
+} from "@/libs/composeUtils"
+import { debounce } from "@/libs/utils"
 import { Braces, Calendar, Paperclip, Trash2, X } from "lucide-react"
 import { useEffect } from "react"
 import { FormProvider, useForm, useFormContext } from "react-hook-form"
 import TextareaAutosize from "react-textarea-autosize"
 import { toast } from "react-toastify"
 
-const MessageActions = ({
-	isSending,
-	attachments,
-	onDiscard,
-}: {
-	isSending: boolean
-	attachments: DraftAttachment[]
-	onDiscard: () => void
-}) => {
-	const { setIsFileDialogOpen } = useUIStore()
-	const { setValue, getValues } = useFormContext<ComposeFormData>()
-
-	const removeAttachment = (attachment: DraftAttachment) => {
-		setValue(
-			"attachments.current",
-			getValues("attachments.current").filter(
-				(a) => a.name !== attachment.name
-			)
-		)
-		setValue("attachments.toDelete", [
-			...getValues("attachments.toDelete"),
-			attachment,
-		])
-	}
+const MessageActions = () => {
+	const { isPending: isSending } = useSendEmail()
+	const { draftId } = useComposeStore()
+	const form = useFormContext<ComposeFormData>()
+	const addAttachment = useAddAttachment(form)
+	const attachments = form.watch("attachments.current")
 
 	return (
 		<div className="flex flex-col border-t border-slate-200">
@@ -53,7 +42,6 @@ const MessageActions = ({
 						<AttachmentChip
 							key={attachment.path}
 							attachment={attachment}
-							onRemove={() => removeAttachment(attachment)}
 						/>
 					))}
 				</div>
@@ -119,84 +107,60 @@ const MessageActions = ({
 							<span className="text-sm font-medium">AI</span>
 						</button>
 					</KeyboardTooltip>
-					<KeyboardTooltip
-						tooltips={[
+					<IconButton
+						icon={Calendar}
+						tooltipLabel="Share availability"
+						keyboardShortcuts={[
 							{
 								keys: ["⌘", "shift", "A"],
 								label: "Share availability",
 							},
 						]}
-						delayDuration={150}
-					>
-						<button className="rounded-md p-2 text-slate-500 hover:text-slate-700">
-							<Calendar className="h-4 w-4" />
-						</button>
-					</KeyboardTooltip>
-					<KeyboardTooltip
-						tooltips={[
+					/>
+					<IconButton
+						icon={Braces}
+						tooltipLabel="Use snippet inline"
+						keyboardShortcuts={[
 							{
 								keys: [";"],
 								label: "Use snippet inline",
 							},
 						]}
-						delayDuration={150}
-					>
-						<button className="rounded-md p-2 text-slate-500 hover:text-slate-700">
-							<Braces className="h-4 w-4" />
-						</button>
-					</KeyboardTooltip>
-
-					<KeyboardTooltip
-						tooltips={[
+					/>
+					<IconButton
+						icon={Paperclip}
+						tooltipLabel="Attach"
+						keyboardShortcuts={[
 							{
 								keys: ["⌘", "shift", "U"],
 								label: "Attach",
 							},
 						]}
-						delayDuration={150}
-					>
-						<button
-							onClick={() =>
-								handleAttach(
-									setIsFileDialogOpen,
-									setValue,
-									getValues
-								)
-							}
-							className="rounded-md p-2 text-slate-500 hover:text-slate-700"
-						>
-							<Paperclip className="h-4 w-4" />
-						</button>
-					</KeyboardTooltip>
-					<KeyboardTooltip
-						tooltips={[
+						onClick={() => addAttachment}
+					/>
+					<IconButton
+						icon={Trash2}
+						tooltipLabel="Discard"
+						keyboardShortcuts={[
 							{
 								keys: ["⌘", "shift", ","],
 								label: "Discard",
 							},
 						]}
-						delayDuration={150}
-					>
-						<button
-							onClick={onDiscard}
-							className="rounded-md p-2 text-slate-500 hover:text-slate-700"
-						>
-							<Trash2 className="h-4 w-4" />
-						</button>
-					</KeyboardTooltip>
+						onClick={() => {
+							discardDraft(draftId || "")
+						}}
+					/>
 				</div>
 			</div>
 		</div>
 	)
 }
 
-const AttachmentChip = ({
-	attachment,
-	onRemove,
-}: {
-	attachment: DraftAttachment
-	onRemove: () => void
-}) => {
+const AttachmentChip = ({ attachment }: { attachment: DraftAttachment }) => {
+	const form = useFormContext<ComposeFormData>()
+	const removeAttachment = useRemoveAttachment(form)
+
 	return (
 		<div
 			className="group relative flex w-[150px] rounded-md bg-[#DCE2EA] px-2 pb-12 pt-1 transition-colors duration-200 hover:bg-[#404040]/90"
@@ -211,7 +175,7 @@ const AttachmentChip = ({
 			</span>
 			<IconButton
 				icon={X}
-				onClick={onRemove}
+				onClick={() => removeAttachment(attachment)}
 				className="invisible absolute right-1 top-1 group-hover:visible"
 				variant="inverse"
 			/>
@@ -228,15 +192,8 @@ export const ComposePaneOverlay = ({
 }) => {
 	const { data: emails } = useFolderEmails()
 	const { mutateAsync: createDraft } = useCreateDraft()
-	const { mutateAsync: sendEmail, isPending } = sendEmailMutation()
-	const {
-		selectedFolder,
-		selectedIndices,
-		isComposing,
-		setIsComposing,
-		setShowEmptySubjectDialog,
-		setShowNoRecipientsDialog,
-	} = useUIStore()
+	const { selectedFolder, selectedIndices, isComposing, setIsComposing } =
+		useUIStore()
 	const { draftId, setDraftId } = useComposeStore()
 	const selectedIndex = selectedIndices[selectedFolder?.id || "INBOX"] || 0
 	const email = emails?.[selectedIndex]
@@ -254,61 +211,59 @@ export const ComposePaneOverlay = ({
 			},
 		},
 	})
-	const { handleSubmit, watch, setValue, getValues, register } = form
-	const formValues = watch()
-
-	const handleSend = handleSubmit((data: ComposeFormData) => {
-		if (!data.subject.trim()) {
-			setShowEmptySubjectDialog(true)
-			return
-		}
-		if (!data.to.length && !data.cc.length && !data.bcc.length) {
-			setShowNoRecipientsDialog(true)
-			return
-		}
-
-		sendEmail({
-			to: data.to,
-			cc: data.cc,
-			bcc: data.bcc,
-			subject: data.subject,
-			body: data.message,
-			attachments: data.attachments.current,
-			replyToEmail: isReply ? replyToEmail : undefined,
-		})
-			.then(() => {
-				setIsComposing(false)
-				form.reset()
-			})
-			.catch(() => {})
-	})
+	const { setValue, getValues, register } = form
+	const send = sendEmail(form)
+	useComposeShortcuts(form)
 
 	useEffect(() => {
+		let lastValues = ""
 		const debouncedSaveDraft = debounce(() => {
-			const { message, subject, to, cc, bcc, attachments } = getValues()
-			if (!message && !subject && !to.length && !cc.length && !bcc.length)
+			const values = getValues()
+			const currentValues = JSON.stringify({
+				message: values.message,
+				subject: values.subject,
+				to: values.to,
+				cc: values.cc,
+				bcc: values.bcc,
+				attachments: values.attachments,
+			})
+
+			if (currentValues === lastValues) return
+			lastValues = currentValues
+
+			if (
+				!values.message &&
+				!values.subject &&
+				!values.to.length &&
+				!values.cc.length &&
+				!values.bcc.length
+			)
 				return
 
 			createDraft({
-				to,
-				cc,
-				bcc,
-				subject,
-				body: message,
+				to: values.to,
+				cc: values.cc,
+				bcc: values.bcc,
+				subject: values.subject,
+				body: values.message,
 				draftId,
-				attachmentsToDelete: attachments.toDelete,
-				attachmentsToAdd: attachments.toAdd,
+				attachmentsToDelete: values.attachments.toDelete,
+				attachmentsToAdd: values.attachments.toAdd,
 			}).then((data) => {
 				if (!draftId) setDraftId(data.draft_id)
 				else toast.success("Draft saved")
 			})
 		}, 3000)
 
-		debouncedSaveDraft()
-		return () => debouncedSaveDraft.cancel()
-	}, [formValues])
+		const subscription = form.watch(() => debouncedSaveDraft())
+		return () => {
+			subscription.unsubscribe()
+			debouncedSaveDraft.cancel()
+		}
+	}, [draftId, createDraft])
 
 	useEffect(() => {
+		console.log("draftId", draftId)
 		if (draftId) {
 			const draft = emails?.find((e) => e.id === draftId)
 			if (draft) {
@@ -327,6 +282,9 @@ export const ComposePaneOverlay = ({
 					})) || []
 				)
 			}
+		} else {
+			form.reset()
+			console.log("reset")
 		}
 	}, [draftId])
 
@@ -334,21 +292,21 @@ export const ComposePaneOverlay = ({
 
 	return (
 		<div className="absolute inset-0 z-40 flex flex-row bg-white">
-			<SendEmptySubjectDialog onConfirm={handleSend} />
-			<SendNoRecipientsDialog />
 			<BackNavigationSection onClose={() => setIsComposing(false)} />
 			<FormProvider {...form}>
+				<SendEmptySubjectDialog />
+				<SendNoRecipientsDialog />
 				<form
 					className="flex w-3/5 flex-col items-center"
-					onSubmit={handleSend}
+					onSubmit={send}
 				>
 					<h2 className="text-lg w-3/5 p-4 font-medium">
 						New Message
 					</h2>
 					<div className="flex w-3/5 flex-col rounded-2xl px-4 pt-4 shadow-2xl">
 						<div className="flex flex-col gap-2">
-							<RecipientFields form={form} />
-							<SubjectField form={form} />
+							<RecipientFields />
+							<SubjectField />
 							<div className="flex min-h-0 flex-1 flex-col">
 								<div className="flex-1 overflow-y-auto">
 									<TextareaAutosize
@@ -361,11 +319,7 @@ export const ComposePaneOverlay = ({
 								</div>
 							</div>
 						</div>
-						<MessageActions
-							isSending={isPending}
-							attachments={formValues.attachments.current}
-							onDiscard={() => setIsComposing(false)}
-						/>
+						<MessageActions />
 					</div>
 				</form>
 			</FormProvider>

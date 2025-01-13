@@ -33,7 +33,7 @@ export const useContacts = () => {
 	})
 }
 
-export const sendEmailMutation = () => {
+export const useSendEmail = () => {
 	const queryClient = useQueryClient()
 	const { selectedAccountId } = useAccountStore()
 	return useMutation({

@@ -8,9 +8,13 @@ import {
 	DialogTitle,
 } from "@/components/ui/Dialog"
 import { useUIStore } from "@/hooks/useUIStore"
+import { sendEmail } from "@/libs/composeUtils"
+import { useFormContext } from "react-hook-form"
 
-const SendEmptySubjectDialog = ({ onConfirm }: { onConfirm: () => void }) => {
+const SendEmptySubjectDialog = () => {
 	const { showEmptySubjectDialog, setShowEmptySubjectDialog } = useUIStore()
+	const form = useFormContext<ComposeFormData>()
+	const send = sendEmail(form)
 
 	return (
 		<Dialog
@@ -33,7 +37,7 @@ const SendEmptySubjectDialog = ({ onConfirm }: { onConfirm: () => void }) => {
 						Cancel
 					</Button>
 					<Button
-						onClick={onConfirm}
+						onClick={send}
 						className="rounded-md bg-blue-600 px-3 py-1.5 text-sm text-white hover:bg-blue-700"
 					>
 						Send anyway

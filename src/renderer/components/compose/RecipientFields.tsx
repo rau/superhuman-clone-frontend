@@ -1,14 +1,10 @@
-import { KeyboardTooltip } from "@/components/KeyboardTooltip"
-import { useContacts } from "@/hooks/dataHooks"
+import { IconButton } from "@/components/ui/IconButton"
 import { useComposeStore } from "@/hooks/useComposeStore"
+import { useAddContact, useRemoveContact } from "@/libs/composeUtils"
 import { filterContacts } from "@/libs/contactUtils"
 import { cn } from "@/libs/utils"
 import { ChevronDown, ChevronUp, PictureInPicture2, X } from "lucide-react"
-import { useFormContext, UseFormReturn } from "react-hook-form"
-
-interface RecipientFieldsProps {
-	form: UseFormReturn<ComposeFormData>
-}
+import { useFormContext } from "react-hook-form"
 
 const ContactChip = ({
 	contact,
@@ -17,15 +13,8 @@ const ContactChip = ({
 	contact: EmailParticipant
 	field: RecipientField
 }) => {
-	const { setValue, getValues } = useFormContext<ComposeFormData>()
-
-	const handleRemove = () => {
-		const contacts = getValues(field)
-		setValue(
-			field,
-			contacts.filter((c) => c.email !== contact.email)
-		)
-	}
+	const form = useFormContext<ComposeFormData>()
+	const removeContact = useRemoveContact(form, field)
 
 	return (
 		<div className="group flex items-center gap-1 hover:bg-slate-100">
@@ -35,7 +24,7 @@ const ContactChip = ({
 
 			<X
 				className="hidden h-3 w-3 text-slate-500 hover:cursor-pointer hover:text-slate-700 group-hover:block"
-				onClick={handleRemove}
+				onClick={() => removeContact(contact)}
 			/>
 		</div>
 	)
@@ -48,28 +37,13 @@ const ContactSuggestion = ({
 	index: number
 	contact: EmailParticipant
 }) => {
-	const {
-		selectedContactIndex,
-		setSelectedContactIndex,
-		setShowSuggestions,
-		setQuery,
-		activeField,
-	} = useComposeStore()
-	const { setValue, getValues } = useFormContext<ComposeFormData>()
-
-	const addContact = (contact: EmailParticipant, field: RecipientField) => {
-		setValue(field, [...getValues(field), contact])
-	}
-
-	const handleAddContact = () => {
-		addContact(contact, activeField)
-		setShowSuggestions(false)
-		setQuery("", activeField)
-	}
+	const { selectedContactIndex, setSelectedContactIndex } = useComposeStore()
+	const form = useFormContext<ComposeFormData>()
+	const addContact = useAddContact(form)
 
 	return (
 		<div
-			onClick={handleAddContact}
+			onClick={() => addContact(contact)}
 			onMouseEnter={() => setSelectedContactIndex(index)}
 			className={cn(
 				"flex w-full cursor-pointer items-center gap-3 px-3 py-2",
@@ -88,62 +62,17 @@ const ContactSuggestion = ({
 	)
 }
 
-const RecipientFields = ({ form }: RecipientFieldsProps) => {
-	const { data: contacts } = useContacts()
-	const {
-		showSuggestions,
-		toQuery,
-		ccQuery,
-		bccQuery,
-		showCcBcc,
-		setShowCcBcc,
-		activeField,
-		setActiveField,
-		setShowSuggestions,
-		setQuery,
-		setSelectedContactIndex,
-	} = useComposeStore()
+const RecipientFields = () => {
+	const form = useFormContext<ComposeFormData>()
+	const { showSuggestions, showCcBcc, activeField } = useComposeStore()
 
-	const { watch, setValue } = form
-	const { to, cc, bcc } = watch()
-
-	const filteredContacts = filterContacts(
-		contacts,
-		activeField === "to"
-			? toQuery
-			: activeField === "cc"
-				? ccQuery
-				: bccQuery,
-		activeField === "to" ? to : activeField === "cc" ? cc : bcc
-	)
-
-	const handleQueryChange = (value: string, field: RecipientField) => {
-		setQuery(value, field)
-		console.log("value", value)
-		if (value.length === 0) {
-			setShowSuggestions(false)
-		} else {
-			setSelectedContactIndex(0)
-		}
-	}
-
-	const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-		if (e.key === "Backspace" && e.currentTarget.value === "") {
-			e.preventDefault()
-			const contacts =
-				activeField === "to" ? to : activeField === "cc" ? cc : bcc
-			const lastContact = contacts[contacts.length - 1]
-			if (lastContact) {
-				setValue(activeField, [...contacts.slice(0, -1)])
-			}
-		}
-	}
+	const filteredContacts = filterContacts(form)
 
 	const getSuggestionsPosition = () => {
 		if (!showSuggestions || !filteredContacts?.length) return null
 
 		const inputContainer = document.querySelector(
-			activeField === "to" ? ".to-container" : `.${activeField}-container`
+			`.${activeField}-container`
 		)
 
 		if (!inputContainer) return null
@@ -157,148 +86,15 @@ const RecipientFields = ({ form }: RecipientFieldsProps) => {
 		}
 	}
 
-	console.log("showSuggestions", showSuggestions)
-
 	return (
 		<div className="relative">
 			<div className="flex flex-col">
-				<div className="flex flex-row items-center">
-					<div className="to-container flex flex-1 flex-wrap items-center py-1">
-						<span className="w-[50px] text-sm font-medium">To</span>
-						{to.map((contact, index) => (
-							<div className="flex items-center" key={index}>
-								<ContactChip contact={contact} field="to" />
-								<span className="px-1 text-sm font-medium text-slate-400">
-									&#183;
-								</span>
-							</div>
-						))}
-						<input
-							autoFocus
-							type="text"
-							value={toQuery}
-							onChange={(e) =>
-								handleQueryChange(e.target.value, "to")
-							}
-							onFocus={() => setActiveField("to")}
-							onKeyDown={handleKeyDown}
-							className="ml-2 min-h-4 flex-1 text-sm outline-none"
-						/>
-					</div>
-					<KeyboardTooltip
-						tooltips={[
-							{
-								keys: ["⌘", "shift", "C"],
-								label: "Cc",
-							},
-							{
-								keys: ["⌘", "shift", "B"],
-								label: "Bcc",
-							},
-						]}
-						delayDuration={150}
-					>
-						<button
-							onClick={() => setShowCcBcc(!showCcBcc)}
-							className="rounded-full p-1 text-slate-500 hover:text-slate-700"
-							tabIndex={-1}
-						>
-							{showCcBcc ? (
-								<ChevronUp className="h-4 w-4" />
-							) : (
-								<ChevronDown className="h-4 w-4" />
-							)}
-						</button>
-					</KeyboardTooltip>
-					<KeyboardTooltip
-						tooltips={[
-							{
-								keys: ["⌘", "shift", "P"],
-								label: "Popout",
-							},
-							{
-								keys: ["⌘", "/"],
-								label: "Popout and search",
-							},
-						]}
-						delayDuration={150}
-					>
-						<button
-							className="text-slate-500 hover:text-slate-700"
-							tabIndex={-1}
-						>
-							<PictureInPicture2 className="h-3 w-3" />
-						</button>
-					</KeyboardTooltip>
-				</div>
+				<RecipientField field="to" />
 
 				{showCcBcc && (
 					<>
-						<div className="flex items-center">
-							<div className="cc-container flex flex-1 flex-wrap items-center py-1">
-								<span className="w-[50px] text-sm font-medium">
-									Cc
-								</span>
-								{cc.map((contact, index) => (
-									<div
-										className="flex items-center"
-										key={index}
-									>
-										<ContactChip
-											contact={contact}
-											field="cc"
-										/>
-										<span className="px-1 text-sm font-medium text-slate-400">
-											&#183;
-										</span>
-									</div>
-								))}
-								<input
-									data-cc-field
-									type="text"
-									value={ccQuery}
-									onChange={(e) =>
-										handleQueryChange(e.target.value, "cc")
-									}
-									onFocus={() => setActiveField("cc")}
-									onKeyDown={handleKeyDown}
-									className="ml-2 flex-1 text-sm outline-none"
-								/>
-							</div>
-						</div>
-
-						<div className="flex items-center">
-							<div className="bcc-container flex flex-1 flex-wrap items-center py-1">
-								<span className="w-[50px] text-sm font-medium">
-									Bcc
-								</span>
-								{bcc.map((contact, index) => (
-									<div
-										className="flex items-center"
-										key={index}
-									>
-										<ContactChip
-											contact={contact}
-											field="bcc"
-										/>
-										<span className="px-1 text-sm font-medium text-slate-400">
-											&#183;
-										</span>
-									</div>
-								))}
-								<input
-									data-bcc-field
-									type="text"
-									value={bccQuery}
-									onChange={(e) =>
-										handleQueryChange(e.target.value, "bcc")
-									}
-									onFocus={() => setActiveField("bcc")}
-									onKeyDown={handleKeyDown}
-									className="fl ex-1 text-sm outline-none"
-								/>
-							</div>
-						</div>
+						<RecipientField field="cc" />
+						<RecipientField field="bcc" />
 					</>
 				)}
 
@@ -317,6 +113,138 @@ const RecipientFields = ({ form }: RecipientFieldsProps) => {
 					</div>
 				)}
 			</div>
+		</div>
+	)
+}
+
+const RecipientField = ({ field }: { field: RecipientField }) => {
+	const {
+		activeField,
+		setActiveField,
+		showCcBcc,
+		setShowCcBcc,
+		setToQuery,
+		setCcQuery,
+		setBccQuery,
+		setShowSuggestions,
+		setSelectedContactIndex,
+		toQuery,
+		ccQuery,
+		bccQuery,
+	} = useComposeStore()
+	const { watch, setValue } = useFormContext<ComposeFormData>()
+	const { to, cc, bcc } = watch()
+
+	const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+		if (e.key === "Backspace" && e.currentTarget.value === "") {
+			e.preventDefault()
+			const contacts =
+				activeField === "to" ? to : activeField === "cc" ? cc : bcc
+			const lastContact = contacts[contacts.length - 1]
+			if (lastContact) {
+				setValue(activeField, [...contacts.slice(0, -1)])
+			}
+		}
+	}
+
+	const handleQueryChange = (value: string) => {
+		if (activeField === "to") {
+			setToQuery(value)
+		} else if (activeField === "cc") {
+			setCcQuery(value)
+		} else if (activeField === "bcc") {
+			setBccQuery(value)
+		}
+		if (value.length === 0) {
+			setShowSuggestions(false)
+		} else {
+			setShowSuggestions(true)
+			setSelectedContactIndex(0)
+		}
+	}
+
+	let label = ""
+	let contacts: EmailParticipant[] = []
+	let query = ""
+
+	if (field === "to") {
+		label = "To"
+		contacts = to
+		query = toQuery
+	} else if (field === "cc") {
+		label = "Cc"
+		contacts = cc
+		query = ccQuery
+	} else if (field === "bcc") {
+		label = "Bcc"
+		contacts = bcc
+		query = bccQuery
+	}
+
+	return (
+		<div className="flex items-center">
+			<div
+				className={`${field}-container flex flex-1 flex-wrap items-center py-1`}
+			>
+				<span className="w-[50px] text-sm font-medium">{label}</span>
+				{contacts.map((contact, index) => (
+					<div className="flex items-center" key={index}>
+						<ContactChip contact={contact} field={field} />
+						<span className="px-1 text-sm font-medium text-slate-400">
+							&#183;
+						</span>
+					</div>
+				))}
+				<input
+					data-field={field}
+					type="text"
+					value={query}
+					onChange={(e) => handleQueryChange(e.target.value)}
+					onFocus={() => setActiveField(field)}
+					onKeyDown={handleKeyDown}
+					className={cn(
+						"text-sm outline-none",
+						field === "to" ? "ml-2 min-h-4 flex-1" : "flex-1"
+					)}
+					autoFocus={field === "to"}
+				/>
+			</div>
+			{field === "to" && (
+				<>
+					<IconButton
+						icon={showCcBcc ? ChevronUp : ChevronDown}
+						onClick={() => setShowCcBcc(!showCcBcc)}
+						keyboardShortcuts={[
+							{
+								keys: ["⌘", "shift", "C"],
+								label: "Cc",
+							},
+							{
+								keys: ["⌘", "shift", "B"],
+								label: "Bcc",
+							},
+						]}
+						tabIndex={-1}
+						type="button"
+					/>
+					<IconButton
+						icon={PictureInPicture2}
+						tabIndex={-1}
+						keyboardShortcuts={[
+							{
+								keys: ["⌘", "shift", "P"],
+								label: "Popout",
+							},
+							{
+								keys: ["⌘", "/"],
+								label: "Popout and search",
+							},
+						]}
+						size="sm"
+						type="button"
+					/>
+				</>
+			)}
 		</div>
 	)
 }

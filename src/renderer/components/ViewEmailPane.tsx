@@ -3,7 +3,11 @@ import { ComposePaneOverlay } from "@/components/compose/ComposePaneOverlay"
 import { EmailSenderDetailsPane } from "@/components/EmailSenderDetailsPane"
 import { KeyboardTooltip } from "@/components/KeyboardTooltip"
 import { TopActionsBar } from "@/components/TopActionsBar"
-import { useFolderEmails, useMarkEmailDone } from "@/hooks/dataHooks"
+import {
+	useFolderEmails,
+	useMarkEmailDone,
+	useMarkEmailRead,
+} from "@/hooks/dataHooks"
 import { useUIStore } from "@/hooks/useUIStore"
 import { parseEmailBody } from "@/libs/emailUtils"
 import { cn } from "@/libs/utils"
@@ -64,6 +68,7 @@ export const ViewEmailPane = () => {
 	const { data: emails } = useFolderEmails()
 	const email = emails?.[selectedIndex]
 	const { mutate: handleMarkDone } = useMarkEmailDone()
+	const { mutateAsync: markEmailRead } = useMarkEmailRead()
 	const {
 		selectedMessageIndex,
 		setSelectedMessageIndex,
@@ -76,6 +81,15 @@ export const ViewEmailPane = () => {
 	const { isShowingEmail, setIsShowingEmail } = useUIStore()
 	const lastMessageRef = useRef<HTMLDivElement>(null)
 	const [isScrolled, setIsScrolled] = useState(false)
+
+	useEffect(() => {
+		if (email && !email.messages[0].read && isShowingEmail) {
+			markEmailRead({
+				emails_input: [email],
+				read: true,
+			})
+		}
+	}, [email?.id, isShowingEmail])
 
 	// useEffect(() => {
 	// 	if (email?.messages && lastMessageRef.current) {

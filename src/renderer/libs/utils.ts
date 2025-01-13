@@ -1,5 +1,4 @@
 import { clsx, type ClassValue } from "clsx"
-import { UseFormGetValues, UseFormSetValue } from "react-hook-form"
 import { twMerge } from "tailwind-merge"
 
 export function cn(...inputs: ClassValue[]) {
@@ -33,29 +32,4 @@ export const debounce = <T extends (...args: any[]) => any>(
 	}
 
 	return executedFunction
-}
-
-export const handleAttach = async (
-	setIsFileDialogOpen: (isOpen: boolean) => void,
-	setValue: UseFormSetValue<ComposeFormData>,
-	getValues: UseFormGetValues<ComposeFormData>
-) => {
-	setIsFileDialogOpen(true)
-	const result = await window.electron.openFile()
-	setIsFileDialogOpen(false)
-	if (!result.canceled && result.filePaths.length > 0) {
-		const filePath = result.filePaths[0]
-		const stats = await window.electron.getFileStats(filePath)
-		const content = await window.electron.readFile(filePath)
-		setValue("attachments.current", [
-			...getValues("attachments.current"),
-			{
-				name: filePath.split("/").pop()!,
-				size: stats.size,
-				path: filePath,
-				content: content,
-				type: "file",
-			},
-		])
-	}
 }

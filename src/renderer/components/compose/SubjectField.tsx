@@ -1,10 +1,7 @@
-import { UseFormReturn } from "react-hook-form"
+import { useFormContext } from "react-hook-form"
 
-interface SubjectFieldProps {
-	form: UseFormReturn<ComposeFormData>
-}
-
-const SubjectField = ({ form }: SubjectFieldProps) => {
+const SubjectField = () => {
+	const form = useFormContext<ComposeFormData>()
 	const { setValue, watch } = form
 	const subject = watch("subject")
 

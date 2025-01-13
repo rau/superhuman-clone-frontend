@@ -133,3 +133,11 @@ export const getUniqueSenderNames = (messages: EmailMessage[]): string => {
 				.join(", ")
 		: Array.from(uniqueNames).join(", ")
 }
+
+export const getUniqueSenderNamesForDraft = (
+	messages: EmailMessage[]
+): string => {
+	return Array.from(messages[0].to?.to || [])
+		.map((recipient) => recipient.name || recipient.email)
+		.join(", ")
+}

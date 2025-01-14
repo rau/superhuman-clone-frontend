@@ -18,6 +18,9 @@ interface ComposeState {
 	setShowCcBcc: (show: boolean) => void
 	setShowSuggestions: (show: boolean) => void
 	setToQuery: (value: string) => void
+
+	selectedContacts: Record<RecipientField, Set<string>>
+	setSelectedContacts: (field: RecipientField, emails: Set<string>) => void
 }
 
 export const useComposeStore = create<ComposeState>((set) => ({
@@ -38,4 +41,14 @@ export const useComposeStore = create<ComposeState>((set) => ({
 	setShowCcBcc: (show) => set({ showCcBcc: show }),
 	setShowSuggestions: (show) => set({ showSuggestions: show }),
 	setToQuery: (value) => set({ toQuery: value }),
+
+	selectedContacts: {
+		to: new Set(),
+		cc: new Set(),
+		bcc: new Set(),
+	},
+	setSelectedContacts: (field, emails) =>
+		set((state) => ({
+			selectedContacts: { ...state.selectedContacts, [field]: emails },
+		})),
 }))

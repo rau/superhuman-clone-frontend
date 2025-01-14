@@ -22,6 +22,12 @@ export const useComposeShortcuts = (form: UseFormReturn<ComposeFormData>) => {
 		selectedContactIndex,
 		setSelectedContactIndex,
 		draftId,
+		activeField,
+		selectedContacts,
+		setSelectedContacts,
+		toQuery,
+		ccQuery,
+		bccQuery,
 	} = useComposeStore()
 	const { mutateAsync: discardDraft } = useDiscardDraft()
 
@@ -33,6 +39,16 @@ export const useComposeShortcuts = (form: UseFormReturn<ComposeFormData>) => {
 		{
 			key: "Escape",
 			handler: () => {
+				const hasSelectedContacts = Object.values(
+					selectedContacts
+				).some((set) => set.size > 0)
+
+				if (hasSelectedContacts) {
+					setSelectedContacts("to", new Set())
+					setSelectedContacts("cc", new Set())
+					setSelectedContacts("bcc", new Set())
+					return
+				}
 				setIsComposing(false)
 			},
 		},
@@ -44,8 +60,6 @@ export const useComposeShortcuts = (form: UseFormReturn<ComposeFormData>) => {
 					return
 				}
 
-				const { activeField, toQuery, ccQuery, bccQuery } =
-					useComposeStore.getState()
 				const query =
 					activeField === "to"
 						? toQuery
@@ -138,6 +152,36 @@ export const useComposeShortcuts = (form: UseFormReturn<ComposeFormData>) => {
 			},
 			meta: true,
 			shift: true,
+		},
+		{
+			key: "a",
+			handler: (e) => {
+				const activeElement = document.activeElement
+				const isFieldFocused =
+					activeElement?.getAttribute("data-field") === activeField
+
+				const query =
+					activeField === "to"
+						? toQuery
+						: activeField === "cc"
+							? ccQuery
+							: bccQuery
+
+				if (isFieldFocused && query.length > 0) {
+					// @ts-ignore
+					activeElement?.select()
+					e.stopPropagation()
+					return
+				}
+
+				if (isFieldFocused) {
+					const contacts = form.getValues(activeField)
+					const emails = new Set(contacts.map((c) => c.email))
+					setSelectedContacts(activeField, emails)
+					e.preventDefault()
+				}
+			},
+			meta: true,
 		},
 	]
 

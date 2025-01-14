@@ -15,16 +15,39 @@ const ContactChip = ({
 }) => {
 	const form = useFormContext<ComposeFormData>()
 	const removeContact = useRemoveContact(form, field)
+	const { selectedContacts, setSelectedContacts } = useComposeStore()
+	const isSelected = selectedContacts[field].has(contact.email)
 
 	return (
-		<div className="group flex items-center gap-1 hover:bg-slate-100">
+		<div
+			className={cn(
+				"group flex items-center gap-1 p-[2px]",
+				isSelected || "hover:bg-slate-100 dark:hover:bg-slate-800",
+				isSelected && "bg-slate-100 dark:bg-slate-800"
+			)}
+			onClick={() => {
+				const newSelected = new Set(selectedContacts[field])
+				if (isSelected) {
+					newSelected.delete(contact.email)
+				} else {
+					newSelected.add(contact.email)
+				}
+				setSelectedContacts(field, newSelected)
+			}}
+		>
 			<span className="select-none text-sm font-medium">
 				{contact.name || contact.email}
 			</span>
 
 			<X
-				className="hidden h-3 w-3 text-slate-500 hover:cursor-pointer hover:text-slate-700 group-hover:block"
-				onClick={() => removeContact(contact)}
+				className={cn(
+					"h-3 w-3 text-slate-500 hover:cursor-pointer hover:text-slate-700",
+					isSelected ? "block" : "hidden group-hover:block"
+				)}
+				onClick={(e) => {
+					e.stopPropagation()
+					removeContact(contact)
+				}}
 			/>
 		</div>
 	)
@@ -131,23 +154,110 @@ const RecipientField = ({ field }: { field: RecipientField }) => {
 		toQuery,
 		ccQuery,
 		bccQuery,
+		setSelectedContacts,
+		selectedContacts,
 	} = useComposeStore()
 	const { watch, setValue } = useFormContext<ComposeFormData>()
 	const { to, cc, bcc } = watch()
 
 	const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-		if (e.key === "Backspace" && e.currentTarget.value === "") {
+		const contacts =
+			activeField === "to" ? to : activeField === "cc" ? cc : bcc
+
+		if (
+			(e.key === "ArrowLeft" || e.key === "ArrowRight") &&
+			e.currentTarget.value === ""
+		) {
 			e.preventDefault()
-			const contacts =
-				activeField === "to" ? to : activeField === "cc" ? cc : bcc
-			const lastContact = contacts[contacts.length - 1]
-			if (lastContact) {
-				setValue(activeField, [...contacts.slice(0, -1)])
+
+			const currentSelectedIndex = contacts.findIndex((c) =>
+				selectedContacts[field].has(c.email)
+			)
+			let newIndex = currentSelectedIndex
+
+			if (e.key === "ArrowLeft") {
+				newIndex =
+					currentSelectedIndex === -1
+						? contacts.length - 1
+						: Math.max(0, currentSelectedIndex - 1)
+			} else if (currentSelectedIndex !== -1) {
+				newIndex = Math.min(
+					contacts.length - 1,
+					currentSelectedIndex + 1
+				)
+			}
+
+			if (newIndex !== -1 && newIndex !== currentSelectedIndex) {
+				const newSelectedContact = contacts[newIndex]
+				if (newSelectedContact) {
+					setSelectedContacts(
+						field,
+						new Set([newSelectedContact.email])
+					)
+				}
+			}
+		}
+
+		if (e.key === "Backspace") {
+			const hasSelectedContacts = selectedContacts[field].size > 0
+
+			if (e.currentTarget.value === "") {
+				e.preventDefault()
+				if (hasSelectedContacts) {
+					const contacts = watch(field)
+					const currentSelectedIndex = contacts.findIndex((c) =>
+						selectedContacts[field].has(c.email)
+					)
+					setValue(
+						field,
+						contacts.filter(
+							(c) => !selectedContacts[field].has(c.email)
+						)
+					)
+
+					const remainingContacts = contacts.filter(
+						(c) => !selectedContacts[field].has(c.email)
+					)
+					if (
+						remainingContacts.length > 0 &&
+						currentSelectedIndex < remainingContacts.length
+					) {
+						setSelectedContacts(
+							field,
+							new Set([
+								remainingContacts[currentSelectedIndex].email,
+							])
+						)
+					} else {
+						setSelectedContacts(field, new Set())
+					}
+				} else {
+					const contacts =
+						activeField === "to"
+							? to
+							: activeField === "cc"
+								? cc
+								: bcc
+					const lastContact = contacts[contacts.length - 1]
+					if (lastContact) {
+						setValue(activeField, [...contacts.slice(0, -1)])
+						if (contacts.length > 1) {
+							setSelectedContacts(
+								field,
+								new Set([contacts[contacts.length - 2].email])
+							)
+						}
+					}
+				}
 			}
 		}
 	}
 
 	const handleQueryChange = (value: string) => {
+		if (value.length > 0) {
+			setSelectedContacts(field, new Set())
+		}
+
 		if (activeField === "to") {
 			setToQuery(value)
 		} else if (activeField === "cc") {
@@ -201,6 +311,9 @@ const RecipientField = ({ field }: { field: RecipientField }) => {
 					value={query}
 					onChange={(e) => handleQueryChange(e.target.value)}
 					onFocus={() => setActiveField(field)}
+					onBlur={() => {
+						setSelectedContacts(field, new Set())
+					}}
 					onKeyDown={handleKeyDown}
 					className={cn(
 						"text-sm outline-none",

@@ -1,4 +1,5 @@
 import { BackNavigationSection } from "@/components/BackNavigationSection"
+import { AIPromptInput } from "@/components/compose/AIPromptInput"
 import RecipientFields from "@/components/compose/RecipientFields"
 import { SendEmptySubjectDialog } from "@/components/compose/SendEmptySubjectDialog"
 import { SendNoRecipientsDialog } from "@/components/compose/SendNoRecipientsDialog"
@@ -192,8 +193,14 @@ export const ComposePaneOverlay = ({
 }) => {
 	const { data: emails } = useFolderEmails()
 	const { mutateAsync: createDraft } = useCreateDraft()
-	const { selectedFolder, selectedIndices, isComposing, setIsComposing } =
-		useUIStore()
+	const {
+		selectedFolder,
+		selectedIndices,
+		isComposing,
+		setIsComposing,
+		showAIPrompt,
+		setShowAIPrompt,
+	} = useUIStore()
 	const { draftId, setDraftId } = useComposeStore()
 	const selectedIndex = selectedIndices[selectedFolder?.id || "INBOX"] || 0
 	const email = emails?.[selectedIndex]
@@ -307,15 +314,17 @@ export const ComposePaneOverlay = ({
 						<div className="flex flex-col gap-2">
 							<RecipientFields />
 							<SubjectField />
-							<div className="flex min-h-0 flex-1 flex-col">
+							<div className="relative flex min-h-0 flex-1 flex-col">
 								<div className="flex-1 overflow-y-auto">
 									<TextareaAutosize
+										data-message-field
 										{...register("message")}
 										placeholder="Tip: Hit ⌘J for AI"
 										className="w-full resize-none pt-1 text-sm font-light outline-none"
 										minRows={12}
 										maxRows={24}
 									/>
+									{showAIPrompt && <AIPromptInput />}
 								</div>
 							</div>
 						</div>

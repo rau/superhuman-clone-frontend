@@ -16,7 +16,8 @@ interface ShortcutConfig {
 }
 
 export const useComposeShortcuts = (form: UseFormReturn<ComposeFormData>) => {
-	const { setIsComposing, isComposing } = useUIStore()
+	const { setIsComposing, isComposing, setShowAIPrompt, showAIPrompt } =
+		useUIStore()
 	const {
 		showSuggestions,
 		selectedContactIndex,
@@ -28,6 +29,8 @@ export const useComposeShortcuts = (form: UseFormReturn<ComposeFormData>) => {
 		toQuery,
 		ccQuery,
 		bccQuery,
+		aiPromptMode,
+		setAiPromptMode,
 	} = useComposeStore()
 	const { mutateAsync: discardDraft } = useDiscardDraft()
 
@@ -39,6 +42,11 @@ export const useComposeShortcuts = (form: UseFormReturn<ComposeFormData>) => {
 		{
 			key: "Escape",
 			handler: () => {
+				if (showAIPrompt) {
+					setShowAIPrompt(false)
+					return
+				}
+
 				const hasSelectedContacts = Object.values(
 					selectedContacts
 				).some((set) => set.size > 0)
@@ -167,6 +175,12 @@ export const useComposeShortcuts = (form: UseFormReturn<ComposeFormData>) => {
 							? ccQuery
 							: bccQuery
 
+				if (!isFieldFocused) {
+					e.preventDefault()
+					e.stopPropagation()
+					return
+				}
+
 				if (isFieldFocused && query.length > 0) {
 					// @ts-ignore
 					activeElement?.select()
@@ -179,6 +193,28 @@ export const useComposeShortcuts = (form: UseFormReturn<ComposeFormData>) => {
 					const emails = new Set(contacts.map((c) => c.email))
 					setSelectedContacts(activeField, emails)
 					e.preventDefault()
+				}
+			},
+			meta: true,
+		},
+		{
+			key: "j",
+			handler: () => {
+				const messageArea = document.querySelector(
+					"[data-message-field]"
+				) as HTMLTextAreaElement
+				if (messageArea && messageArea.value.length > 0) {
+					messageArea.select()
+				}
+				if (showAIPrompt && messageArea?.value.length > 0) {
+					setAiPromptMode(aiPromptMode === "draft" ? "edit" : "draft")
+				} else {
+					const promptInput = document.querySelector(
+						"[data-ai-prompt]"
+					) as HTMLElement
+					promptInput?.focus()
+					setShowAIPrompt(true)
+					setAiPromptMode("draft")
 				}
 			},
 			meta: true,
@@ -202,6 +238,14 @@ export const useComposeShortcuts = (form: UseFormReturn<ComposeFormData>) => {
 					shiftMatch &&
 					ctrlMatch
 				) {
+					if (
+						e.key === "a" &&
+						meta &&
+						!document.activeElement?.hasAttribute("data-field")
+					) {
+						return
+					}
+
 					e.preventDefault()
 					e.stopPropagation()
 					handler(e)
@@ -212,5 +256,5 @@ export const useComposeShortcuts = (form: UseFormReturn<ComposeFormData>) => {
 
 		window.addEventListener("keydown", handleKeyDown)
 		return () => window.removeEventListener("keydown", handleKeyDown)
-	}, [isComposing, shortcuts, showSuggestions])
+	}, [isComposing, shortcuts, showSuggestions, aiPromptMode])
 }

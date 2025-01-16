@@ -51,6 +51,9 @@ interface UIState {
 
 	moveToDialogIndex: number
 	setMoveToDialogIndex: (index: number) => void
+
+	showAIPrompt: boolean
+	setShowAIPrompt: (value: boolean) => void
 }
 
 const INITIAL_FOLDER: Folder = {
@@ -84,6 +87,7 @@ export const useUIStore = create<UIState>((set) => ({
 	selectedMessageIndex: 0,
 	collapsedMessages: {},
 	isFileDialogOpen: false,
+	showAIPrompt: false,
 	setIsSearching: (isSearching) => set({ isSearching }),
 	setIsShowingEmail: (isShowingEmail) => set({ isShowingEmail }),
 	setIsComposing: (isComposing) => set({ isComposing }),
@@ -141,4 +145,5 @@ export const useUIStore = create<UIState>((set) => ({
 	setIsFileDialogOpen: (value) => set({ isFileDialogOpen: value }),
 	setShowNoRecipientsDialog: (value) =>
 		set({ showNoRecipientsDialog: value }),
+	setShowAIPrompt: (value) => set({ showAIPrompt: value }),
 }))

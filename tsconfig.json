@@ -1,29 +1,27 @@
 {
-	"compilerOptions": {
-		"incremental": true,
-		"target": "es2022",
-		"module": "commonjs",
-		"lib": ["dom", "es2022"],
-		"jsx": "react-jsx",
-		"strict": true,
-		"sourceMap": true,
-		"moduleResolution": "node",
-		"esModuleInterop": true,
-		"allowSyntheticDefaultImports": true,
-		"resolveJsonModule": true,
-		"allowJs": true,
-		"outDir": ".erb/dll",
-		"baseUrl": ".",
-		"paths": {
-			"@/*": ["./src/renderer/*"]
-		}
-	},
-	"include": [
-		"next-env.d.ts",
-		"**/*.ts",
-		"**/*.tsx",
-		".next/types/**/*.ts",
-		"build/types/**/*.ts"
-	],
-	"exclude": ["test", "release/build", "release/app/dist", ".erb/dll"]
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./app/*"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
 }

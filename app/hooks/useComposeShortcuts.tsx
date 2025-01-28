@@ -1,5 +1,6 @@
 import { useDiscardDraft } from "@/hooks/dataHooks"
 import { useComposeStore } from "@/hooks/useComposeStore"
+import { useAIPromptStore } from "@/hooks/usePromptStore"
 import { useUIStore } from "@/hooks/useUIStore"
 import { sendEmail, useAddAttachment, useAddContact } from "@/libs/composeUtils"
 import { filterContacts } from "@/libs/contactUtils"
@@ -29,9 +30,17 @@ export const useComposeShortcuts = (form: UseFormReturn<ComposeFormData>) => {
 		toQuery,
 		ccQuery,
 		bccQuery,
+		selectedRange,
+		setSelectedRange,
+	} = useComposeStore()
+	const {
 		aiPromptMode,
 		setAiPromptMode,
-	} = useComposeStore()
+		setAiPrompt,
+		setAiPromptEdit,
+		showAIPromptContextMenu,
+		setShowAIPromptContextMenu,
+	} = useAIPromptStore()
 	const { mutateAsync: discardDraft } = useDiscardDraft()
 
 	const send = sendEmail(form)
@@ -44,6 +53,11 @@ export const useComposeShortcuts = (form: UseFormReturn<ComposeFormData>) => {
 			handler: () => {
 				if (showAIPrompt) {
 					setShowAIPrompt(false)
+					setAiPrompt("")
+					if (showAIPromptContextMenu) {
+						setShowAIPromptContextMenu(false)
+						setAiPromptEdit("")
+					}
 					return
 				}
 
@@ -203,18 +217,34 @@ export const useComposeShortcuts = (form: UseFormReturn<ComposeFormData>) => {
 				const messageArea = document.querySelector(
 					"[data-message-field]"
 				) as HTMLTextAreaElement
-				if (messageArea && messageArea.value.length > 0) {
+				const hasSelectedText =
+					(window.getSelection()?.toString().length ?? 0) > 0
+				// console.log("messageArea", messageArea)
+				const selection = window.getSelection()
+				console.log("selection", selection)
+				if (selection && selection.rangeCount > 0) {
+					const range = selection.getRangeAt(0)
+					const rect = range.getBoundingClientRect()
+					console.log("rect", rect)
+					setSelectedRange(rect.top, rect.bottom)
+				}
+				if (messageArea && !hasSelectedText) {
 					messageArea.select()
 				}
 				if (showAIPrompt && messageArea?.value.length > 0) {
 					setAiPromptMode(aiPromptMode === "draft" ? "edit" : "draft")
+				} else if (showAIPrompt && hasSelectedText) {
+					setAiPromptMode("edit")
 				} else {
-					const promptInput = document.querySelector(
-						"[data-ai-prompt]"
-					) as HTMLElement
-					promptInput?.focus()
 					setShowAIPrompt(true)
 					setAiPromptMode("draft")
+					setTimeout(() => {
+						const promptInput = document.querySelector(
+							"[data-ai-prompt]"
+						) as HTMLElement
+						// console.log(promptInput)
+						promptInput?.focus()
+					}, 100)
 				}
 			},
 			meta: true,
@@ -227,6 +257,8 @@ export const useComposeShortcuts = (form: UseFormReturn<ComposeFormData>) => {
 
 			shortcuts.forEach(({ key, handler, meta, shift, ctrl }) => {
 				if (handled) return
+
+				if (!isComposing) return
 
 				const metaMatch = meta ? e.metaKey : !e.metaKey
 				const shiftMatch = shift ? e.shiftKey : !e.shiftKey
@@ -256,5 +288,5 @@ export const useComposeShortcuts = (form: UseFormReturn<ComposeFormData>) => {
 
 		window.addEventListener("keydown", handleKeyDown)
 		return () => window.removeEventListener("keydown", handleKeyDown)
-	}, [isComposing, shortcuts, showSuggestions, aiPromptMode])
+	}, [isComposing, shortcuts, showSuggestions, aiPromptMode, selectedRange])
 }

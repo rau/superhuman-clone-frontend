@@ -201,7 +201,8 @@ export const ComposePaneOverlay = ({
 		showAIPrompt,
 		setShowAIPrompt,
 	} = useUIStore()
-	const { draftId, setDraftId } = useComposeStore()
+	const { draftId, setDraftId, selectedRange, setSelectedRange } =
+		useComposeStore()
 	const selectedIndex = selectedIndices[selectedFolder?.id || "INBOX"] || 0
 	const email = emails?.[selectedIndex]
 
@@ -223,39 +224,48 @@ export const ComposePaneOverlay = ({
 	useComposeShortcuts(form)
 
 	useEffect(() => {
-		let lastValues = ""
+		const initialValues = JSON.stringify({
+			message: getValues("message"),
+			subject: getValues("subject"),
+			to: getValues("to"),
+			cc: getValues("cc"),
+			bcc: getValues("bcc"),
+			attachments: getValues("attachments"),
+		})
+		let lastValues = initialValues
+
 		const debouncedSaveDraft = debounce(() => {
-			const values = getValues()
 			const currentValues = JSON.stringify({
-				message: values.message,
-				subject: values.subject,
-				to: values.to,
-				cc: values.cc,
-				bcc: values.bcc,
-				attachments: values.attachments,
+				message: getValues("message"),
+				subject: getValues("subject"),
+				to: getValues("to"),
+				cc: getValues("cc"),
+				bcc: getValues("bcc"),
+				attachments: getValues("attachments"),
 			})
 
-			if (currentValues === lastValues) return
+			if (currentValues === lastValues || currentValues === initialValues)
+				return
 			lastValues = currentValues
 
 			if (
-				!values.message &&
-				!values.subject &&
-				!values.to.length &&
-				!values.cc.length &&
-				!values.bcc.length
+				!getValues("message") &&
+				!getValues("subject") &&
+				!getValues("to").length &&
+				!getValues("cc").length &&
+				!getValues("bcc").length
 			)
 				return
 
 			createDraft({
-				to: values.to,
-				cc: values.cc,
-				bcc: values.bcc,
-				subject: values.subject,
-				body: values.message,
+				to: getValues("to"),
+				cc: getValues("cc"),
+				bcc: getValues("bcc"),
+				subject: getValues("subject"),
+				body: getValues("message"),
 				draftId,
-				attachmentsToDelete: values.attachments.toDelete,
-				attachmentsToAdd: values.attachments.toAdd,
+				attachmentsToDelete: getValues("attachments.toDelete"),
+				attachmentsToAdd: getValues("attachments.toAdd"),
 			}).then((data) => {
 				if (!draftId) setDraftId(data.draft_id)
 				else toast.success("Draft saved")
@@ -295,6 +305,8 @@ export const ComposePaneOverlay = ({
 		}
 	}, [draftId])
 
+	// console.log("selectedRange", selectedRange)
+
 	if (!isComposing) return null
 
 	return (
@@ -315,15 +327,35 @@ export const ComposePaneOverlay = ({
 							<RecipientFields />
 							<SubjectField />
 							<div className="relative flex min-h-0 flex-1 flex-col">
-								<div className="flex-1 overflow-y-auto">
-									<TextareaAutosize
-										data-message-field
-										{...register("message")}
-										placeholder="Tip: Hit ⌘J for AI"
-										className="w-full resize-none pt-1 text-sm font-light outline-none"
-										minRows={12}
-										maxRows={24}
-									/>
+								<div className="flex-1 items-center overflow-y-auto">
+									<div className="relative">
+										<TextareaAutosize
+											data-message-field
+											className="w-full resize-none bg-transparent text-sm outline-none selection:bg-blue-200 selection:!bg-opacity-100"
+											value={getValues("message")}
+											onChange={(e) =>
+												setValue(
+													"message",
+													e.target.value
+												)
+											}
+											minRows={1}
+											maxRows={10}
+											placeholder="Tip: Hit ⌘J for AI"
+										/>
+										{selectedRange.end >
+											selectedRange.start && (
+											<div
+												className="pointer-events-none absolute left-0 right-0 top-0"
+												style={{
+													backgroundColor:
+														"rgba(59, 130, 246, 0.2)",
+													height: "100%",
+													clipPath: `inset(${selectedRange.start}px 0 ${selectedRange.end}px 0)`,
+												}}
+											/>
+										)}
+									</div>
 									{showAIPrompt && <AIPromptInput />}
 								</div>
 							</div>

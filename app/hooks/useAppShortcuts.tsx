@@ -466,6 +466,10 @@ export const useAppShortcuts = () => {
 			const currentMode = getCurrentMode()
 			let handled = false
 
+			if (isComposing) {
+				return
+			}
+
 			shortcuts.forEach(
 				({ key, handler, meta, shift, ctrl, disabledModes = [] }) => {
 					if (handled) return

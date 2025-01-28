@@ -1,7 +1,5 @@
 import { create } from "zustand"
 
-type AiPromptMode = "edit" | "draft"
-
 interface ComposeState {
 	activeField: RecipientField
 	bccQuery: string
@@ -24,11 +22,14 @@ interface ComposeState {
 	selectedContacts: Record<RecipientField, Set<string>>
 	setSelectedContacts: (field: RecipientField, emails: Set<string>) => void
 
-	aiPrompt: string
-	setAiPrompt: (value: string) => void
+	showDiscardDialog: boolean
+	setShowDiscardDialog: (show: boolean) => void
 
-	aiPromptMode: AiPromptMode
-	setAiPromptMode: (mode: AiPromptMode) => void
+	selectedRange: {
+		start: number
+		end: number
+	}
+	setSelectedRange: (start: number, end: number) => void
 }
 
 export const useComposeStore = create<ComposeState>((set) => ({
@@ -60,9 +61,12 @@ export const useComposeStore = create<ComposeState>((set) => ({
 			selectedContacts: { ...state.selectedContacts, [field]: emails },
 		})),
 
-	aiPrompt: "",
-	setAiPrompt: (value) => set({ aiPrompt: value }),
+	showDiscardDialog: false,
+	setShowDiscardDialog: (show) => set({ showDiscardDialog: show }),
 
-	aiPromptMode: "draft",
-	setAiPromptMode: (mode) => set({ aiPromptMode: mode }),
+	selectedRange: {
+		start: 0,
+		end: 0,
+	},
+	setSelectedRange: (start, end) => set({ selectedRange: { start, end } }),
 }))

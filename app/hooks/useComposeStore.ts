@@ -25,11 +25,11 @@ interface ComposeState {
 	showDiscardDialog: boolean
 	setShowDiscardDialog: (show: boolean) => void
 
-	selectedRange: {
+	selectedText: {
 		start: number
 		end: number
 	}
-	setSelectedRange: (start: number, end: number) => void
+	setSelectedText: (start: number, end: number) => void
 }
 
 export const useComposeStore = create<ComposeState>((set) => ({
@@ -64,9 +64,9 @@ export const useComposeStore = create<ComposeState>((set) => ({
 	showDiscardDialog: false,
 	setShowDiscardDialog: (show) => set({ showDiscardDialog: show }),
 
-	selectedRange: {
+	selectedText: {
 		start: 0,
 		end: 0,
 	},
-	setSelectedRange: (start, end) => set({ selectedRange: { start, end } }),
+	setSelectedText: (start, end) => set({ selectedText: { start, end } }),
 }))

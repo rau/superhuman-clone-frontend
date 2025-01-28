@@ -8,6 +8,8 @@ import {
 	draftMakeShorterUserPrompt,
 	draftSystemPrompt,
 	draftUserPrompt,
+	editSystemPrompt,
+	editUserPrompt,
 	fixSpellingAndGrammarSystemPrompt,
 	fixSpellingAndGrammarUserPrompt,
 	improveWritingSystemPrompt,
@@ -103,6 +105,22 @@ export const queryGptFixSpellingAndGrammar = async (prompt: string) => {
 		{
 			role: ChatMessageRole.User,
 			content: fixSpellingAndGrammarUserPrompt + prompt,
+		},
+	]
+	return queryGpt(messages)
+}
+
+export const queryGptEdit = async (
+	editInstructions: string,
+	partToEdit: string
+) => {
+	console.log("queryGptEdit", editInstructions, partToEdit)
+	const messages = [
+		{ role: ChatMessageRole.System, content: editSystemPrompt },
+		{
+			role: ChatMessageRole.User,
+			content:
+				editUserPrompt + "\n" + editInstructions + "\n" + partToEdit,
 		},
 	]
 	return queryGpt(messages)

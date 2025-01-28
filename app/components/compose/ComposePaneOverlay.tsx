@@ -201,8 +201,7 @@ export const ComposePaneOverlay = ({
 		showAIPrompt,
 		setShowAIPrompt,
 	} = useUIStore()
-	const { draftId, setDraftId, selectedRange, setSelectedRange } =
-		useComposeStore()
+	const { draftId, setDraftId, setSelectedText } = useComposeStore()
 	const selectedIndex = selectedIndices[selectedFolder?.id || "INBOX"] || 0
 	const email = emails?.[selectedIndex]
 
@@ -305,8 +304,6 @@ export const ComposePaneOverlay = ({
 		}
 	}, [draftId])
 
-	// console.log("selectedRange", selectedRange)
-
 	if (!isComposing) return null
 
 	return (
@@ -340,21 +337,27 @@ export const ComposePaneOverlay = ({
 												)
 											}
 											minRows={1}
-											maxRows={10}
 											placeholder="Tip: Hit ⌘J for AI"
+											onSelect={(e) => {
+												const target =
+													e.target as HTMLTextAreaElement
+												setSelectedText(
+													target.selectionStart,
+													target.selectionEnd
+												)
+											}}
+											onBlur={() => {
+												setSelectedText(0, 0)
+											}}
 										/>
-										{selectedRange.end >
-											selectedRange.start && (
-											<div
-												className="pointer-events-none absolute left-0 right-0 top-0"
-												style={{
-													backgroundColor:
-														"rgba(59, 130, 246, 0.2)",
-													height: "100%",
-													clipPath: `inset(${selectedRange.start}px 0 ${selectedRange.end}px 0)`,
-												}}
-											/>
-										)}
+										{/* <div className="absolute bottom-0 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-lg bg-white px-4 py-2 shadow-lg">
+											{(window.getSelection()?.toString()
+												?.length ?? 0) > 0 && (
+												<div className="flex gap-2">
+													<TextSelectionMenu />
+												</div>
+											)}
+										</div> */}
 									</div>
 									{showAIPrompt && <AIPromptInput />}
 								</div>

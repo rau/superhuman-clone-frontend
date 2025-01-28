@@ -9,11 +9,12 @@ import {
 	queryGptDraftMakeLonger,
 	queryGptDraftMakeShorter,
 	queryGptDraftSimplify,
+	queryGptEdit,
 	queryGptFixSpellingAndGrammar,
 	queryGptImproveWriting,
 } from "@/libs/gpt/gptUtils"
 import { ArrowUp } from "lucide-react"
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useFormContext } from "react-hook-form"
 import TextareaAutosize from "react-textarea-autosize"
 
@@ -28,7 +29,7 @@ import {
 const AIPromptInput = () => {
 	const [isLoading, setIsLoading] = useState(false)
 	const { setShowAIPrompt } = useUIStore()
-	const { setShowDiscardDialog } = useComposeStore()
+	const { setShowDiscardDialog, selectedText } = useComposeStore()
 	const {
 		aiPrompt,
 		setAiPrompt,
@@ -45,24 +46,25 @@ const AIPromptInput = () => {
 
 	const promptRef = useRef<HTMLDivElement>(null)
 	const firstItemRef = useRef<HTMLDivElement>(null)
-	// useEffect(() => {
-	// 	const handleClickOutside = (e: MouseEvent) => {
-	// 		if (
-	// 			promptRef.current &&
-	// 			!promptRef.current.contains(e.target as Node)
-	// 		) {
-	// 			if (aiPrompt.length > 0) {
-	// 				setShowDiscardDialog(true)
-	// 			} else {
-	// 				setShowAIPrompt(false)
-	// 			}
-	// 		}
-	// 	}
 
-	// 	document.addEventListener('mousedown', handleClickOutside)
-	// 	return () =>
-	// 		document.removeEventListener('mousedown', handleClickOutside)
-	// }, [aiPrompt])
+	useEffect(() => {
+		const handleClickOutside = (e: MouseEvent) => {
+			if (
+				promptRef.current &&
+				!promptRef.current.contains(e.target as Node)
+			) {
+				if (aiPrompt.length > 0) {
+					setShowDiscardDialog(true)
+				} else {
+					setShowAIPrompt(false)
+				}
+			}
+		}
+
+		document.addEventListener("mousedown", handleClickOutside)
+		return () =>
+			document.removeEventListener("mousedown", handleClickOutside)
+	}, [aiPrompt])
 
 	// useEffect(() => {
 	// 	if (showAIPromptContextMenu) {
@@ -95,6 +97,22 @@ const AIPromptInput = () => {
 	const handleFixSpellingAndGrammar = () =>
 		handleGptAction(queryGptFixSpellingAndGrammar)
 
+	const handleEdit = async () => {
+		setIsLoading(true)
+		setShowAIPromptContextMenu(false)
+		const result = await queryGptEdit(
+			aiPrompt,
+			getValues("message").slice(selectedText.start, selectedText.end)
+		)
+		if (result) {
+			setAiPrompt(result)
+		}
+		setShowAIPromptContextMenu(true)
+		setIsLoading(false)
+	}
+
+	console.log("showing AI prompt")
+
 	return (
 		<div className="relative">
 			<div
@@ -121,7 +139,9 @@ const AIPromptInput = () => {
 							<Separator orientation="horizontal" className="" />
 							<TextareaAutosize
 								data-ai-prompt-edit
-								placeholder={"Describe how to edit the text"}
+								placeholder={
+									"Describe how to edit the selected text"
+								}
 								className="mt-2 w-full resize-none bg-transparent text-xs text-gray-800 placeholder-gray-500 outline-none"
 								value={aiPromptEdit}
 								onChange={(e) =>
@@ -169,7 +189,7 @@ const AIPromptInput = () => {
 								placeholder={
 									aiPromptMode === "draft"
 										? "Outline your email in brief notes"
-										: "Describe how to edit the text"
+										: "Describe how to edit the selected text"
 								}
 								className="mt-2 w-full resize-none text-xs text-gray-800 outline-none"
 								value={aiPrompt}
@@ -179,7 +199,11 @@ const AIPromptInput = () => {
 								onKeyDown={async (e) => {
 									if (e.key === "Enter" && !e.shiftKey) {
 										e.preventDefault()
-										await handleSubmit()
+										if (aiPromptMode === "draft") {
+											await handleSubmit()
+										} else {
+											await handleEdit()
+										}
 									}
 								}}
 							/>
@@ -270,6 +294,8 @@ const AIPromptInput = () => {
 		</div>
 	)
 }
+
+const EditDropdownMenu = () => {}
 
 const DiscardDialog = () => {
 	const { showDiscardDialog, setShowDiscardDialog } = useComposeStore()

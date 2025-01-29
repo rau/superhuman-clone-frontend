@@ -54,6 +54,7 @@ const MoveToDialog = () => {
 
 	return (
 		<Dialog open={isMoveToDialogOpen} onOpenChange={setIsMoveToDialogOpen}>
+			<DialogTitle hidden>Move to ...</DialogTitle>
 			<DialogContent className="p-0" hideOverlay>
 				<DialogHeader className="border-b border-slate-800 p-4">
 					<DialogTitle>Move to ...</DialogTitle>

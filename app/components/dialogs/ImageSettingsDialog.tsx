@@ -1,4 +1,4 @@
-import { Dialog, DialogContent } from "@/components/ui/Dialog"
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/Dialog"
 import { Label } from "@/components/ui/Label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/RadioGroup"
 import { useUIStore } from "@/hooks/useUIStore"
@@ -11,7 +11,8 @@ export const ImageSettingsDialog = () => {
 			open={isImageSettingsOpen}
 			onOpenChange={setIsImageSettingsOpen}
 		>
-			<DialogContent className="w-[500px]">
+			<DialogTitle hidden>Images</DialogTitle>
+			<DialogContent className="w-[600px]">
 				<div className="flex flex-col gap-6 p-6">
 					<h2 className="text-xl font-semibold">Images</h2>
 					<p className="text-sm text-slate-600">

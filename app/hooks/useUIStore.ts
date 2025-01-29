@@ -8,7 +8,6 @@ interface UIState {
 	isSettingsOpen: boolean
 	isShortcutsPaneOpen: boolean
 	isAISettingsOpen: boolean
-	isQuickTipsOpen: boolean
 	isDownloadsOpen: boolean
 	isImageSettingsOpen: boolean
 	isSignInOpen: boolean
@@ -38,7 +37,6 @@ interface UIState {
 	setIsSettingsOpen: (open: boolean) => void
 	setIsShortcutsPaneOpen: (open: boolean) => void
 	setIsAISettingsOpen: (open: boolean) => void
-	setIsQuickTipsOpen: (open: boolean) => void
 	setIsDownloadsOpen: (value: boolean) => void
 	setIsImageSettingsOpen: (value: boolean) => void
 	setIsSignInOpen: (value: boolean) => void
@@ -72,7 +70,6 @@ export const useUIStore = create<UIState>((set) => ({
 	isShortcutsPaneOpen: false,
 	isAISettingsOpen: false,
 	selectedFolder: INITIAL_FOLDER,
-	isQuickTipsOpen: true,
 	isDownloadsOpen: false,
 	isImageSettingsOpen: false,
 	isSignInOpen: false,
@@ -96,7 +93,6 @@ export const useUIStore = create<UIState>((set) => ({
 	setSelectedFolder: (folder) => set({ selectedFolder: folder }),
 	setIsShortcutsPaneOpen: (open) => set({ isShortcutsPaneOpen: open }),
 	setIsAISettingsOpen: (open) => set({ isAISettingsOpen: open }),
-	setIsQuickTipsOpen: (open) => set({ isQuickTipsOpen: open }),
 	setIsDownloadsOpen: (value) => set({ isDownloadsOpen: value }),
 	setIsImageSettingsOpen: (value) => set({ isImageSettingsOpen: value }),
 	setIsSignInOpen: (value) => set({ isSignInOpen: value }),

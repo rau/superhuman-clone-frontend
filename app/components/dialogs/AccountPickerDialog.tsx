@@ -1,5 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar"
-import { Dialog, DialogContent } from "@/components/ui/Dialog"
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/Dialog"
 import { useAccounts, useSignOutAccount } from "@/hooks/dataHooks"
 import { useAccountStore } from "@/hooks/useAccountStore"
 import { useUIStore } from "@/hooks/useUIStore"
@@ -17,9 +17,10 @@ export const AccountPickerDialog = () => {
 			open={isAccountDialogOpen}
 			onOpenChange={setIsAccountDialogOpen}
 		>
+			<DialogTitle hidden>Accounts</DialogTitle>
 			<DialogContent className="w-fit min-w-[600px]">
 				<div className="flex flex-col gap-2">
-					<h2 className="pb-2 text-lg">Accounts</h2>
+					<h2 className="text-lg pb-2">Accounts</h2>
 					{accounts?.map((account, index) => (
 						<div
 							key={account.email}

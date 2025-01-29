@@ -53,6 +53,8 @@ export const useAppShortcuts = () => {
 		setShowReplyPane,
 		collapsedMessages,
 		setCollapsedMessages,
+		isAISettingsOpen,
+		isShortcutsPaneOpen,
 	} = useUIStore()
 
 	const { setDraftId } = useComposeStore()
@@ -466,7 +468,7 @@ export const useAppShortcuts = () => {
 			const currentMode = getCurrentMode()
 			let handled = false
 
-			if (isComposing) {
+			if (isAISettingsOpen || isShortcutsPaneOpen || isComposing) {
 				return
 			}
 
@@ -502,5 +504,7 @@ export const useAppShortcuts = () => {
 		isShowingEmail,
 		isMoveToDialogOpen,
 		shortcuts,
+		isAISettingsOpen,
+		isShortcutsPaneOpen,
 	])
 }

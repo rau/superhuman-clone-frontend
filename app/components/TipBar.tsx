@@ -1,4 +1,4 @@
-import { useUIStore } from "@/hooks/useUIStore"
+import { useSettingsStore } from "@/hooks/useSettingsStore"
 import { X } from "lucide-react"
 import { IconButton } from "./ui/IconButton"
 
@@ -20,8 +20,8 @@ const tipItemsDiv = tipItems.map((item, index) => (
 ))
 
 export const TipBar = () => {
-	const { isQuickTipsOpen, setIsQuickTipsOpen } = useUIStore()
-	if (!isQuickTipsOpen) return null
+	const { settings, setSettings } = useSettingsStore()
+	if (!settings.isQuickTipsOpen) return null
 
 	return (
 		<div className="flex h-[24px] items-center justify-center bg-background">
@@ -31,7 +31,7 @@ export const TipBar = () => {
 			</div>
 			<IconButton
 				icon={X}
-				onClick={() => setIsQuickTipsOpen(false)}
+				onClick={() => setSettings({ isQuickTipsOpen: false })}
 				className="absolute right-4"
 			/>
 		</div>

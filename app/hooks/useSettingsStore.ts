@@ -1,11 +1,42 @@
 import { create } from "zustand"
+import { persist } from "zustand/middleware"
 
-interface SettingsState {
+interface Settings {
 	downloadPath: string
-	setDownloadPath: (path: string) => void
+	jobTitle: string
+	company: string
+	companyDescription: string
+	firstName: string
+	lastName: string
+	greeting: string
+	signature: string
+	isQuickTipsOpen: boolean
 }
 
-export const useSettingsStore = create<SettingsState>((set) => ({
-	downloadPath: "Downloads",
-	setDownloadPath: (path) => set({ downloadPath: path }),
-}))
+interface SettingsState {
+	settings: Settings
+	setSettings: (settings: Partial<Settings>) => void
+}
+
+export const useSettingsStore = create<SettingsState>()(
+	persist(
+		(set) => ({
+			settings: {
+				downloadPath: "Downloads",
+				jobTitle: "",
+				company: "",
+				companyDescription: "",
+				firstName: "",
+				lastName: "",
+				greeting: "",
+				signature: "",
+				isQuickTipsOpen: true,
+			},
+			setSettings: (newSettings) =>
+				set((state) => ({
+					settings: { ...state.settings, ...newSettings },
+				})),
+		}),
+		{ name: "settings" }
+	)
+)

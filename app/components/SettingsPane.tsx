@@ -1,21 +1,19 @@
 import { SuperhumanFooter } from "@/components/SuperhumanFooter"
 import { Switch } from "@/components/ui/Switch"
+import { useSettingsStore } from "@/hooks/useSettingsStore"
 import { useUIStore } from "@/hooks/useUIStore"
 import { useEffect } from "react"
 
 export const SettingsPane = () => {
 	const {
-		isQuickTipsOpen,
-		setIsSettingsOpen,
 		setIsShortcutsPaneOpen,
 		setIsAISettingsOpen,
-		setIsQuickTipsOpen,
 		setIsDownloadsOpen,
 		setIsImageSettingsOpen,
 		setIsAccountDialogOpen,
 		setIsThemeDialogOpen,
 	} = useUIStore()
-
+	const { settings, setSettings } = useSettingsStore()
 	useEffect(() => {
 		const scrollable = document.getElementById("scrollingArea")
 		let timer: NodeJS.Timeout
@@ -95,12 +93,6 @@ export const SettingsPane = () => {
 								Start Tutorial
 							</p>
 							<p className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700">
-								Attend a Live Webinar
-							</p>
-							<p className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700">
-								Book 1:1 Coaching
-							</p>
-							<p className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700">
 								Get Started Guide
 							</p>
 							<div className="flex items-center justify-between">
@@ -109,9 +101,12 @@ export const SettingsPane = () => {
 								</p>
 								<Switch
 									variant="small"
-									checked={isQuickTipsOpen}
+									checked={settings.isQuickTipsOpen}
 									onCheckedChange={() => {
-										setIsQuickTipsOpen(!isQuickTipsOpen)
+										setSettings({
+											isQuickTipsOpen:
+												!settings.isQuickTipsOpen,
+										})
 									}}
 								/>
 							</div>

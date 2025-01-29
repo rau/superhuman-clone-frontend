@@ -17,6 +17,7 @@ const SendNoRecipientsDialog = () => {
 			open={showNoRecipientsDialog}
 			onOpenChange={setShowNoRecipientsDialog}
 		>
+			<DialogTitle hidden>Send without recipients?</DialogTitle>
 			<DialogContent>
 				<DialogHeader>
 					<DialogTitle>Send without recipients?</DialogTitle>

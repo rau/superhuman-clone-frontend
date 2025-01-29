@@ -21,6 +21,7 @@ const SendEmptySubjectDialog = () => {
 			open={showEmptySubjectDialog}
 			onOpenChange={setShowEmptySubjectDialog}
 		>
+			<DialogTitle hidden>Send without subject?</DialogTitle>
 			<DialogContent>
 				<DialogHeader>
 					<DialogTitle>Send without subject?</DialogTitle>

@@ -856,7 +856,8 @@ const SHORTCUT_SECTIONS: ShortcutSection[] = [
 
 export const ShortcutsPane = () => {
 	const [search, setSearch] = useState("")
-	const { selectedThreads, selectedFolder } = useUIStore()
+	const { selectedThreads, selectedFolder, setIsShortcutsPaneOpen } =
+		useUIStore()
 
 	const hasSelectedThreads =
 		selectedThreads[selectedFolder?.id || "INBOX"]?.size > 0
@@ -876,7 +877,14 @@ export const ShortcutsPane = () => {
 		.filter((section) => section.shortcuts.length > 0)
 
 	return (
-		<div className="fixed right-0 top-0 z-50 flex h-screen w-[400px] flex-col bg-white">
+		<div
+			className="fixed right-0 top-0 z-50 flex h-screen w-[400px] flex-col bg-white"
+			onKeyDown={(e) => {
+				if (e.key === "Escape") {
+					setIsShortcutsPaneOpen(false)
+				}
+			}}
+		>
 			<SearchBar search={search} setSearch={setSearch} />
 			<div className="flex-1 overflow-y-auto">
 				<div className="flex flex-col gap-4 p-6">
@@ -886,9 +894,9 @@ export const ShortcutsPane = () => {
 								{section.title}
 							</h2>
 							<div className="flex flex-col gap-1">
-								{section.shortcuts.map((shortcut) => (
+								{section.shortcuts.map((shortcut, index) => (
 									<ShortcutItem
-										key={shortcut.label}
+										key={index}
 										label={shortcut.label}
 										keys={shortcut.keys}
 										searchTerm={search}

@@ -12,7 +12,7 @@ const BackNavigationSection = ({
 	onNext?: () => void
 }) => {
 	return (
-		<div className="flex w-1/5 flex-col bg-slate-50 p-4">
+		<div className="flex w-1/5 min-w-fit flex-col bg-yellow-50 p-4">
 			<div className="flex flex-row gap-2">
 				<KeyboardTooltip
 					tooltips={[

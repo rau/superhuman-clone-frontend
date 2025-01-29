@@ -17,6 +17,9 @@ interface AIPromptState {
 
 	aiPromptEdit: string
 	setAiPromptEdit: (value: string) => void
+
+	isAiPromptLoading: boolean
+	setIsAiPromptLoading: (value: boolean) => void
 }
 
 export const useAIPromptStore = create<AIPromptState>((set) => ({
@@ -35,4 +38,7 @@ export const useAIPromptStore = create<AIPromptState>((set) => ({
 
 	aiPromptEdit: "",
 	setAiPromptEdit: (value) => set({ aiPromptEdit: value }),
+
+	isAiPromptLoading: false,
+	setIsAiPromptLoading: (value) => set({ isAiPromptLoading: value }),
 }))

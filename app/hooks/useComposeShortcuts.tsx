@@ -40,6 +40,8 @@ export const useComposeShortcuts = (form: UseFormReturn<ComposeFormData>) => {
 		setAiPromptEdit,
 		showAIPromptContextMenu,
 		setShowAIPromptContextMenu,
+		isAiPromptLoading,
+		setIsAiPromptLoading,
 	} = useAIPromptStore()
 	const { mutateAsync: discardDraft } = useDiscardDraft()
 
@@ -54,6 +56,7 @@ export const useComposeShortcuts = (form: UseFormReturn<ComposeFormData>) => {
 				if (showAIPrompt) {
 					setShowAIPrompt(false)
 					setAiPrompt("")
+					setAiPromptMode("draft")
 					if (showAIPromptContextMenu) {
 						setShowAIPromptContextMenu(false)
 						setAiPromptEdit("")
@@ -217,12 +220,7 @@ export const useComposeShortcuts = (form: UseFormReturn<ComposeFormData>) => {
 				const messageArea = document.querySelector(
 					"[data-message-field]"
 				) as HTMLTextAreaElement
-				console.log(
-					messageArea?.value.slice(
-						selectedText.start,
-						selectedText.end
-					)
-				)
+				if (isAiPromptLoading) setIsAiPromptLoading(false)
 				if (selectedText.start === selectedText.end && !showAIPrompt) {
 					setShowAIPrompt(true)
 					setAiPromptMode("draft")
@@ -235,14 +233,13 @@ export const useComposeShortcuts = (form: UseFormReturn<ComposeFormData>) => {
 				} else {
 					setShowAIPrompt(true)
 					setAiPromptMode(aiPromptMode === "draft" ? "edit" : "draft")
-					setTimeout(() => {
-						const promptInput = document.querySelector(
-							"[data-ai-prompt]"
-						) as HTMLElement
-						// console.log(promptInput)
-						promptInput?.focus()
-					}, 100)
 				}
+				setTimeout(() => {
+					const promptInput = document.querySelector(
+						"[data-ai-prompt]"
+					) as HTMLElement
+					promptInput?.focus()
+				}, 100)
 			},
 			meta: true,
 		},

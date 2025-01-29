@@ -81,3 +81,7 @@ Fix the spelling and grammar in this draft. Only return the email body text (no 
 export let editUserPrompt = `
 Edit this part of an email using the following instructions. First, I will give you the instructions, and then on a new line, I will give you the email part to edit.
 `.trim()
+
+export let updateUserPrompt = `
+I am going to give you a piece of an email that I want to update. Please update it using the following instructions. First, I will give you the instructions, and then on a new line, I will give you the email part to update.
+`.trim()

@@ -16,6 +16,7 @@ import {
 	improveWritingUserPrompt,
 	simplifySystemPrompt,
 	simplifyUserPrompt,
+	updateUserPrompt,
 } from "./gptStrings"
 
 type ChatMessage = {
@@ -123,5 +124,25 @@ export const queryGptEdit = async (
 				editUserPrompt + "\n" + editInstructions + "\n" + partToEdit,
 		},
 	]
+	return queryGpt(messages)
+}
+
+export const queryGptUpdate = async (
+	updateInstructions: string,
+	partToUpdate: string
+) => {
+	const messages = [
+		{ role: ChatMessageRole.System, content: editSystemPrompt },
+		{
+			role: ChatMessageRole.User,
+			content:
+				updateUserPrompt +
+				"\n" +
+				updateInstructions +
+				"\n" +
+				partToUpdate,
+		},
+	]
+	console.log(messages)
 	return queryGpt(messages)
 }

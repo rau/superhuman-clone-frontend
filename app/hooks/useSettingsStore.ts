@@ -13,6 +13,12 @@ export enum ImageDisplayBehavior {
 	BLOCK_ALL = "block-all",
 }
 
+export enum MeetingLinksBehavior {
+	AUTO_ZOOM = "auto-zoom",
+	AUTO_MEETS_AND_TEAMS = "auto-meets-and-teams",
+	DO_NOT = "do-not",
+}
+
 interface Settings {
 	downloadPath: string
 	jobTitle: string
@@ -35,6 +41,7 @@ interface Settings {
 	blockedSenders: Set<string>
 	imageDisplayBehavior: ImageDisplayBehavior
 	instantIntro: string
+	meetingLinksBehavior: MeetingLinksBehavior
 }
 
 interface SettingsState {
@@ -67,6 +74,7 @@ export const useSettingsStore = create<SettingsState>()(
 				blockedSenders: new Set(),
 				imageDisplayBehavior: ImageDisplayBehavior.SHOW_ALL,
 				instantIntro: "firstname",
+				meetingLinksBehavior: MeetingLinksBehavior.DO_NOT,
 			},
 			setSettings: (newSettings) =>
 				set((state) => ({

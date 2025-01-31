@@ -11,6 +11,7 @@ import { EmojiSkinColorDialog } from "@/components/dialogs/EmojiSkinColorDialog"
 import { GetMeToZeroDialog } from "@/components/dialogs/GetMeToZeroDialog"
 import { ImageSettingsDialog } from "@/components/dialogs/ImageSettingsDialog"
 import { InstantIntroDialog } from "@/components/dialogs/InstantIntroDialog"
+import { MeetingLinksDialog } from "@/components/dialogs/MeetingLinksDialog"
 import { MoveToDialog } from "@/components/dialogs/MoveToDialog"
 import { SignatureDialog } from "@/components/dialogs/SignatureDialog"
 import { ThemeDialog } from "@/components/dialogs/ThemeDialog"
@@ -65,6 +66,7 @@ const Home = () => {
 			<InstantIntroDialog />
 			<AutoBCCDialog />
 			<BlockedSendersDialog />
+			<MeetingLinksDialog />
 			<MoveToDialog />
 			<ComposePaneOverlay />
 			<SearchPane />

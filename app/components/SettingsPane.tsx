@@ -22,6 +22,7 @@ export const SettingsPane = () => {
 		setIsAutoBCCDialogOpen,
 		setIsBlockedSendersDialogOpen,
 		setIsInstantIntroDialogOpen,
+		setIsMeetingLinksOpen,
 	} = useUIStore()
 	const { settings, setSettings } = useSettingsStore()
 
@@ -257,7 +258,10 @@ export const SettingsPane = () => {
 							>
 								Instant Intro
 							</p>
-							<p className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700">
+							<p
+								className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700"
+								onClick={() => setIsMeetingLinksOpen(true)}
+							>
 								Meeting Links
 							</p>
 							<p className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700">

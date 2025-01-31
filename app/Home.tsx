@@ -3,8 +3,10 @@
 import { ComposePaneOverlay } from "@/components/compose/ComposePaneOverlay"
 import { AISettingsDialog } from "@/components/dialogs/AISettingsDialog"
 import { DownloadsDialog } from "@/components/dialogs/DownloadsDialog"
+import { EmojiSkinColorDialog } from "@/components/dialogs/EmojiSkinColorDialog"
 import { ImageSettingsDialog } from "@/components/dialogs/ImageSettingsDialog"
 import { MoveToDialog } from "@/components/dialogs/MoveToDialog"
+import { SignatureDialog } from "@/components/dialogs/SignatureDialog"
 import { ThemeDialog } from "@/components/dialogs/ThemeDialog"
 import { EmailsContainer } from "@/components/EmailsContainer"
 import { FileDialogOverlay } from "@/components/FileDialogOverlay"
@@ -12,7 +14,7 @@ import { SearchPane } from "@/components/SearchPane"
 import { SignInPane } from "@/components/SignInPane"
 import { TipBar } from "@/components/TipBar"
 import { ViewEmailPane } from "@/components/ViewEmailPane"
-import { useAccounts, useFolderEmails } from "@/hooks/dataHooks"
+import { useAccounts } from "@/hooks/dataHooks"
 import { useAccountStore } from "@/hooks/useAccountStore"
 import { useAppShortcuts } from "@/hooks/useAppShortcuts"
 import { useUIStore } from "@/hooks/useUIStore"
@@ -20,9 +22,8 @@ import { useEffect } from "react"
 
 const Home = () => {
 	const { data: accounts, isLoading } = useAccounts()
-	const { data: emails } = useFolderEmails()
 	const { setSelectedAccountId } = useAccountStore()
-	const { isSignInOpen, isFileDialogOpen } = useUIStore()
+	const { isSignInOpen } = useUIStore()
 
 	useEffect(() => {
 		if (accounts && accounts.length > 0) {
@@ -49,7 +50,9 @@ const Home = () => {
 			<AISettingsDialog />
 			<DownloadsDialog />
 			<ImageSettingsDialog />
+			<EmojiSkinColorDialog />
 			<ThemeDialog />
+			<SignatureDialog />
 			<MoveToDialog />
 			<ComposePaneOverlay />
 			<SearchPane />

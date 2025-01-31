@@ -12,6 +12,7 @@ export const SettingsPane = () => {
 		setIsImageSettingsOpen,
 		setIsAccountDialogOpen,
 		setIsThemeDialogOpen,
+		setIsEmojiSkinColorOpen,
 	} = useUIStore()
 	const { settings, setSettings } = useSettingsStore()
 	useEffect(() => {
@@ -162,15 +163,35 @@ export const SettingsPane = () => {
 								<p className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700">
 									Autocomplete
 								</p>
-								<Switch variant="small" />
+								<Switch
+									variant="small"
+									checked={settings.autocomplete}
+									onCheckedChange={() => {
+										setSettings({
+											autocomplete:
+												!settings.autocomplete,
+										})
+									}}
+								/>
 							</div>
 							<div className="flex items-center justify-between">
 								<p className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700">
 									Autocorrect
 								</p>
-								<Switch variant="small" />
+								<Switch
+									variant="small"
+									checked={settings.autocorrect}
+									onCheckedChange={() => {
+										setSettings({
+											autocorrect: !settings.autocorrect,
+										})
+									}}
+								/>
 							</div>
-							<p className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700">
+							<p
+								className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700"
+								onClick={() => setIsEmojiSkinColorOpen(true)}
+							>
 								Emoji
 							</p>
 							<p className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700">
@@ -225,31 +246,61 @@ export const SettingsPane = () => {
 								<p className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700">
 									Backtick as Escape
 								</p>
-								<Switch variant="small" />
+								<Switch
+									variant="small"
+									checked={settings.backtickAsEscape}
+									onCheckedChange={() => {
+										setSettings({
+											backtickAsEscape:
+												!settings.backtickAsEscape,
+										})
+									}}
+								/>
 							</div>
 							<div className="flex items-center justify-between">
 								<p className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700">
 									Send + Mark Done
 								</p>
-								<Switch variant="small" />
+								<Switch
+									variant="small"
+									checked={settings.sendAndMarkDone}
+									onCheckedChange={() => {
+										setSettings({
+											sendAndMarkDone:
+												!settings.sendAndMarkDone,
+										})
+									}}
+								/>
 							</div>
 							<div className="flex items-center justify-between">
 								<p className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700">
 									RSVP + Mark Done
 								</p>
-								<Switch variant="small" />
-							</div>
-							<div className="flex items-center justify-between">
-								<p className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700">
-									Hide Comment Bar
-								</p>
-								<Switch variant="small" />
+								<Switch
+									variant="small"
+									checked={settings.rsvpAndMarkDone}
+									onCheckedChange={() => {
+										setSettings({
+											rsvpAndMarkDone:
+												!settings.rsvpAndMarkDone,
+										})
+									}}
+								/>
 							</div>
 							<div className="flex items-center justify-between">
 								<p className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700">
 									Show Sender Full Names
 								</p>
-								<Switch variant="small" />
+								<Switch
+									variant="small"
+									checked={settings.showSenderFullNames}
+									onCheckedChange={() => {
+										setSettings({
+											showSenderFullNames:
+												!settings.showSenderFullNames,
+										})
+									}}
+								/>
 							</div>
 						</div>
 					</div>

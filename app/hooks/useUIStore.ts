@@ -24,6 +24,8 @@ interface UIState {
 	setCollapsedMessages: (value: Record<number, boolean>) => void
 	isFileDialogOpen: boolean
 	setIsFileDialogOpen: (value: boolean) => void
+	isSignatureDialogOpen: boolean
+	setIsSignatureDialogOpen: (value: boolean) => void
 
 	showEmptySubjectDialog: boolean
 	showNoRecipientsDialog: boolean
@@ -52,6 +54,9 @@ interface UIState {
 
 	showAIPrompt: boolean
 	setShowAIPrompt: (value: boolean) => void
+
+	isEmojiSkinColorOpen: boolean
+	setIsEmojiSkinColorOpen: (value: boolean) => void
 }
 
 const INITIAL_FOLDER: Folder = {
@@ -85,6 +90,8 @@ export const useUIStore = create<UIState>((set) => ({
 	collapsedMessages: {},
 	isFileDialogOpen: false,
 	showAIPrompt: false,
+	isEmojiSkinColorOpen: false,
+	isSignatureDialogOpen: false,
 	setIsSearching: (isSearching) => set({ isSearching }),
 	setIsShowingEmail: (isShowingEmail) => set({ isShowingEmail }),
 	setIsComposing: (isComposing) => set({ isComposing }),
@@ -142,4 +149,6 @@ export const useUIStore = create<UIState>((set) => ({
 	setShowNoRecipientsDialog: (value) =>
 		set({ showNoRecipientsDialog: value }),
 	setShowAIPrompt: (value) => set({ showAIPrompt: value }),
+	setIsEmojiSkinColorOpen: (value) => set({ isEmojiSkinColorOpen: value }),
+	setIsSignatureDialogOpen: (value) => set({ isSignatureDialogOpen: value }),
 }))

@@ -7,10 +7,27 @@ import {
 } from "@/components/ui/Dialog"
 import { useSettingsStore } from "@/hooks/useSettingsStore"
 import { useUIStore } from "@/hooks/useUIStore"
+import { useEffect } from "react"
 
 export const AISettingsDialog = () => {
 	const { isAISettingsOpen, setIsAISettingsOpen } = useUIStore()
 	const { settings, setSettings } = useSettingsStore()
+
+	useEffect(() => {
+		if (isAISettingsOpen) {
+			setTimeout(() => {
+				const input = document.getElementById(
+					"job-title"
+				) as HTMLInputElement
+				if (input) {
+					input.setSelectionRange(
+						input.value.length,
+						input.value.length
+					)
+				}
+			}, 0)
+		}
+	}, [isAISettingsOpen])
 
 	return (
 		<Dialog open={isAISettingsOpen} onOpenChange={setIsAISettingsOpen}>
@@ -29,6 +46,7 @@ export const AISettingsDialog = () => {
 								Job title:
 							</label>
 							<input
+								id="job-title"
 								className="rounded-md border border-slate-200 px-3 py-2 text-sm outline-none focus:border-blue-500"
 								value={settings.jobTitle}
 								onChange={(e) =>

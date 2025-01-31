@@ -10,7 +10,14 @@ interface Settings {
 	lastName: string
 	greeting: string
 	signature: string
+	autocomplete: boolean
+	autocorrect: boolean
 	isQuickTipsOpen: boolean
+	backtickAsEscape: boolean
+	sendAndMarkDone: boolean
+	rsvpAndMarkDone: boolean
+	showSenderFullNames: boolean
+	emojiSkinColor: number
 }
 
 interface SettingsState {
@@ -30,7 +37,14 @@ export const useSettingsStore = create<SettingsState>()(
 				lastName: "",
 				greeting: "",
 				signature: "",
+				autocomplete: true,
+				autocorrect: true,
 				isQuickTipsOpen: true,
+				backtickAsEscape: false,
+				sendAndMarkDone: false,
+				rsvpAndMarkDone: false,
+				showSenderFullNames: false,
+				emojiSkinColor: 0,
 			},
 			setSettings: (newSettings) =>
 				set((state) => ({

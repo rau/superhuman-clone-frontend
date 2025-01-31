@@ -19,6 +19,11 @@ export enum MeetingLinksBehavior {
 	DO_NOT = "do-not",
 }
 
+export enum NotificationsReminderBehavior {
+	NO_REPLY = "no-reply",
+	REGARDLESS = "regardless",
+}
+
 interface Settings {
 	downloadPath: string
 	jobTitle: string
@@ -42,6 +47,8 @@ interface Settings {
 	imageDisplayBehavior: ImageDisplayBehavior
 	instantIntro: string
 	meetingLinksBehavior: MeetingLinksBehavior
+	notificationsReminderBehavior: NotificationsReminderBehavior
+	readStatuses: boolean
 }
 
 interface SettingsState {
@@ -75,6 +82,9 @@ export const useSettingsStore = create<SettingsState>()(
 				imageDisplayBehavior: ImageDisplayBehavior.SHOW_ALL,
 				instantIntro: "firstname",
 				meetingLinksBehavior: MeetingLinksBehavior.DO_NOT,
+				notificationsReminderBehavior:
+					NotificationsReminderBehavior.NO_REPLY,
+				readStatuses: false,
 			},
 			setSettings: (newSettings) =>
 				set((state) => ({

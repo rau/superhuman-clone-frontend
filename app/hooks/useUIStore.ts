@@ -78,6 +78,12 @@ interface UIState {
 
 	isMeetingLinksOpen: boolean
 	setIsMeetingLinksOpen: (value: boolean) => void
+
+	isNotificationsOpen: boolean
+	setIsNotificationsOpen: (value: boolean) => void
+
+	isRemindersOpen: boolean
+	setIsRemindersOpen: (value: boolean) => void
 }
 
 const INITIAL_FOLDER: Folder = {
@@ -120,7 +126,8 @@ export const useUIStore = create<UIState>((set) => ({
 	isBlockedSendersDialogOpen: false,
 	isInstantIntroDialogOpen: false,
 	isMeetingLinksOpen: false,
-
+	isNotificationsOpen: false,
+	isRemindersOpen: false,
 	setIsSearching: (isSearching) => set({ isSearching }),
 	setIsShowingEmail: (isShowingEmail) => set({ isShowingEmail }),
 	setIsComposing: (isComposing) => set({ isComposing }),
@@ -190,4 +197,6 @@ export const useUIStore = create<UIState>((set) => ({
 	setIsInstantIntroDialogOpen: (value) =>
 		set({ isInstantIntroDialogOpen: value }),
 	setIsMeetingLinksOpen: (value) => set({ isMeetingLinksOpen: value }),
+	setIsNotificationsOpen: (value) => set({ isNotificationsOpen: value }),
+	setIsRemindersOpen: (value) => set({ isRemindersOpen: value }),
 }))

@@ -23,6 +23,8 @@ export const SettingsPane = () => {
 		setIsBlockedSendersDialogOpen,
 		setIsInstantIntroDialogOpen,
 		setIsMeetingLinksOpen,
+		setIsNotificationsOpen,
+		setIsRemindersOpen,
 	} = useUIStore()
 	const { settings, setSettings } = useSettingsStore()
 
@@ -264,12 +266,40 @@ export const SettingsPane = () => {
 							>
 								Meeting Links
 							</p>
-							<p className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700">
+							<p
+								className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700"
+								onClick={() => setIsNotificationsOpen(true)}
+							>
 								Notifications
 							</p>
-							<p className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700">
+							<p
+								className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700"
+								onClick={() => setIsRemindersOpen(true)}
+							>
 								Reminders
 							</p>
+							<div
+								className="flex items-center justify-between hover:cursor-pointer"
+								onClick={() =>
+									setSettings({
+										readStatuses: !settings.readStatuses,
+									})
+								}
+							>
+								<p className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700">
+									Read Statuses
+								</p>
+								<Switch
+									variant="small"
+									checked={settings.readStatuses}
+									onCheckedChange={() => {
+										setSettings({
+											readStatuses:
+												!settings.readStatuses,
+										})
+									}}
+								/>
+							</div>
 						</div>
 					</div>
 

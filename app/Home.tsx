@@ -13,6 +13,8 @@ import { ImageSettingsDialog } from "@/components/dialogs/ImageSettingsDialog"
 import { InstantIntroDialog } from "@/components/dialogs/InstantIntroDialog"
 import { MeetingLinksDialog } from "@/components/dialogs/MeetingLinksDialog"
 import { MoveToDialog } from "@/components/dialogs/MoveToDialog"
+import { NotificationsDialog } from "@/components/dialogs/NotificationsDialog"
+import { RemindersDialog } from "@/components/dialogs/RemindersDialog"
 import { SignatureDialog } from "@/components/dialogs/SignatureDialog"
 import { ThemeDialog } from "@/components/dialogs/ThemeDialog"
 import { EmailsContainer } from "@/components/EmailsContainer"
@@ -67,6 +69,8 @@ const Home = () => {
 			<AutoBCCDialog />
 			<BlockedSendersDialog />
 			<MeetingLinksDialog />
+			<NotificationsDialog />
+			<RemindersDialog />
 			<MoveToDialog />
 			<ComposePaneOverlay />
 			<SearchPane />

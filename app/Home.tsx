@@ -2,6 +2,9 @@
 
 import { ComposePaneOverlay } from "@/components/compose/ComposePaneOverlay"
 import { AISettingsDialog } from "@/components/dialogs/AISettingsDialog"
+import { AutoAdvanceDialog } from "@/components/dialogs/AutoAdvanceDialog"
+import { AutoBCCDialog } from "@/components/dialogs/AutoBCCDialog"
+import { BlockedSendersDialog } from "@/components/dialogs/BlockedSendersDialog"
 import { BulkActionsDialog } from "@/components/dialogs/BulkActionsDialog"
 import { DownloadsDialog } from "@/components/dialogs/DownloadsDialog"
 import { EmojiSkinColorDialog } from "@/components/dialogs/EmojiSkinColorDialog"
@@ -57,6 +60,9 @@ const Home = () => {
 			<SignatureDialog />
 			<GetMeToZeroDialog />
 			<BulkActionsDialog />
+			<AutoAdvanceDialog />
+			<AutoBCCDialog />
+			<BlockedSendersDialog />
 			<MoveToDialog />
 			<ComposePaneOverlay />
 			<SearchPane />

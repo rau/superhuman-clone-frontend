@@ -1,10 +1,15 @@
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/Dialog"
 import { Label } from "@/components/ui/Label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/RadioGroup"
+import {
+	ImageDisplayBehavior,
+	useSettingsStore,
+} from "@/hooks/useSettingsStore"
 import { useUIStore } from "@/hooks/useUIStore"
 
 export const ImageSettingsDialog = () => {
 	const { isImageSettingsOpen, setIsImageSettingsOpen } = useUIStore()
+	const { settings, setSettings } = useSettingsStore()
 
 	return (
 		<Dialog
@@ -13,23 +18,32 @@ export const ImageSettingsDialog = () => {
 		>
 			<DialogTitle hidden>Images</DialogTitle>
 			<DialogContent className="w-[600px]">
-				<div className="flex flex-col gap-6 p-6">
+				<div className="flex flex-col gap-6">
 					<h2 className="text-xl font-semibold">Images</h2>
-					<p className="text-sm text-slate-600">
+					<p className="text-xs text-slate-600">
 						Choose which images to display. This setting also
 						affects Superhuman on mobile.
 					</p>
 					<RadioGroup
-						defaultValue="show-all"
+						defaultValue={settings.imageDisplayBehavior}
 						className="flex flex-col gap-4"
+						onValueChange={(value) => {
+							setSettings({
+								imageDisplayBehavior:
+									value as ImageDisplayBehavior,
+							})
+						}}
 					>
 						<div className="flex items-center gap-2">
-							<RadioGroupItem value="show-all" id="show-all" />
+							<RadioGroupItem
+								value={ImageDisplayBehavior.SHOW_ALL}
+								id="show-all"
+							/>
 							<Label htmlFor="show-all">Show all images</Label>
 						</div>
 						<div className="flex items-center gap-2">
 							<RadioGroupItem
-								value="block-tracking"
+								value={ImageDisplayBehavior.BLOCK_TRACKING}
 								id="block-tracking"
 							/>
 							<Label htmlFor="block-tracking">
@@ -37,7 +51,10 @@ export const ImageSettingsDialog = () => {
 							</Label>
 						</div>
 						<div className="flex items-center gap-2">
-							<RadioGroupItem value="block-all" id="block-all" />
+							<RadioGroupItem
+								value={ImageDisplayBehavior.BLOCK_ALL}
+								id="block-all"
+							/>
 							<Label htmlFor="block-all">
 								Block all remote images
 							</Label>

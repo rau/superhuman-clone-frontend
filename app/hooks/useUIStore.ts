@@ -63,6 +63,15 @@ interface UIState {
 
 	isBulkActionsOpen: boolean
 	setIsBulkActionsOpen: (value: boolean) => void
+
+	isAutoAdvanceDialogOpen: boolean
+	setIsAutoAdvanceDialogOpen: (value: boolean) => void
+
+	isAutoBCCDialogOpen: boolean
+	setIsAutoBCCDialogOpen: (value: boolean) => void
+
+	isBlockedSendersDialogOpen: boolean
+	setIsBlockedSendersDialogOpen: (value: boolean) => void
 }
 
 const INITIAL_FOLDER: Folder = {
@@ -100,6 +109,9 @@ export const useUIStore = create<UIState>((set) => ({
 	isSignatureDialogOpen: false,
 	isGetMeToZeroOpen: false,
 	isBulkActionsOpen: false,
+	isAutoAdvanceDialogOpen: false,
+	isAutoBCCDialogOpen: false,
+	isBlockedSendersDialogOpen: false,
 	setIsSearching: (isSearching) => set({ isSearching }),
 	setIsShowingEmail: (isShowingEmail) => set({ isShowingEmail }),
 	setIsComposing: (isComposing) => set({ isComposing }),
@@ -161,4 +173,9 @@ export const useUIStore = create<UIState>((set) => ({
 	setIsSignatureDialogOpen: (value) => set({ isSignatureDialogOpen: value }),
 	setIsGetMeToZeroOpen: (value) => set({ isGetMeToZeroOpen: value }),
 	setIsBulkActionsOpen: (value) => set({ isBulkActionsOpen: value }),
+	setIsAutoAdvanceDialogOpen: (value) =>
+		set({ isAutoAdvanceDialogOpen: value }),
+	setIsAutoBCCDialogOpen: (value) => set({ isAutoBCCDialogOpen: value }),
+	setIsBlockedSendersDialogOpen: (value) =>
+		set({ isBlockedSendersDialogOpen: value }),
 }))

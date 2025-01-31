@@ -1,6 +1,18 @@
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
 
+export enum AutoAdvanceBehavior {
+	OLDER = "older",
+	LIST = "list",
+	NEWER = "newer",
+}
+
+export enum ImageDisplayBehavior {
+	SHOW_ALL = "show-all",
+	BLOCK_TRACKING = "block-tracking",
+	BLOCK_ALL = "block-all",
+}
+
 interface Settings {
 	downloadPath: string
 	jobTitle: string
@@ -18,6 +30,10 @@ interface Settings {
 	rsvpAndMarkDone: boolean
 	showSenderFullNames: boolean
 	emojiSkinColor: number
+	autoAdvanceBehavior: AutoAdvanceBehavior
+	autoBccEmails: Set<string>
+	blockedSenders: Set<string>
+	imageDisplayBehavior: ImageDisplayBehavior
 }
 
 interface SettingsState {
@@ -45,6 +61,10 @@ export const useSettingsStore = create<SettingsState>()(
 				rsvpAndMarkDone: false,
 				showSenderFullNames: false,
 				emojiSkinColor: 0,
+				autoAdvanceBehavior: AutoAdvanceBehavior.OLDER,
+				autoBccEmails: new Set(),
+				blockedSenders: new Set(),
+				imageDisplayBehavior: ImageDisplayBehavior.SHOW_ALL,
 			},
 			setSettings: (newSettings) =>
 				set((state) => ({

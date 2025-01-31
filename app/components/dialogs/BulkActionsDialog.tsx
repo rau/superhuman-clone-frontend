@@ -15,18 +15,17 @@ export const BulkActionsDialog = () => {
 							There are no recent bulk actions.
 						</p>
 					</div>
-					<div className="flex flex-col gap-2">
-						<p className="text-xs text-slate-500">
-							Would you like to clean up your inbox? Hit{" "}
-							<kbd className="rounded-md border border-slate-200 bg-slate-100 px-1.5 py-0.5 text-xs font-medium text-slate-500">
-								⌘
-							</kbd>{" "}
-							<kbd className="rounded-md border border-slate-200 bg-slate-100 px-1.5 py-0.5 text-xs font-medium text-slate-500">
-								K
-							</kbd>{" "}
-							and Get Me To Zero.
-						</p>
-					</div>
+
+					<p className="text-xs text-slate-500">
+						Would you like to clean up your inbox? Hit{" "}
+						<kbd className="rounded-md border border-slate-200 bg-slate-100 px-1.5 py-0.5 text-xs font-medium text-slate-500">
+							⌘
+						</kbd>{" "}
+						<kbd className="rounded-md border border-slate-200 bg-slate-100 px-1.5 py-0.5 text-xs font-medium text-slate-500">
+							K
+						</kbd>{" "}
+						and Get Me To Zero.
+					</p>
 				</div>
 			</DialogContent>
 		</Dialog>

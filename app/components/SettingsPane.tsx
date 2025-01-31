@@ -17,8 +17,13 @@ export const SettingsPane = () => {
 		setIsEmojiSkinColorOpen,
 		setIsGetMeToZeroOpen,
 		setIsBulkActionsOpen,
+		setIsAutoAdvanceDialogOpen,
+		setIsSignatureDialogOpen,
+		setIsAutoBCCDialogOpen,
+		setIsBlockedSendersDialogOpen,
 	} = useUIStore()
 	const { settings, setSettings } = useSettingsStore()
+
 	useEffect(() => {
 		const scrollable = document.getElementById("scrollingArea")
 		let timer: NodeJS.Timeout
@@ -199,7 +204,10 @@ export const SettingsPane = () => {
 							>
 								Emoji
 							</p>
-							<p className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700">
+							<p
+								className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700"
+								onClick={() => setIsSignatureDialogOpen(true)}
+							>
 								Signatures
 							</p>
 						</div>
@@ -208,13 +216,24 @@ export const SettingsPane = () => {
 					<div>
 						<h2 className="mb-2 text-xs font-bold">Workflow</h2>
 						<div className="flex flex-col gap-1">
-							<p className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700">
+							<p
+								className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700"
+								onClick={() => setIsAutoAdvanceDialogOpen(true)}
+							>
 								Auto-Advance
 							</p>
-							<p className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700">
+							<p
+								className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700"
+								onClick={() => setIsAutoBCCDialogOpen(true)}
+							>
 								Auto-Bcc
 							</p>
-							<p className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700">
+							<p
+								className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700"
+								onClick={() =>
+									setIsBlockedSendersDialogOpen(true)
+								}
+							>
 								Blocked Senders
 							</p>
 							<p

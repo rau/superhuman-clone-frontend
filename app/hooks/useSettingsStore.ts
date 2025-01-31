@@ -34,6 +34,7 @@ interface Settings {
 	autoBccEmails: Set<string>
 	blockedSenders: Set<string>
 	imageDisplayBehavior: ImageDisplayBehavior
+	instantIntro: string
 }
 
 interface SettingsState {
@@ -65,6 +66,7 @@ export const useSettingsStore = create<SettingsState>()(
 				autoBccEmails: new Set(),
 				blockedSenders: new Set(),
 				imageDisplayBehavior: ImageDisplayBehavior.SHOW_ALL,
+				instantIntro: "firstname",
 			},
 			setSettings: (newSettings) =>
 				set((state) => ({

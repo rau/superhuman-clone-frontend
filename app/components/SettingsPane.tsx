@@ -21,6 +21,7 @@ export const SettingsPane = () => {
 		setIsSignatureDialogOpen,
 		setIsAutoBCCDialogOpen,
 		setIsBlockedSendersDialogOpen,
+		setIsInstantIntroDialogOpen,
 	} = useUIStore()
 	const { settings, setSettings } = useSettingsStore()
 
@@ -248,7 +249,12 @@ export const SettingsPane = () => {
 							>
 								Images
 							</p>
-							<p className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700">
+							<p
+								className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700"
+								onClick={() =>
+									setIsInstantIntroDialogOpen(true)
+								}
+							>
 								Instant Intro
 							</p>
 							<p className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700">

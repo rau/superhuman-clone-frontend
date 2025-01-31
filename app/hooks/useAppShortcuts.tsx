@@ -56,6 +56,7 @@ export const useAppShortcuts = () => {
 		isAISettingsOpen,
 		isShortcutsPaneOpen,
 		isAutoBCCDialogOpen,
+		isInstantIntroDialogOpen,
 	} = useUIStore()
 
 	const { setDraftId } = useComposeStore()
@@ -473,7 +474,8 @@ export const useAppShortcuts = () => {
 				isAISettingsOpen ||
 				isShortcutsPaneOpen ||
 				isComposing ||
-				isAutoBCCDialogOpen
+				isAutoBCCDialogOpen ||
+				isInstantIntroDialogOpen
 			) {
 				return
 			}
@@ -513,5 +515,6 @@ export const useAppShortcuts = () => {
 		isAISettingsOpen,
 		isShortcutsPaneOpen,
 		isAutoBCCDialogOpen,
+		isInstantIntroDialogOpen,
 	])
 }

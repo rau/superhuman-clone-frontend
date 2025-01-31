@@ -72,6 +72,9 @@ interface UIState {
 
 	isBlockedSendersDialogOpen: boolean
 	setIsBlockedSendersDialogOpen: (value: boolean) => void
+
+	isInstantIntroDialogOpen: boolean
+	setIsInstantIntroDialogOpen: (value: boolean) => void
 }
 
 const INITIAL_FOLDER: Folder = {
@@ -112,6 +115,7 @@ export const useUIStore = create<UIState>((set) => ({
 	isAutoAdvanceDialogOpen: false,
 	isAutoBCCDialogOpen: false,
 	isBlockedSendersDialogOpen: false,
+	isInstantIntroDialogOpen: false,
 	setIsSearching: (isSearching) => set({ isSearching }),
 	setIsShowingEmail: (isShowingEmail) => set({ isShowingEmail }),
 	setIsComposing: (isComposing) => set({ isComposing }),
@@ -178,4 +182,6 @@ export const useUIStore = create<UIState>((set) => ({
 	setIsAutoBCCDialogOpen: (value) => set({ isAutoBCCDialogOpen: value }),
 	setIsBlockedSendersDialogOpen: (value) =>
 		set({ isBlockedSendersDialogOpen: value }),
+	setIsInstantIntroDialogOpen: (value) =>
+		set({ isInstantIntroDialogOpen: value }),
 }))

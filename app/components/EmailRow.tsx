@@ -11,6 +11,7 @@ import {
 import { cn, decodeHtml } from "@/libs/utils"
 import { format } from "date-fns"
 import { Check, Clock, Copy, Paperclip, SquareCheckBig } from "lucide-react"
+import { useRouter } from "next/navigation"
 import { toast } from "react-toastify"
 
 interface EmailRowProps {
@@ -19,6 +20,7 @@ interface EmailRowProps {
 }
 
 export const EmailRow = ({ email, isSelected }: EmailRowProps) => {
+	const router = useRouter()
 	const { setSelectedIndex, setIsShowingEmail } = useUIStore()
 	const { data: emails } = useFolderEmails()
 	const { mutateAsync: markDone } = useMarkEmailDone()
@@ -40,6 +42,7 @@ export const EmailRow = ({ email, isSelected }: EmailRowProps) => {
 			setDraftId(email.id)
 			return
 		} else {
+			router.push(`/email/${email.id}`)
 			setSelectedIndex(selectedFolder.id, emails.indexOf(email))
 			setIsShowingEmail(true)
 		}
@@ -141,11 +144,11 @@ export const EmailRow = ({ email, isSelected }: EmailRowProps) => {
 				<div className="flex flex-1 gap-2 truncate">
 					<span
 						className={cn(
-							"w-[350px] truncate text-xs",
+							"truncate text-xs",
 							isThreadSelected && "text-white"
 						)}
 					>
-						{email.subject}
+						{email.subject || "-"}
 					</span>
 					<span
 						className={cn(

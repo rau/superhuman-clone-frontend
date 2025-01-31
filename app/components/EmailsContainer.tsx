@@ -7,6 +7,7 @@ import { IconButton } from "@/components/ui/IconButton"
 import { Loader } from "@/components/ui/Loader"
 import { useSidebar } from "@/components/ui/Sidebar"
 import { useFolderEmails } from "@/hooks/dataHooks"
+import { useSettingsStore } from "@/hooks/useSettingsStore"
 import { useThemeStore } from "@/hooks/useThemeStore"
 import { useUIStore } from "@/hooks/useUIStore"
 import { groupEmailsByDate } from "@/libs/emailUtils"
@@ -53,18 +54,17 @@ const SelectAllButton = () => {
 export const EmailsContainer = () => {
 	const { data: emails, isLoading } = useFolderEmails()
 	const {
-		setIsShowingEmail,
 		selectedFolder,
 		selectedIndices,
 		setSelectedIndex,
 		isSettingsOpen,
 		isShortcutsPaneOpen,
-		isQuickTipsOpen,
 		selectedThreads,
 		setIsComposing,
 		setIsSearching,
 	} = useUIStore()
 	const { toggleSidebar } = useSidebar()
+	const { settings } = useSettingsStore()
 	const { theme } = useThemeStore()
 
 	const selectedIndex = selectedIndices[selectedFolder?.id || "INBOX"] || 0
@@ -174,7 +174,9 @@ export const EmailsContainer = () => {
 			<div
 				className={cn(
 					"w-1/5 bg-[#FBFDFF]",
-					isQuickTipsOpen ? "h-[calc(100vh-20px)]" : "h-screen"
+					settings.isQuickTipsOpen
+						? "h-[calc(100vh-20px)]"
+						: "h-screen"
 				)}
 			>
 				{isShortcutsPaneOpen ? (

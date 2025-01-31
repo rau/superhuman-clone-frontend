@@ -57,6 +57,12 @@ interface UIState {
 
 	isEmojiSkinColorOpen: boolean
 	setIsEmojiSkinColorOpen: (value: boolean) => void
+
+	isGetMeToZeroOpen: boolean
+	setIsGetMeToZeroOpen: (value: boolean) => void
+
+	isBulkActionsOpen: boolean
+	setIsBulkActionsOpen: (value: boolean) => void
 }
 
 const INITIAL_FOLDER: Folder = {
@@ -92,6 +98,8 @@ export const useUIStore = create<UIState>((set) => ({
 	showAIPrompt: false,
 	isEmojiSkinColorOpen: false,
 	isSignatureDialogOpen: false,
+	isGetMeToZeroOpen: false,
+	isBulkActionsOpen: false,
 	setIsSearching: (isSearching) => set({ isSearching }),
 	setIsShowingEmail: (isShowingEmail) => set({ isShowingEmail }),
 	setIsComposing: (isComposing) => set({ isComposing }),
@@ -151,4 +159,6 @@ export const useUIStore = create<UIState>((set) => ({
 	setShowAIPrompt: (value) => set({ showAIPrompt: value }),
 	setIsEmojiSkinColorOpen: (value) => set({ isEmojiSkinColorOpen: value }),
 	setIsSignatureDialogOpen: (value) => set({ isSignatureDialogOpen: value }),
+	setIsGetMeToZeroOpen: (value) => set({ isGetMeToZeroOpen: value }),
+	setIsBulkActionsOpen: (value) => set({ isBulkActionsOpen: value }),
 }))

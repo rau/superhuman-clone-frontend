@@ -2,7 +2,9 @@ import { SuperhumanFooter } from "@/components/SuperhumanFooter"
 import { Switch } from "@/components/ui/Switch"
 import { useSettingsStore } from "@/hooks/useSettingsStore"
 import { useUIStore } from "@/hooks/useUIStore"
+import Link from "next/link"
 import { useEffect } from "react"
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/Tooltip"
 
 export const SettingsPane = () => {
 	const {
@@ -13,6 +15,8 @@ export const SettingsPane = () => {
 		setIsAccountDialogOpen,
 		setIsThemeDialogOpen,
 		setIsEmojiSkinColorOpen,
+		setIsGetMeToZeroOpen,
+		setIsBulkActionsOpen,
 	} = useUIStore()
 	const { settings, setSettings } = useSettingsStore()
 	useEffect(() => {
@@ -64,23 +68,6 @@ export const SettingsPane = () => {
 
 					<div>
 						<h2 className="mb-2 text-xs font-bold">
-							Superhuman for Sales
-						</h2>
-						<div className="flex flex-col gap-1">
-							<p className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700">
-								HubSpot
-							</p>
-							<p className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700">
-								Pipedrive
-							</p>
-							<p className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700">
-								Salesforce
-							</p>
-						</div>
-					</div>
-
-					<div>
-						<h2 className="mb-2 text-xs font-bold">
 							Learn Superhuman
 						</h2>
 						<div className="flex flex-col gap-1">
@@ -93,24 +80,45 @@ export const SettingsPane = () => {
 							<p className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700">
 								Start Tutorial
 							</p>
-							<p className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700">
-								Get Started Guide
-							</p>
-							<div className="flex items-center justify-between">
+							<Link
+								href="https://help.superhuman.com/article/580-superhuman-fundamentals"
+								target="_blank"
+							>
 								<p className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700">
-									Quick Tips
+									Get Started Guide
 								</p>
-								<Switch
-									variant="small"
-									checked={settings.isQuickTipsOpen}
-									onCheckedChange={() => {
-										setSettings({
-											isQuickTipsOpen:
-												!settings.isQuickTipsOpen,
-										})
-									}}
-								/>
-							</div>
+							</Link>
+							<Tooltip delayDuration={300}>
+								<TooltipTrigger>
+									<div
+										className="flex cursor-pointer items-center justify-between"
+										onClick={() =>
+											setSettings({
+												isQuickTipsOpen:
+													!settings.isQuickTipsOpen,
+											})
+										}
+									>
+										<p className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700">
+											Quick Tips
+										</p>
+										<Switch
+											variant="small"
+											checked={settings.isQuickTipsOpen}
+											onCheckedChange={() => {
+												setSettings({
+													isQuickTipsOpen:
+														!settings.isQuickTipsOpen,
+												})
+											}}
+										/>
+									</div>
+								</TooltipTrigger>
+								<TooltipContent side="left">
+									Show the Quick Tips bar and learn common
+									shortcuts to work twice as fast.
+								</TooltipContent>
+							</Tooltip>
 						</div>
 					</div>
 
@@ -124,9 +132,6 @@ export const SettingsPane = () => {
 								Add Accounts
 							</p>
 							<p className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700">
-								Edit Profile
-							</p>
-							<p className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700">
 								Calendars
 							</p>
 							<p
@@ -135,22 +140,22 @@ export const SettingsPane = () => {
 							>
 								Theme
 							</p>
-							<p className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700">
-								Achievements
-							</p>
-							<p className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700">
-								Billing
-							</p>
 						</div>
 					</div>
 
 					<div>
 						<h2 className="mb-2 text-xs font-bold">Triage</h2>
 						<div className="flex flex-col gap-1">
-							<p className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700">
+							<p
+								className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700"
+								onClick={() => setIsGetMeToZeroOpen(true)}
+							>
 								Get Me To Zero
 							</p>
-							<p className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700">
+							<p
+								className="text-xs text-slate-500 hover:cursor-pointer hover:text-slate-700"
+								onClick={() => setIsBulkActionsOpen(true)}
+							>
 								Bulk Actions
 							</p>
 						</div>

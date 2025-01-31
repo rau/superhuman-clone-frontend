@@ -2,8 +2,10 @@
 
 import { ComposePaneOverlay } from "@/components/compose/ComposePaneOverlay"
 import { AISettingsDialog } from "@/components/dialogs/AISettingsDialog"
+import { BulkActionsDialog } from "@/components/dialogs/BulkActionsDialog"
 import { DownloadsDialog } from "@/components/dialogs/DownloadsDialog"
 import { EmojiSkinColorDialog } from "@/components/dialogs/EmojiSkinColorDialog"
+import { GetMeToZeroDialog } from "@/components/dialogs/GetMeToZeroDialog"
 import { ImageSettingsDialog } from "@/components/dialogs/ImageSettingsDialog"
 import { MoveToDialog } from "@/components/dialogs/MoveToDialog"
 import { SignatureDialog } from "@/components/dialogs/SignatureDialog"
@@ -53,6 +55,8 @@ const Home = () => {
 			<EmojiSkinColorDialog />
 			<ThemeDialog />
 			<SignatureDialog />
+			<GetMeToZeroDialog />
+			<BulkActionsDialog />
 			<MoveToDialog />
 			<ComposePaneOverlay />
 			<SearchPane />

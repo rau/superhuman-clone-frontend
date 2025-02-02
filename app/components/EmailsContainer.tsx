@@ -63,7 +63,6 @@ export const EmailsContainer = () => {
 		isSettingsOpen,
 		isShortcutsPaneOpen,
 		selectedThreads,
-		setIsComposing,
 	} = useUIStore()
 	const { toggleSidebar } = useSidebar()
 	const { settings } = useSettingsStore()
@@ -116,7 +115,7 @@ export const EmailsContainer = () => {
 					<div className="flex items-center gap-2">
 						<IconButton
 							icon={Pencil}
-							onClick={() => setIsComposing(true)}
+							onClick={() => router.push("/compose")}
 							keyboardShortcuts={[
 								{
 									keys: ["C"],

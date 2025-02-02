@@ -1,3 +1,5 @@
+"use client"
+
 import { BackNavigationSection } from "@/components/BackNavigationSection"
 import { AIPromptInput } from "@/components/compose/AIPromptInput"
 import RecipientFields from "@/components/compose/RecipientFields"
@@ -23,14 +25,15 @@ import {
 } from "@/libs/composeUtils"
 import { debounce } from "@/libs/utils"
 import { Braces, Calendar, Paperclip, Trash2, X } from "lucide-react"
+import { useParams, useRouter } from "next/navigation"
 import { useEffect } from "react"
 import { FormProvider, useForm, useFormContext } from "react-hook-form"
 import TextareaAutosize from "react-textarea-autosize"
 import { toast } from "react-toastify"
 
 const MessageActions = () => {
+	const { draftId } = useParams()
 	const { isPending: isSending } = useSendEmail()
-	const { draftId } = useComposeStore()
 	const form = useFormContext<ComposeFormData>()
 	const addAttachment = useAddAttachment(form)
 	const attachments = form.watch("attachments.current")
@@ -149,7 +152,7 @@ const MessageActions = () => {
 							},
 						]}
 						onClick={() => {
-							discardDraft(draftId || "")
+							discardDraft(draftId as string)
 						}}
 					/>
 				</div>
@@ -184,24 +187,21 @@ const AttachmentChip = ({ attachment }: { attachment: DraftAttachment }) => {
 	)
 }
 
-export const ComposePaneOverlay = ({
+const ComposePane = ({
+	draftId,
 	isReply = false,
 	replyToEmail,
 }: {
+	draftId?: string
 	isReply?: boolean
 	replyToEmail?: EmailMessage
 }) => {
 	const { data: emails } = useFolderEmails()
 	const { mutateAsync: createDraft } = useCreateDraft()
-	const {
-		selectedFolder,
-		selectedIndices,
-		isComposing,
-		setIsComposing,
-		showAIPrompt,
-		setShowAIPrompt,
-	} = useUIStore()
-	const { draftId, setDraftId, setSelectedText } = useComposeStore()
+	const { selectedFolder, selectedIndices, showAIPrompt, setShowAIPrompt } =
+		useUIStore()
+	const router = useRouter()
+	const { setSelectedText } = useComposeStore()
 	const selectedIndex = selectedIndices[selectedFolder?.id || "INBOX"] || 0
 	const email = emails?.[selectedIndex]
 
@@ -266,8 +266,9 @@ export const ComposePaneOverlay = ({
 				attachmentsToDelete: getValues("attachments.toDelete"),
 				attachmentsToAdd: getValues("attachments.toAdd"),
 			}).then((data) => {
-				if (!draftId) setDraftId(data.draft_id)
-				else toast.success("Draft saved")
+				if (!draftId) {
+					router.push(`/compose/${data.id}`)
+				} else toast.success("Draft saved")
 			})
 		}, 3000)
 
@@ -279,10 +280,10 @@ export const ComposePaneOverlay = ({
 	}, [draftId, createDraft])
 
 	useEffect(() => {
-		console.log("draftId", draftId)
 		if (draftId) {
 			const draft = emails?.find((e) => e.id === draftId)
 			if (draft) {
+				console.log("found draft", draft)
 				setValue("message", draft.messages[0].body)
 				setValue("subject", draft.subject)
 				setValue("to", draft.messages[0].to.to || [])
@@ -298,17 +299,12 @@ export const ComposePaneOverlay = ({
 					})) || []
 				)
 			}
-		} else {
-			form.reset()
-			console.log("reset")
 		}
-	}, [draftId])
-
-	if (!isComposing) return null
+	}, [draftId, emails])
 
 	return (
 		<div className="absolute inset-0 z-40 flex flex-row bg-white">
-			<BackNavigationSection onClose={() => setIsComposing(false)} />
+			<BackNavigationSection onClose={() => router.back()} />
 			<FormProvider {...form}>
 				<SendEmptySubjectDialog />
 				<SendNoRecipientsDialog />
@@ -316,9 +312,7 @@ export const ComposePaneOverlay = ({
 					className="flex w-3/5 flex-col items-center"
 					onSubmit={send}
 				>
-					<h2 className="text-lg w-3/5 p-4 font-medium">
-						New Message
-					</h2>
+					<p className="text-lg w-3/5 p-4 font-medium">New Message</p>
 					<div className="flex w-3/5 flex-col rounded-2xl px-4 pt-4 shadow-2xl">
 						<div className="flex flex-col gap-2">
 							<RecipientFields />
@@ -373,3 +367,5 @@ export const ComposePaneOverlay = ({
 		</div>
 	)
 }
+
+export { ComposePane }

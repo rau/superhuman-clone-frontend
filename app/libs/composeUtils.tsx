@@ -1,6 +1,7 @@
 import { useDiscardDraft, useSendEmail } from "@/hooks/dataHooks"
 import { useComposeStore } from "@/hooks/useComposeStore"
 import { useUIStore } from "@/hooks/useUIStore"
+import { useParams, useRouter } from "next/navigation"
 import { UseFormReturn } from "react-hook-form"
 import { toast } from "react-toastify"
 
@@ -8,12 +9,10 @@ export const sendEmail = (form: UseFormReturn<ComposeFormData>) => {
 	const { mutateAsync: send } = useSendEmail()
 	const { mutateAsync: discardDraft } = useDiscardDraft()
 	const { handleSubmit } = form
-	const {
-		setShowEmptySubjectDialog,
-		setShowNoRecipientsDialog,
-		setIsComposing,
-	} = useUIStore()
-	const { draftId, setDraftId } = useComposeStore()
+	const { setShowEmptySubjectDialog, setShowNoRecipientsDialog } =
+		useUIStore()
+	const router = useRouter()
+	const { draftId } = useParams()
 
 	return handleSubmit((data: ComposeFormData) => {
 		if (!data.subject.trim()) {
@@ -36,10 +35,9 @@ export const sendEmail = (form: UseFormReturn<ComposeFormData>) => {
 		})
 			.then(() => {
 				if (draftId) {
-					discardDraft([draftId])
-					setDraftId("")
+					discardDraft([draftId as string])
 				}
-				setIsComposing(false)
+				router.push("/")
 				form.reset()
 			})
 			.catch(() => {})
@@ -128,10 +126,10 @@ export const useRemoveAttachment = (form: UseFormReturn<ComposeFormData>) => {
 
 export const discardDraft = (draftId: string) => {
 	const { mutateAsync } = useDiscardDraft()
-	const { setIsComposing } = useUIStore()
+	const router = useRouter()
 
 	return () => {
-		setIsComposing(false)
+		router.push("/")
 		mutateAsync([draftId]).then(() => toast.success("Draft discarded"))
 	}
 }

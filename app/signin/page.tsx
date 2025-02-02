@@ -1,10 +1,12 @@
+"use client"
+
 import { Button } from "@/components/ui/Button"
-import { useUIStore } from "@/hooks/useUIStore"
 import { initiateGoogleAuth } from "@/services/googleServices"
 import { ChevronLeft } from "lucide-react"
+import { useRouter } from "next/navigation"
 
-export const SignInPane = () => {
-	const { setIsSignInOpen } = useUIStore()
+const SignInPage = () => {
+	const router = useRouter()
 
 	const handleGmailLogin = async () => {
 		try {
@@ -19,7 +21,7 @@ export const SignInPane = () => {
 			<Button
 				variant="ghost"
 				className="absolute left-4 top-4 text-white hover:bg-white/10"
-				onClick={() => setIsSignInOpen(false)}
+				onClick={() => router.back()}
 			>
 				<ChevronLeft className="h-4 w-4" />
 				<span>Back</span>
@@ -51,3 +53,5 @@ export const SignInPane = () => {
 		</div>
 	)
 }
+
+export default SignInPage

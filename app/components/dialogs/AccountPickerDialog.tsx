@@ -4,10 +4,11 @@ import { useAccounts, useSignOutAccount } from "@/hooks/dataHooks"
 import { useAccountStore } from "@/hooks/useAccountStore"
 import { useUIStore } from "@/hooks/useUIStore"
 import { GripVertical } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 export const AccountPickerDialog = () => {
-	const { isAccountDialogOpen, setIsAccountDialogOpen, setIsSignInOpen } =
-		useUIStore()
+	const router = useRouter()
+	const { isAccountDialogOpen, setIsAccountDialogOpen } = useUIStore()
 	const { setSelectedAccountId } = useAccountStore()
 	const { data: accounts } = useAccounts()
 	const { mutate: signOut } = useSignOutAccount()
@@ -67,8 +68,8 @@ export const AccountPickerDialog = () => {
 						<span
 							className="text-blue-600 hover:cursor-pointer hover:text-blue-700 hover:underline"
 							onClick={() => {
-								setIsSignInOpen(true)
 								setIsAccountDialogOpen(false)
+								router.push("/signin")
 							}}
 						>
 							Sign in with your email provider

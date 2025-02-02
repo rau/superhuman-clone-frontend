@@ -1,7 +1,6 @@
 "use client"
 
 import { BackNavigationSection } from "@/components/BackNavigationSection"
-import { ComposePaneOverlay } from "@/components/compose/ComposePaneOverlay"
 import { EmailSenderDetailsPane } from "@/components/EmailSenderDetailsPane"
 import { KeyboardTooltip } from "@/components/KeyboardTooltip"
 import { TopActionsBar } from "@/components/TopActionsBar"
@@ -82,7 +81,6 @@ export const ViewEmailPane = () => {
 		setShowReplyPane,
 		collapsedMessages,
 		setCollapsedMessages,
-		isComposing,
 	} = useUIStore()
 	const lastMessageRef = useRef<HTMLDivElement>(null)
 	const [isScrolled, setIsScrolled] = useState(false)
@@ -288,12 +286,12 @@ export const ViewEmailPane = () => {
 								message={message}
 								isCollapsed={collapsedMessages[i]}
 							/>
-							{showReplyPane && (
+							{/* {showReplyPane && (
 								<ComposePaneOverlay
 									isReply={true}
 									replyToEmail={email.messages[i]}
 								/>
-							)}
+							)} */}
 						</div>
 					))}
 				</div>

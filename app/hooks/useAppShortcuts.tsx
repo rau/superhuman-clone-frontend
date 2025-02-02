@@ -12,7 +12,6 @@ import {
 	useTrashEmail,
 } from "@/hooks/dataHooks"
 import { useAccountStore } from "@/hooks/useAccountStore"
-import { useComposeStore } from "@/hooks/useComposeStore"
 import { useEmailActionsStore } from "@/hooks/useEmailActionsStore"
 import { useUIStore } from "@/hooks/useUIStore"
 import { useUndo } from "@/hooks/useUndo"
@@ -33,14 +32,12 @@ interface ShortcutConfig {
 
 export const useAppShortcuts = () => {
 	const {
-		setIsComposing,
 		selectedFolder,
 		selectedIndices,
 		setSelectedIndex,
 		selectedThreads,
 		setSelectedThreads,
 		setIsMoveToDialogOpen,
-		isComposing,
 		isMoveToDialogOpen,
 		toggleThreadSelection,
 		moveToDialogIndex,
@@ -55,8 +52,6 @@ export const useAppShortcuts = () => {
 		isAutoBCCDialogOpen,
 		isInstantIntroDialogOpen,
 	} = useUIStore()
-
-	const { setDraftId } = useComposeStore()
 
 	const { lastAction } = useEmailActionsStore()
 	const { data: emails } = useFolderEmails()
@@ -116,9 +111,9 @@ export const useAppShortcuts = () => {
 
 	const getCurrentMode = (): ShortcutMode => {
 		if (isMoveToDialogOpen) return "dialog"
-		if (isComposing) return "compose"
+		if (pathname.includes("/compose")) return "compose"
 		if (pathname.includes("/search")) return "search"
-		if (isShowingEmail()) return "email"
+		if (pathname.includes("/email/")) return "email"
 		return "global"
 	}
 
@@ -126,8 +121,7 @@ export const useAppShortcuts = () => {
 		{
 			key: "c",
 			handler: () => {
-				setDraftId("")
-				setIsComposing(true)
+				router.push("/compose")
 			},
 			mode: "global",
 			disabledModes: ["compose"],
@@ -145,10 +139,12 @@ export const useAppShortcuts = () => {
 						)
 					}
 				}
-				if (pathname.includes("/search")) {
+				if (
+					pathname.includes("/search") ||
+					pathname.includes("/compose")
+				) {
 					router.push("/")
 				}
-				setIsComposing(false)
 				setOpen(false)
 			},
 			mode: "global",
@@ -335,7 +331,7 @@ export const useAppShortcuts = () => {
 					handleMove(folders[moveToDialogIndex])
 					return
 				}
-				if (isComposing) return
+				if (pathname.includes("/compose")) return
 				if (
 					isShowingEmail() &&
 					collapsedMessages[selectedMessageIndex]
@@ -346,8 +342,7 @@ export const useAppShortcuts = () => {
 					return
 				}
 				if (emails?.[selectedIndex].is_draft) {
-					setDraftId(emails[selectedIndex].id)
-					setIsComposing(true)
+					router.push(`/compose/${emails[selectedIndex].id}`)
 					return
 				}
 				router.push(`/email/${emails?.[selectedIndex].id}`)
@@ -481,7 +476,7 @@ export const useAppShortcuts = () => {
 			if (
 				isAISettingsOpen ||
 				isShortcutsPaneOpen ||
-				isComposing ||
+				pathname.includes("/compose") ||
 				isAutoBCCDialogOpen ||
 				isInstantIntroDialogOpen
 			) {
@@ -517,7 +512,6 @@ export const useAppShortcuts = () => {
 		window.addEventListener("keydown", handleKeyDown)
 		return () => window.removeEventListener("keydown", handleKeyDown)
 	}, [
-		isComposing,
 		isShowingEmail,
 		isMoveToDialogOpen,
 		shortcuts,
@@ -525,5 +519,6 @@ export const useAppShortcuts = () => {
 		isShortcutsPaneOpen,
 		isAutoBCCDialogOpen,
 		isInstantIntroDialogOpen,
+		pathname,
 	])
 }

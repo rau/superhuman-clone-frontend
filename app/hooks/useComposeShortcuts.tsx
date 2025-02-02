@@ -4,6 +4,7 @@ import { useAIPromptStore } from "@/hooks/usePromptStore"
 import { useUIStore } from "@/hooks/useUIStore"
 import { sendEmail, useAddAttachment, useAddContact } from "@/libs/composeUtils"
 import { filterContacts } from "@/libs/contactUtils"
+import { useParams, usePathname, useRouter } from "next/navigation"
 import { useEffect } from "react"
 import { UseFormReturn } from "react-hook-form"
 import { toast } from "react-toastify"
@@ -17,13 +18,14 @@ interface ShortcutConfig {
 }
 
 export const useComposeShortcuts = (form: UseFormReturn<ComposeFormData>) => {
-	const { setIsComposing, isComposing, setShowAIPrompt, showAIPrompt } =
-		useUIStore()
+	const router = useRouter()
+	const pathname = usePathname()
+	const { draftId } = useParams()
+	const { setShowAIPrompt, showAIPrompt } = useUIStore()
 	const {
 		showSuggestions,
 		selectedContactIndex,
 		setSelectedContactIndex,
-		draftId,
 		activeField,
 		selectedContacts,
 		setSelectedContacts,
@@ -74,13 +76,17 @@ export const useComposeShortcuts = (form: UseFormReturn<ComposeFormData>) => {
 					setSelectedContacts("bcc", new Set())
 					return
 				}
-				setIsComposing(false)
+				router.push("/")
 			},
 		},
 		{
 			key: "Enter",
 			handler: () => {
-				if (isComposing && showSuggestions && filteredContacts.length) {
+				if (
+					pathname.includes("/compose") &&
+					showSuggestions &&
+					filteredContacts.length
+				) {
 					addContact(filteredContacts[selectedContactIndex])
 					return
 				}
@@ -104,7 +110,7 @@ export const useComposeShortcuts = (form: UseFormReturn<ComposeFormData>) => {
 		{
 			key: "ArrowDown",
 			handler: () => {
-				if (isComposing && showSuggestions) {
+				if (pathname.includes("/compose") && showSuggestions) {
 					setSelectedContactIndex(
 						(selectedContactIndex + 1) % filteredContacts.length
 					)
@@ -114,7 +120,7 @@ export const useComposeShortcuts = (form: UseFormReturn<ComposeFormData>) => {
 		{
 			key: "ArrowUp",
 			handler: () => {
-				if (isComposing && showSuggestions) {
+				if (pathname.includes("/compose") && showSuggestions) {
 					setSelectedContactIndex(
 						(selectedContactIndex - 1 + filteredContacts.length) %
 							filteredContacts.length
@@ -147,8 +153,8 @@ export const useComposeShortcuts = (form: UseFormReturn<ComposeFormData>) => {
 		{
 			key: ",",
 			handler: () => {
-				setIsComposing(false)
-				discardDraft([draftId || ""]).then(() =>
+				router.push("/")
+				discardDraft([draftId as string]).then(() =>
 					toast.success("Draft discarded")
 				)
 			},
@@ -252,7 +258,7 @@ export const useComposeShortcuts = (form: UseFormReturn<ComposeFormData>) => {
 			shortcuts.forEach(({ key, handler, meta, shift, ctrl }) => {
 				if (handled) return
 
-				if (!isComposing) return
+				if (!pathname.includes("/compose")) return
 
 				const metaMatch = meta ? e.metaKey : !e.metaKey
 				const shiftMatch = shift ? e.shiftKey : !e.shiftKey
@@ -291,5 +297,5 @@ export const useComposeShortcuts = (form: UseFormReturn<ComposeFormData>) => {
 
 		window.addEventListener("keydown", handleKeyDown)
 		return () => window.removeEventListener("keydown", handleKeyDown)
-	}, [isComposing, shortcuts, showSuggestions, aiPromptMode, selectedText])
+	}, [pathname, shortcuts, showSuggestions, aiPromptMode, selectedText])
 }

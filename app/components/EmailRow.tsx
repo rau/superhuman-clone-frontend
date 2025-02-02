@@ -3,7 +3,6 @@
 import { ActionUndoToast } from "@/components/ActionUndoToast"
 import { KeyboardTooltip } from "@/components/KeyboardTooltip"
 import { useFolderEmails, useMarkEmailDone } from "@/hooks/dataHooks"
-import { useComposeStore } from "@/hooks/useComposeStore"
 import { useUIStore } from "@/hooks/useUIStore"
 import {
 	getUniqueSenderNames,
@@ -25,22 +24,16 @@ export const EmailRow = ({ email, isSelected }: EmailRowProps) => {
 	const { setSelectedIndex } = useUIStore()
 	const { data: emails } = useFolderEmails()
 	const { mutateAsync: markDone } = useMarkEmailDone()
-	const {
-		selectedThreads,
-		selectedFolder,
-		toggleThreadSelection,
-		setIsComposing,
-	} = useUIStore()
+	const { selectedThreads, selectedFolder, toggleThreadSelection } =
+		useUIStore()
 	const isThreadSelected = selectedThreads[
 		selectedFolder?.id || "INBOX"
 	]?.has(email.id)
-	const { setDraftId } = useComposeStore()
 
 	const handleClick = () => {
 		if (!emails || !selectedFolder) return
 		if (email.is_draft) {
-			setIsComposing(true)
-			setDraftId(email.id)
+			router.push(`/compose/${email.id}`)
 			return
 		} else {
 			router.push(`/email/${email.id}`)

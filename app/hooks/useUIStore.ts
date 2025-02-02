@@ -1,7 +1,6 @@
 import { create } from "zustand"
 
 interface UIState {
-	isComposing: boolean
 	isAccountDialogOpen: boolean
 	isSettingsOpen: boolean
 	isShortcutsPaneOpen: boolean
@@ -29,7 +28,6 @@ interface UIState {
 	showNoRecipientsDialog: boolean
 	setShowEmptySubjectDialog: (value: boolean) => void
 	setShowNoRecipientsDialog: (value: boolean) => void
-	setIsComposing: (isComposing: boolean) => void
 	setIsAccountDialogOpen: (open: boolean) => void
 	setSelectedFolder: (folder: Folder) => void
 	setIsSettingsOpen: (open: boolean) => void
@@ -90,7 +88,6 @@ const INITIAL_FOLDER: Folder = {
 }
 
 export const useUIStore = create<UIState>((set) => ({
-	isComposing: false,
 	isAccountDialogOpen: false,
 	isSettingsOpen: false,
 	isShortcutsPaneOpen: false,
@@ -122,7 +119,6 @@ export const useUIStore = create<UIState>((set) => ({
 	isMeetingLinksOpen: false,
 	isNotificationsOpen: false,
 	isRemindersOpen: false,
-	setIsComposing: (isComposing) => set({ isComposing }),
 	setIsAccountDialogOpen: (open) => set({ isAccountDialogOpen: open }),
 	setIsSettingsOpen: (open) => set({ isSettingsOpen: open }),
 	setSelectedFolder: (folder) => set({ selectedFolder: folder }),

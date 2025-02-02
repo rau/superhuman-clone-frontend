@@ -1,85 +1,5 @@
 import { create } from "zustand"
 
-interface UIState {
-	isAccountDialogOpen: boolean
-	isSettingsOpen: boolean
-	isShortcutsPaneOpen: boolean
-	isAISettingsOpen: boolean
-	isDownloadsOpen: boolean
-	isImageSettingsOpen: boolean
-	isSignInOpen: boolean
-	isThemeDialogOpen: boolean
-	isMoveToDialogOpen: boolean
-	selectedIndices: Record<string, number>
-	selectedThreads: Record<string, Set<string>>
-	selectedFolder: Folder | null
-	selectedMessageIndex: number
-	setSelectedMessageIndex: (index: number) => void
-	showReplyPane: boolean
-	setShowReplyPane: (value: boolean) => void
-	collapsedMessages: Record<number, boolean>
-	setCollapsedMessages: (value: Record<number, boolean>) => void
-	isFileDialogOpen: boolean
-	setIsFileDialogOpen: (value: boolean) => void
-	isSignatureDialogOpen: boolean
-	setIsSignatureDialogOpen: (value: boolean) => void
-
-	showEmptySubjectDialog: boolean
-	showNoRecipientsDialog: boolean
-	setShowEmptySubjectDialog: (value: boolean) => void
-	setShowNoRecipientsDialog: (value: boolean) => void
-	setIsAccountDialogOpen: (open: boolean) => void
-	setSelectedFolder: (folder: Folder) => void
-	setIsSettingsOpen: (open: boolean) => void
-	setIsShortcutsPaneOpen: (open: boolean) => void
-	setIsAISettingsOpen: (open: boolean) => void
-	setIsDownloadsOpen: (value: boolean) => void
-	setIsImageSettingsOpen: (value: boolean) => void
-	setIsSignInOpen: (value: boolean) => void
-	setSelectedIndex: (folderId: string, index: number) => void
-	setIsThemeDialogOpen: (value: boolean) => void
-	setSelectedThreads: (folderId: string, threadIds: Set<string>) => void
-	toggleThreadSelection: (folderId: string, threadId: string) => void
-	clearSelectedThreads: (folderId: string) => void
-	setIsMoveToDialogOpen: (value: boolean) => void
-
-	moveToDialogIndex: number
-	setMoveToDialogIndex: (index: number) => void
-
-	showAIPrompt: boolean
-	setShowAIPrompt: (value: boolean) => void
-
-	isEmojiSkinColorOpen: boolean
-	setIsEmojiSkinColorOpen: (value: boolean) => void
-
-	isGetMeToZeroOpen: boolean
-	setIsGetMeToZeroOpen: (value: boolean) => void
-
-	isBulkActionsOpen: boolean
-	setIsBulkActionsOpen: (value: boolean) => void
-
-	isAutoAdvanceDialogOpen: boolean
-	setIsAutoAdvanceDialogOpen: (value: boolean) => void
-
-	isAutoBCCDialogOpen: boolean
-	setIsAutoBCCDialogOpen: (value: boolean) => void
-
-	isBlockedSendersDialogOpen: boolean
-	setIsBlockedSendersDialogOpen: (value: boolean) => void
-
-	isInstantIntroDialogOpen: boolean
-	setIsInstantIntroDialogOpen: (value: boolean) => void
-
-	isMeetingLinksOpen: boolean
-	setIsMeetingLinksOpen: (value: boolean) => void
-
-	isNotificationsOpen: boolean
-	setIsNotificationsOpen: (value: boolean) => void
-
-	isRemindersOpen: boolean
-	setIsRemindersOpen: (value: boolean) => void
-}
-
 const INITIAL_FOLDER: Folder = {
 	id: "INBOX",
 	name: "INBOX",
@@ -87,51 +7,158 @@ const INITIAL_FOLDER: Folder = {
 	messageCount: 0,
 }
 
+interface UIState {
+	// Dialog States
+	isAccountDialogOpen: boolean
+	isAISettingsOpen: boolean
+	isAutoAdvanceDialogOpen: boolean
+	isAutoBCCDialogOpen: boolean
+	isBlockedSendersDialogOpen: boolean
+	isDownloadsOpen: boolean
+	isEmojiSkinColorOpen: boolean
+	isFileDialogOpen: boolean
+	isGetMeToZeroOpen: boolean
+	isImageSettingsOpen: boolean
+	isInstantIntroDialogOpen: boolean
+	isMeetingLinksOpen: boolean
+	isMoveToDialogOpen: boolean
+	isNotificationsOpen: boolean
+	isRemindersOpen: boolean
+	isSettingsOpen: boolean
+	isShortcutsPaneOpen: boolean
+	isSignatureDialogOpen: boolean
+	isSignInOpen: boolean
+	isThemeDialogOpen: boolean
+	showEmptySubjectDialog: boolean
+	showNoRecipientsDialog: boolean
+
+	// Email Selection States
+	selectedFolder: Folder | null
+	selectedIndices: Record<string, number>
+	selectedThreads: Record<string, Set<string>>
+	selectedMessageIndex: number
+	moveToDialogIndex: number
+
+	// Message States
+	collapsedMessages: Record<number, boolean>
+	showReplyPane: boolean
+	showAIPrompt: boolean
+	isBulkActionsOpen: boolean
+
+	// Dialog Setters
+	setIsAccountDialogOpen: (open: boolean) => void
+	setIsAISettingsOpen: (open: boolean) => void
+	setIsAutoAdvanceDialogOpen: (value: boolean) => void
+	setIsAutoBCCDialogOpen: (value: boolean) => void
+	setIsBlockedSendersDialogOpen: (value: boolean) => void
+	setIsDownloadsOpen: (value: boolean) => void
+	setIsEmojiSkinColorOpen: (value: boolean) => void
+	setIsFileDialogOpen: (value: boolean) => void
+	setIsGetMeToZeroOpen: (value: boolean) => void
+	setIsImageSettingsOpen: (value: boolean) => void
+	setIsInstantIntroDialogOpen: (value: boolean) => void
+	setIsMeetingLinksOpen: (value: boolean) => void
+	setIsMoveToDialogOpen: (value: boolean) => void
+	setIsNotificationsOpen: (value: boolean) => void
+	setIsRemindersOpen: (value: boolean) => void
+	setIsSettingsOpen: (open: boolean) => void
+	setIsShortcutsPaneOpen: (open: boolean) => void
+	setIsSignatureDialogOpen: (value: boolean) => void
+	setIsSignInOpen: (value: boolean) => void
+	setIsThemeDialogOpen: (value: boolean) => void
+	setShowEmptySubjectDialog: (value: boolean) => void
+	setShowNoRecipientsDialog: (value: boolean) => void
+
+	// Selection Setters
+	setSelectedFolder: (folder: Folder) => void
+	setSelectedIndex: (folderId: string, index: number) => void
+	setSelectedMessageIndex: (index: number) => void
+	setSelectedThreads: (folderId: string, threadIds: Set<string>) => void
+	setMoveToDialogIndex: (index: number) => void
+	toggleThreadSelection: (folderId: string, threadId: string) => void
+	clearSelectedThreads: (folderId: string) => void
+
+	// Message State Setters
+	setCollapsedMessages: (value: Record<number, boolean>) => void
+	setShowReplyPane: (value: boolean) => void
+	setShowAIPrompt: (value: boolean) => void
+	setIsBulkActionsOpen: (value: boolean) => void
+}
+
 export const useUIStore = create<UIState>((set) => ({
+	// Dialog States
 	isAccountDialogOpen: false,
-	isSettingsOpen: false,
-	isShortcutsPaneOpen: false,
 	isAISettingsOpen: false,
-	selectedFolder: INITIAL_FOLDER,
-	isDownloadsOpen: false,
-	isImageSettingsOpen: false,
-	isSignInOpen: false,
-	selectedIndices: {},
-	isThemeDialogOpen: false,
-	selectedThreads: {},
-	isMoveToDialogOpen: false,
-	moveToDialogIndex: 0,
-	showReplyPane: false,
-	showEmptySubjectDialog: false,
-	showNoRecipientsDialog: false,
-	selectedMessageIndex: 0,
-	collapsedMessages: {},
-	isFileDialogOpen: false,
-	showAIPrompt: false,
-	isEmojiSkinColorOpen: false,
-	isSignatureDialogOpen: false,
-	isGetMeToZeroOpen: false,
-	isBulkActionsOpen: false,
 	isAutoAdvanceDialogOpen: false,
 	isAutoBCCDialogOpen: false,
 	isBlockedSendersDialogOpen: false,
+	isDownloadsOpen: false,
+	isEmojiSkinColorOpen: false,
+	isFileDialogOpen: false,
+	isGetMeToZeroOpen: false,
+	isImageSettingsOpen: false,
 	isInstantIntroDialogOpen: false,
 	isMeetingLinksOpen: false,
+	isMoveToDialogOpen: false,
 	isNotificationsOpen: false,
 	isRemindersOpen: false,
+	isSettingsOpen: false,
+	isShortcutsPaneOpen: false,
+	isSignatureDialogOpen: false,
+	isSignInOpen: false,
+	isThemeDialogOpen: false,
+	showEmptySubjectDialog: false,
+	showNoRecipientsDialog: false,
+
+	// Email Selection States
+	selectedFolder: INITIAL_FOLDER,
+	selectedIndices: {},
+	selectedThreads: {},
+	selectedMessageIndex: 0,
+	moveToDialogIndex: 0,
+
+	// Message States
+	collapsedMessages: {},
+	showReplyPane: false,
+	showAIPrompt: false,
+	isBulkActionsOpen: false,
+
+	// Dialog Setters
 	setIsAccountDialogOpen: (open) => set({ isAccountDialogOpen: open }),
-	setIsSettingsOpen: (open) => set({ isSettingsOpen: open }),
-	setSelectedFolder: (folder) => set({ selectedFolder: folder }),
-	setIsShortcutsPaneOpen: (open) => set({ isShortcutsPaneOpen: open }),
 	setIsAISettingsOpen: (open) => set({ isAISettingsOpen: open }),
+	setIsAutoAdvanceDialogOpen: (value) =>
+		set({ isAutoAdvanceDialogOpen: value }),
+	setIsAutoBCCDialogOpen: (value) => set({ isAutoBCCDialogOpen: value }),
+	setIsBlockedSendersDialogOpen: (value) =>
+		set({ isBlockedSendersDialogOpen: value }),
 	setIsDownloadsOpen: (value) => set({ isDownloadsOpen: value }),
+	setIsEmojiSkinColorOpen: (value) => set({ isEmojiSkinColorOpen: value }),
+	setIsFileDialogOpen: (value) => set({ isFileDialogOpen: value }),
+	setIsGetMeToZeroOpen: (value) => set({ isGetMeToZeroOpen: value }),
 	setIsImageSettingsOpen: (value) => set({ isImageSettingsOpen: value }),
+	setIsInstantIntroDialogOpen: (value) =>
+		set({ isInstantIntroDialogOpen: value }),
+	setIsMeetingLinksOpen: (value) => set({ isMeetingLinksOpen: value }),
+	setIsMoveToDialogOpen: (value) => set({ isMoveToDialogOpen: value }),
+	setIsNotificationsOpen: (value) => set({ isNotificationsOpen: value }),
+	setIsRemindersOpen: (value) => set({ isRemindersOpen: value }),
+	setIsSettingsOpen: (open) => set({ isSettingsOpen: open }),
+	setIsShortcutsPaneOpen: (open) => set({ isShortcutsPaneOpen: open }),
+	setIsSignatureDialogOpen: (value) => set({ isSignatureDialogOpen: value }),
 	setIsSignInOpen: (value) => set({ isSignInOpen: value }),
+	setIsThemeDialogOpen: (value) => set({ isThemeDialogOpen: value }),
+	setShowEmptySubjectDialog: (value) =>
+		set({ showEmptySubjectDialog: value }),
+	setShowNoRecipientsDialog: (value) =>
+		set({ showNoRecipientsDialog: value }),
+
+	// Selection Setters
+	setSelectedFolder: (folder) => set({ selectedFolder: folder }),
 	setSelectedIndex: (folderId, index) =>
 		set((state) => ({
 			selectedIndices: { ...state.selectedIndices, [folderId]: index },
 		})),
-	setIsThemeDialogOpen: (value) => set({ isThemeDialogOpen: value }),
+	setSelectedMessageIndex: (index) => set({ selectedMessageIndex: index }),
 	setSelectedThreads: (folderId, threadIds) =>
 		set((state) => ({
 			selectedThreads: {
@@ -139,15 +166,13 @@ export const useUIStore = create<UIState>((set) => ({
 				[folderId]: threadIds,
 			},
 		})),
+	setMoveToDialogIndex: (index) => set({ moveToDialogIndex: index }),
 	toggleThreadSelection: (folderId, threadId) =>
 		set((state) => {
 			const currentSet = state.selectedThreads[folderId] || new Set()
 			const newSet = new Set(currentSet)
-			if (newSet.has(threadId)) {
-				newSet.delete(threadId)
-			} else {
-				newSet.add(threadId)
-			}
+			if (newSet.has(threadId)) newSet.delete(threadId)
+			else newSet.add(threadId)
 			return {
 				selectedThreads: {
 					...state.selectedThreads,
@@ -162,29 +187,10 @@ export const useUIStore = create<UIState>((set) => ({
 				[folderId]: new Set(),
 			},
 		})),
-	setIsMoveToDialogOpen: (value) => set({ isMoveToDialogOpen: value }),
-	setMoveToDialogIndex: (index) => set({ moveToDialogIndex: index }),
-	setSelectedMessageIndex: (index) => set({ selectedMessageIndex: index }),
-	setShowReplyPane: (value) => set({ showReplyPane: value }),
+
+	// Message State Setters
 	setCollapsedMessages: (value) => set({ collapsedMessages: value }),
-	setShowEmptySubjectDialog: (value) =>
-		set({ showEmptySubjectDialog: value }),
-	setIsFileDialogOpen: (value) => set({ isFileDialogOpen: value }),
-	setShowNoRecipientsDialog: (value) =>
-		set({ showNoRecipientsDialog: value }),
+	setShowReplyPane: (value) => set({ showReplyPane: value }),
 	setShowAIPrompt: (value) => set({ showAIPrompt: value }),
-	setIsEmojiSkinColorOpen: (value) => set({ isEmojiSkinColorOpen: value }),
-	setIsSignatureDialogOpen: (value) => set({ isSignatureDialogOpen: value }),
-	setIsGetMeToZeroOpen: (value) => set({ isGetMeToZeroOpen: value }),
 	setIsBulkActionsOpen: (value) => set({ isBulkActionsOpen: value }),
-	setIsAutoAdvanceDialogOpen: (value) =>
-		set({ isAutoAdvanceDialogOpen: value }),
-	setIsAutoBCCDialogOpen: (value) => set({ isAutoBCCDialogOpen: value }),
-	setIsBlockedSendersDialogOpen: (value) =>
-		set({ isBlockedSendersDialogOpen: value }),
-	setIsInstantIntroDialogOpen: (value) =>
-		set({ isInstantIntroDialogOpen: value }),
-	setIsMeetingLinksOpen: (value) => set({ isMeetingLinksOpen: value }),
-	setIsNotificationsOpen: (value) => set({ isNotificationsOpen: value }),
-	setIsRemindersOpen: (value) => set({ isRemindersOpen: value }),
 }))

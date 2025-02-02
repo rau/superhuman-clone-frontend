@@ -63,14 +63,16 @@ export const getSelectedEmails = (
 	emails: EmailThread[] | undefined
 ): EmailThread[] => {
 	const currentFolderId = selectedFolder?.id || "INBOX"
+	const nonDraftEmails = emails?.filter((e) => !e.is_draft)
 
 	if (selectedThreads[currentFolderId]?.size) {
 		return Array.from(selectedThreads[currentFolderId])
-			.map((id) => emails?.find((e) => e.id === id))
+			.map((id) => nonDraftEmails?.find((e) => e.id === id))
 			.filter(Boolean) as EmailThread[]
 	}
 
-	const selectedEmail = emails?.[selectedIndices[currentFolderId] || 0]
+	const selectedEmail =
+		nonDraftEmails?.[selectedIndices[currentFolderId] || 0]
 	return selectedEmail ? [selectedEmail] : []
 }
 

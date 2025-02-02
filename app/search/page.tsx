@@ -1,9 +1,11 @@
+"use client"
+
 import { EmailRow } from "@/components/EmailRow"
 import { Loader } from "@/components/ui/Loader"
 import { useSearchEmails } from "@/hooks/dataHooks"
 import { useSearchStore } from "@/hooks/useSearchStore"
-import { useUIStore } from "@/hooks/useUIStore"
 import { X } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 const Results = ({ results }: { results: EmailThread[] }) => {
 	const { query } = useSearchStore()
@@ -42,13 +44,14 @@ const Results = ({ results }: { results: EmailThread[] }) => {
 const Header = () => {
 	const { query, setQuery } = useSearchStore()
 	const { refetch } = useSearchEmails(query)
-	const { setIsSearching } = useUIStore()
+	const router = useRouter()
 
 	const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
 		if (e.key === "Enter" && query) {
 			refetch()
 		}
 	}
+
 	return (
 		<div className="flex h-14 items-center justify-between border-b border-slate-200 px-4">
 			<div className="flex-1">
@@ -63,7 +66,7 @@ const Header = () => {
 				/>
 			</div>
 			<button
-				onClick={() => setIsSearching(false)}
+				onClick={() => router.back()}
 				className="rounded p-1 hover:bg-slate-100"
 			>
 				<X className="h-5 w-5" />
@@ -140,12 +143,9 @@ const SearchTips = () => (
 	</div>
 )
 
-export const SearchPane = () => {
-	const { isSearching } = useUIStore()
+const SearchPane = () => {
 	const { query } = useSearchStore()
 	const { data: results = [] } = useSearchEmails(query)
-
-	if (!isSearching) return null
 
 	return (
 		<div className="absolute inset-0 z-50 flex flex-col bg-white">
@@ -159,3 +159,5 @@ export const SearchPane = () => {
 		</div>
 	)
 }
+
+export default SearchPane

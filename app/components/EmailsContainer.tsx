@@ -1,3 +1,5 @@
+"use client"
+
 import { EmailRow } from "@/components/EmailRow"
 import { EmailSenderDetailsPane } from "@/components/EmailSenderDetailsPane"
 import { SettingsPane } from "@/components/SettingsPane"
@@ -13,6 +15,7 @@ import { useUIStore } from "@/hooks/useUIStore"
 import { groupEmailsByDate } from "@/libs/emailUtils"
 import { cn } from "@/libs/utils"
 import { Menu, Pencil, Search, Square, SquareCheckBig } from "lucide-react"
+import { useRouter } from "next/navigation"
 import { useEffect } from "react"
 
 const SelectAllButton = () => {
@@ -61,11 +64,11 @@ export const EmailsContainer = () => {
 		isShortcutsPaneOpen,
 		selectedThreads,
 		setIsComposing,
-		setIsSearching,
 	} = useUIStore()
 	const { toggleSidebar } = useSidebar()
 	const { settings } = useSettingsStore()
 	const { theme } = useThemeStore()
+	const router = useRouter()
 
 	const selectedIndex = selectedIndices[selectedFolder?.id || "INBOX"] || 0
 	const hasSelectedThreads =
@@ -123,7 +126,7 @@ export const EmailsContainer = () => {
 						/>
 						<IconButton
 							icon={Search}
-							onClick={() => setIsSearching(true)}
+							onClick={() => router.push("/search")}
 							keyboardShortcuts={[
 								{
 									keys: ["/"],

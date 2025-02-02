@@ -1,6 +1,7 @@
+"use client"
+
 import { ActionUndoToast } from "@/components/ActionUndoToast"
 import { KeyboardTooltip } from "@/components/KeyboardTooltip"
-
 import { useFolderEmails, useMarkEmailDone } from "@/hooks/dataHooks"
 import { useComposeStore } from "@/hooks/useComposeStore"
 import { useUIStore } from "@/hooks/useUIStore"
@@ -21,7 +22,7 @@ interface EmailRowProps {
 
 export const EmailRow = ({ email, isSelected }: EmailRowProps) => {
 	const router = useRouter()
-	const { setSelectedIndex, setIsShowingEmail } = useUIStore()
+	const { setSelectedIndex } = useUIStore()
 	const { data: emails } = useFolderEmails()
 	const { mutateAsync: markDone } = useMarkEmailDone()
 	const {
@@ -44,7 +45,6 @@ export const EmailRow = ({ email, isSelected }: EmailRowProps) => {
 		} else {
 			router.push(`/email/${email.id}`)
 			setSelectedIndex(selectedFolder.id, emails.indexOf(email))
-			setIsShowingEmail(true)
 		}
 	}
 

@@ -17,6 +17,7 @@ import { useEmailActionsStore } from "@/hooks/useEmailActionsStore"
 import { useUIStore } from "@/hooks/useUIStore"
 import { useUndo } from "@/hooks/useUndo"
 import { getSelectedEmails } from "@/libs/emailUtils"
+import { usePathname, useRouter } from "next/navigation"
 import { useEffect } from "react"
 import { toast } from "react-toastify"
 
@@ -32,9 +33,7 @@ interface ShortcutConfig {
 
 export const useAppShortcuts = () => {
 	const {
-		setIsSearching,
 		setIsComposing,
-		setIsShowingEmail,
 		selectedFolder,
 		selectedIndices,
 		setSelectedIndex,
@@ -42,8 +41,6 @@ export const useAppShortcuts = () => {
 		setSelectedThreads,
 		setIsMoveToDialogOpen,
 		isComposing,
-		isSearching,
-		isShowingEmail,
 		isMoveToDialogOpen,
 		toggleThreadSelection,
 		moveToDialogIndex,
@@ -85,6 +82,9 @@ export const useAppShortcuts = () => {
 		emails
 	)
 
+	const pathname = usePathname()
+	const router = useRouter()
+
 	const toggleMessage = (index: number) => {
 		const next: Record<number, boolean> = { ...collapsedMessages }
 		next[index] = !collapsedMessages[index]
@@ -110,11 +110,15 @@ export const useAppShortcuts = () => {
 		element?.scrollIntoView({ block: "nearest" })
 	}
 
+	function isShowingEmail() {
+		return pathname.includes("/email/")
+	}
+
 	const getCurrentMode = (): ShortcutMode => {
 		if (isMoveToDialogOpen) return "dialog"
 		if (isComposing) return "compose"
-		if (isSearching) return "search"
-		if (isShowingEmail) return "email"
+		if (pathname.includes("/search")) return "search"
+		if (isShowingEmail()) return "email"
 		return "global"
 	}
 
@@ -131,7 +135,7 @@ export const useAppShortcuts = () => {
 		{
 			key: "Escape",
 			handler: () => {
-				if (!isShowingEmail) {
+				if (!isShowingEmail()) {
 					const currentSelected =
 						selectedThreads[selectedFolder?.id || "INBOX"]
 					if (currentSelected?.size > 0) {
@@ -141,16 +145,17 @@ export const useAppShortcuts = () => {
 						)
 					}
 				}
-				setIsSearching(false)
+				if (pathname.includes("/search")) {
+					router.push("/")
+				}
 				setIsComposing(false)
-				setIsShowingEmail(false)
 				setOpen(false)
 			},
 			mode: "global",
 		},
 		{
 			key: "/",
-			handler: () => setIsSearching(true),
+			handler: () => router.push("/search"),
 			mode: "global",
 		},
 		{
@@ -331,7 +336,10 @@ export const useAppShortcuts = () => {
 					return
 				}
 				if (isComposing) return
-				if (isShowingEmail && collapsedMessages[selectedMessageIndex]) {
+				if (
+					isShowingEmail() &&
+					collapsedMessages[selectedMessageIndex]
+				) {
 					const next = { ...collapsedMessages }
 					next[selectedMessageIndex] = false
 					setCollapsedMessages(next)
@@ -342,7 +350,7 @@ export const useAppShortcuts = () => {
 					setIsComposing(true)
 					return
 				}
-				setIsShowingEmail(true)
+				router.push(`/email/${emails?.[selectedIndex].id}`)
 			},
 			mode: "global",
 		},
@@ -352,7 +360,7 @@ export const useAppShortcuts = () => {
 				if (isMoveToDialogOpen) {
 					handleIndexChange(moveToDialogIndex + 1)
 					return
-				} else if (isShowingEmail) {
+				} else if (isShowingEmail()) {
 					setSelectedMessageIndex(
 						Math.min(
 							selectedMessageIndex + 1,
@@ -374,7 +382,7 @@ export const useAppShortcuts = () => {
 				if (isMoveToDialogOpen) {
 					handleIndexChange(moveToDialogIndex - 1)
 					return
-				} else if (isShowingEmail) {
+				} else if (isShowingEmail()) {
 					setSelectedMessageIndex(
 						Math.max(selectedMessageIndex - 1, 0)
 					)
@@ -480,6 +488,8 @@ export const useAppShortcuts = () => {
 				return
 			}
 
+			console.log("key pressed", e.key)
+
 			shortcuts.forEach(
 				({ key, handler, meta, shift, ctrl, disabledModes = [] }) => {
 					if (handled) return
@@ -508,7 +518,6 @@ export const useAppShortcuts = () => {
 		return () => window.removeEventListener("keydown", handleKeyDown)
 	}, [
 		isComposing,
-		isSearching,
 		isShowingEmail,
 		isMoveToDialogOpen,
 		shortcuts,

@@ -14,6 +14,7 @@ import { useUIStore } from "@/hooks/useUIStore"
 import { parseEmailBody } from "@/libs/emailUtils"
 import { cn } from "@/libs/utils"
 import { Check, Clock, Copy, Ellipsis, Share } from "lucide-react"
+import { useParams, useRouter } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
 
 const EmailMessage = ({
@@ -64,10 +65,13 @@ const EmailMessage = ({
 	)
 }
 
-export const ViewEmailPane = ({ emailId }: { emailId: string }) => {
+export const ViewEmailPane = () => {
+	const { emailId } = useParams()
+	const router = useRouter()
 	const { selectedFolder, selectedIndices, setSelectedIndex } = useUIStore()
 	const selectedIndex = selectedIndices[selectedFolder?.id || "INBOX"] || 0
 	const { data: emails } = useFolderEmails()
+	console.log("emails", emails)
 	const email = emails?.find((email) => email.id === emailId)
 	const { mutate: handleMarkDone } = useMarkEmailDone()
 	const { mutateAsync: markEmailRead } = useMarkEmailRead()
@@ -80,24 +84,24 @@ export const ViewEmailPane = ({ emailId }: { emailId: string }) => {
 		setCollapsedMessages,
 		isComposing,
 	} = useUIStore()
-	const { isShowingEmail, setIsShowingEmail } = useUIStore()
 	const lastMessageRef = useRef<HTMLDivElement>(null)
 	const [isScrolled, setIsScrolled] = useState(false)
 
 	useEffect(() => {
-		if (email && !email.messages[0].read && isShowingEmail) {
+		if (email && !email.messages[0].read) {
 			markEmailRead({
 				emails_input: [email],
 				read: true,
 			})
 		}
-	}, [email?.id, isShowingEmail])
+	}, [emailId])
 
-	// useEffect(() => {
-	// 	if (email?.messages && lastMessageRef.current) {
-	// 		lastMessageRef.current.scrollIntoView()
-	// 	}
-	// }, [email, isShowingEmail])
+	// TODO: CHECK THIS WORKS
+	useEffect(() => {
+		if (email?.messages && lastMessageRef.current) {
+			lastMessageRef.current.scrollIntoView()
+		}
+	}, [emailId])
 
 	useEffect(() => {
 		if (email?.messages) {
@@ -154,10 +158,14 @@ export const ViewEmailPane = ({ emailId }: { emailId: string }) => {
 		return () => container?.removeEventListener("scroll", handleScroll)
 	}, [scrollContainerRef.current])
 
+	console.log("email", emailId)
+
 	return (
 		<div className="absolute inset-0 z-50 flex flex-row bg-white">
 			<BackNavigationSection
-				onClose={() => setIsShowingEmail(false)}
+				onClose={() => {
+					router.back()
+				}}
 				onPrevious={() =>
 					setSelectedIndex(
 						selectedFolder?.id || "INBOX",

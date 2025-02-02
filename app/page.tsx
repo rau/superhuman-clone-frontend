@@ -20,10 +20,8 @@ import { SignatureDialog } from "@/components/dialogs/SignatureDialog"
 import { ThemeDialog } from "@/components/dialogs/ThemeDialog"
 import { EmailsContainer } from "@/components/EmailsContainer"
 import { FileDialogOverlay } from "@/components/FileDialogOverlay"
-import { SearchPane } from "@/components/SearchPane"
 import { SignInPane } from "@/components/SignInPane"
 import { TipBar } from "@/components/TipBar"
-import { ViewEmailPane } from "@/components/ViewEmailPane"
 import { useAccounts } from "@/hooks/dataHooks"
 import { useAccountStore } from "@/hooks/useAccountStore"
 import { useAppShortcuts } from "@/hooks/useAppShortcuts"
@@ -75,8 +73,6 @@ const Home = () => {
 			<MoveToDialog />
 			<AccountPickerDialog />
 			<ComposePaneOverlay />
-			<SearchPane />
-			<ViewEmailPane />
 			<FileDialogOverlay />
 		</div>
 	)

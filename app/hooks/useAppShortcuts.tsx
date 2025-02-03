@@ -143,7 +143,8 @@ export const useAppShortcuts = () => {
 				}
 				if (
 					pathname.includes("/search") ||
-					pathname.includes("/compose")
+					pathname.includes("/compose") ||
+					pathname.includes("/email")
 				) {
 					router.push("/")
 				}

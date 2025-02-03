@@ -48,7 +48,6 @@ export const useComposeShortcuts = (form: UseFormReturn<ComposeFormData>) => {
 		setIsAiPromptLoading,
 	} = useAIPromptStore()
 	const { mutateAsync: discardDraft } = useDiscardDraft()
-
 	const send = sendEmail(form)
 	const addContact = useAddContact(form)
 	const filteredContacts = filterContacts(form)
@@ -168,7 +167,9 @@ export const useComposeShortcuts = (form: UseFormReturn<ComposeFormData>) => {
 		{
 			key: "u",
 			handler: async () => {
-				useAddAttachment(form)
+				console.log("u")
+				const addAttachment = useAddAttachment(form)
+				addAttachment()
 			},
 			meta: true,
 			shift: true,
@@ -263,8 +264,6 @@ export const useComposeShortcuts = (form: UseFormReturn<ComposeFormData>) => {
 				if (handled) return
 
 				if (!pathname.includes("/compose")) return
-
-				console.log("key", key)
 
 				const metaMatch = meta ? e.metaKey : !e.metaKey
 				const shiftMatch = shift ? e.shiftKey : !e.shiftKey

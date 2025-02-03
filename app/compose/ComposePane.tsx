@@ -14,6 +14,7 @@ import {
 	useFolderEmails,
 	useSendEmail,
 } from "@/hooks/dataHooks"
+import { useComposeShortcuts } from "@/hooks/useComposeShortcuts"
 import { useComposeStore } from "@/hooks/useComposeStore"
 import { useUIStore } from "@/hooks/useUIStore"
 import {
@@ -139,7 +140,7 @@ const MessageActions = () => {
 								label: "Attach",
 							},
 						]}
-						onClick={() => addAttachment}
+						onClick={() => addAttachment()}
 					/>
 					<IconButton
 						icon={Trash2}
@@ -217,6 +218,7 @@ const ComposePane = ({
 			},
 		},
 	})
+	useComposeShortcuts(form)
 	const { setValue, getValues, register } = form
 	const send = sendEmail(form)
 

@@ -484,8 +484,6 @@ export const useAppShortcuts = () => {
 				return
 			}
 
-			console.log("key pressed", e.key)
-
 			shortcuts.forEach(
 				({ key, handler, meta, shift, ctrl, disabledModes = [] }) => {
 					if (handled) return

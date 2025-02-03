@@ -70,7 +70,6 @@ export const ViewEmailPane = () => {
 	const { selectedFolder, selectedIndices, setSelectedIndex } = useUIStore()
 	const selectedIndex = selectedIndices[selectedFolder?.id || "INBOX"] || 0
 	const { data: emails } = useFolderEmails()
-	console.log("emails", emails)
 	const email = emails?.find((email) => email.id === emailId)
 	const { mutate: handleMarkDone } = useMarkEmailDone()
 	const { mutateAsync: markEmailRead } = useMarkEmailRead()
@@ -155,8 +154,6 @@ export const ViewEmailPane = () => {
 		container?.addEventListener("scroll", handleScroll)
 		return () => container?.removeEventListener("scroll", handleScroll)
 	}, [scrollContainerRef.current])
-
-	console.log("email", emailId)
 
 	return (
 		<div className="absolute inset-0 z-50 flex flex-row bg-white">

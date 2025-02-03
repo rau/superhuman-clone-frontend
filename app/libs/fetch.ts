@@ -41,7 +41,6 @@ export const fetchWithAxios = async (
 			statusText: res.statusText,
 		}
 	} catch (error: any) {
-		console.log(error)
 		if (error.response) {
 			const errorData = error.response.data
 			const errors = errorData.errors
@@ -52,7 +51,6 @@ export const fetchWithAxios = async (
 					(error.detail === null ? "" : error.detail + "\n") +
 					(error.attr === null ? "" : error.attr + "\n")
 			})
-			console.log(message)
 		}
 		throw error
 	}

@@ -115,7 +115,6 @@ export const queryGptEdit = async (
 	editInstructions: string,
 	partToEdit: string
 ) => {
-	console.log("queryGptEdit", editInstructions, partToEdit)
 	const messages = [
 		{ role: ChatMessageRole.System, content: editSystemPrompt },
 		{
@@ -143,6 +142,5 @@ export const queryGptUpdate = async (
 				partToUpdate,
 		},
 	]
-	console.log(messages)
 	return queryGpt(messages)
 }

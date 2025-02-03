@@ -178,8 +178,6 @@ export const fetchFolderEmails = async (
 		accountId: accountId,
 	})
 
-	console.log("drafts", drafts)
-
 	return mergeDraftsAndEmails(drafts, data)
 }
 

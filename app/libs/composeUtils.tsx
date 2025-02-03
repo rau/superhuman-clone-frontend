@@ -85,25 +85,34 @@ export const useAddAttachment = (form: UseFormReturn<ComposeFormData>) => {
 	const { setValue, getValues } = form
 
 	return async () => {
-		const { setIsFileDialogOpen } = useUIStore()
-		setIsFileDialogOpen(true)
-		const result = await window.electron.openFile()
-		setIsFileDialogOpen(false)
-		if (!result.canceled && result.filePaths.length > 0) {
-			const filePath = result.filePaths[0]
-			const stats = await window.electron.getFileStats(filePath)
-			const content = await window.electron.readFile(filePath)
+		const input = document.createElement("input")
+		input.type = "file"
+		input.multiple = true
+
+		input.onchange = async (e) => {
+			const files = (e.target as HTMLInputElement).files
+			if (!files?.length) return
+
+			const newAttachments = await Promise.all(
+				Array.from(files).map(async (file) => ({
+					name: file.name,
+					size: file.size,
+					path: "",
+					content: await file.arrayBuffer(),
+					type: file.type,
+				}))
+			)
+
 			setValue("attachments.current", [
 				...getValues("attachments.current"),
-				{
-					name: filePath.split("/").pop()!,
-					size: stats.size,
-					path: filePath,
-					content: content,
-					type: "file",
-				},
+				...newAttachments.map((a) => ({
+					...a,
+					content: a.content.toString(),
+				})),
 			])
 		}
+
+		input.click()
 	}
 }
 

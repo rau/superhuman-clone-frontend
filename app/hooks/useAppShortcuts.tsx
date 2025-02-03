@@ -1,3 +1,5 @@
+"use client"
+
 import { ActionUndoToast } from "@/components/ActionUndoToast"
 import { useSidebar } from "@/components/ui/Sidebar"
 import {
@@ -476,7 +478,6 @@ export const useAppShortcuts = () => {
 			if (
 				isAISettingsOpen ||
 				isShortcutsPaneOpen ||
-				pathname.includes("/compose") ||
 				isAutoBCCDialogOpen ||
 				isInstantIntroDialogOpen
 			) {

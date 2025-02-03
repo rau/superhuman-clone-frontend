@@ -7,6 +7,7 @@ import "@/globals.css"
 import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import { ToastContainer } from "react-toastify"
+import { ShortcutProvider } from "./components/ShortcutProvider"
 
 const geistSans = Geist({
 	variable: "--font-geist-sans",
@@ -37,15 +38,17 @@ export default function RootLayout({
 					<ThemeProvider>
 						<TooltipProvider>
 							<SidebarProvider defaultOpen={false}>
-								<ToastContainer />
-								<div className="flex h-screen w-screen flex-row">
-									<div className="flex flex-1 flex-col overflow-hidden">
+								<ShortcutProvider>
+									<ToastContainer />
+									<div className="flex h-screen w-screen flex-row">
 										<div className="flex flex-1 flex-col overflow-hidden">
-											{children}
-											<AppSidebar />
+											<div className="flex flex-1 flex-col overflow-hidden">
+												{children}
+												<AppSidebar />
+											</div>
 										</div>
 									</div>
-								</div>
+								</ShortcutProvider>
 							</SidebarProvider>
 						</TooltipProvider>
 					</ThemeProvider>

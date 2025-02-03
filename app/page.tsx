@@ -5,7 +5,6 @@ import { GlobalDialog } from "@/components/GlobalDialog"
 import { TipBar } from "@/components/TipBar"
 import { useAccounts } from "@/hooks/dataHooks"
 import { useAccountStore } from "@/hooks/useAccountStore"
-import { useAppShortcuts } from "@/hooks/useAppShortcuts"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
 
@@ -19,8 +18,6 @@ const Home = () => {
 			setSelectedAccountId(accounts[0].id)
 		}
 	}, [accounts])
-
-	useAppShortcuts()
 
 	if (isLoading) {
 		return null

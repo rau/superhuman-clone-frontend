@@ -1,3 +1,5 @@
+"use client"
+
 import { useDiscardDraft } from "@/hooks/dataHooks"
 import { useComposeStore } from "@/hooks/useComposeStore"
 import { useAIPromptStore } from "@/hooks/usePromptStore"
@@ -154,9 +156,11 @@ export const useComposeShortcuts = (form: UseFormReturn<ComposeFormData>) => {
 			key: ",",
 			handler: () => {
 				router.push("/")
-				discardDraft([draftId as string]).then(() =>
-					toast.success("Draft discarded")
-				)
+				if (draftId) {
+					discardDraft([draftId as string]).then(() =>
+						toast.success("Draft discarded")
+					)
+				}
 			},
 			meta: true,
 			shift: true,
@@ -259,6 +263,8 @@ export const useComposeShortcuts = (form: UseFormReturn<ComposeFormData>) => {
 				if (handled) return
 
 				if (!pathname.includes("/compose")) return
+
+				console.log("key", key)
 
 				const metaMatch = meta ? e.metaKey : !e.metaKey
 				const shiftMatch = shift ? e.shiftKey : !e.shiftKey

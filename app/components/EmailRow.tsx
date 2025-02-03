@@ -2,7 +2,11 @@
 
 import { ActionUndoToast } from "@/components/ActionUndoToast"
 import { KeyboardTooltip } from "@/components/KeyboardTooltip"
-import { useFolderEmails, useMarkEmailDone } from "@/hooks/dataHooks"
+import {
+	useDiscardDraft,
+	useFolderEmails,
+	useMarkEmailDone,
+} from "@/hooks/dataHooks"
 import { useUIStore } from "@/hooks/useUIStore"
 import {
 	getUniqueSenderNames,
@@ -29,6 +33,8 @@ export const EmailRow = ({ email, isSelected }: EmailRowProps) => {
 	const isThreadSelected = selectedThreads[
 		selectedFolder?.id || "INBOX"
 	]?.has(email.id)
+
+	const { mutateAsync: discardDraft } = useDiscardDraft()
 
 	const handleClick = () => {
 		if (!emails || !selectedFolder) return
@@ -208,16 +214,29 @@ export const EmailRow = ({ email, isSelected }: EmailRowProps) => {
 							<button
 								onClick={(e) => {
 									e.stopPropagation()
-									markDone([email]).then(() => {
-										toast(
-											<ActionUndoToast action="Marked as Done" />,
-											{
-												className:
-													"px-2 w-[400px] border border-purple-600/40",
-												closeButton: false,
-											}
-										)
-									})
+									if (email.is_draft) {
+										discardDraft([email.id]).then(() => {
+											toast(
+												<ActionUndoToast action="Draft discarded" />,
+												{
+													className:
+														"px-2 w-[400px] border border-purple-600/40",
+													closeButton: false,
+												}
+											)
+										})
+									} else {
+										markDone([email]).then(() => {
+											toast(
+												<ActionUndoToast action="Marked as Done" />,
+												{
+													className:
+														"px-2 w-[400px] border border-purple-600/40",
+													closeButton: false,
+												}
+											)
+										})
+									}
 								}}
 								className="rounded p-1 text-slate-400 hover:bg-green-50 hover:text-green-600"
 							>

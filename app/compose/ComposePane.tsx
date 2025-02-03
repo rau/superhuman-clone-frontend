@@ -14,7 +14,6 @@ import {
 	useFolderEmails,
 	useSendEmail,
 } from "@/hooks/dataHooks"
-import { useComposeShortcuts } from "@/hooks/useComposeShortcuts"
 import { useComposeStore } from "@/hooks/useComposeStore"
 import { useUIStore } from "@/hooks/useUIStore"
 import {
@@ -220,7 +219,6 @@ const ComposePane = ({
 	})
 	const { setValue, getValues, register } = form
 	const send = sendEmail(form)
-	useComposeShortcuts(form)
 
 	useEffect(() => {
 		const initialValues = JSON.stringify({
